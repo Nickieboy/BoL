@@ -22,8 +22,7 @@ local mana = 0
 local maxHealth = 0
 local maxMana = 0
 local canStun = false
-local MinionManager = { enemy = minionManager(MINION_ENEMY, 625, myHero, MINION_SORT_HEALTH_ASC,
-						team =  minionManager(MINION_ALLY, 625, myHero, MINION_SORT_HEALTH_ASC)
+local EnemyMinions = minionManager(MINION_ENEMY, 625, myHero, MINION_SORT_HEALTH_ASC)
 
 
 --[[		Auto Update		]]
@@ -39,10 +38,10 @@ if AUTOUPDATE then
 	if ServerData then
 		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
 		if ServerVersion then
-			if tonumber(sversion) < ServerVersion then
+			if tonumber(version) < ServerVersion then
 				AutoupdaterMsg("New version available"..ServerVersion)
 				AutoupdaterMsg("Updating, please don't press F9")
-				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () AutoupdaterMsg("Successfully updated. ("..sversion.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
+				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () AutoupdaterMsg("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
 			else
 				AutoupdaterMsg("You have got the latest version ("..ServerVersion..")")
 			end
@@ -133,7 +132,7 @@ end
 function Combo()
 	if (Menu.combo.combo) then
 		if ts.target ~= nil and ValidTarget(ts.target, 625) then
-			if canStun and Menu.combo.comboRStun then
+			if Menu.combo.comboRStun and CanUseSpell(_R) then
 				Combo2()
 			else	
 				Combo1()
@@ -161,21 +160,60 @@ end
 
 function Combo2()
 	if Menu.combo.comboR then
-		if ValidTarget(ts.target, 600) then
-			CastR(ts.target)
+		if canStun then
+			if ValidTarget(ts.target, 600) then
+				CastR(ts.target)
+			end 
+
+			if Menu.combo.comboDFG then
+				if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
+					CastItem(3128, ts.target)
+				end
+			end 
+
+			if Menu.combo.comboQ then
+				CastQ(ts.target)
+			end 
+
+			if Menu.combo.comboW then
+					CastW(ts.target)
+			end 
+		else
+
+			if Menu.combo.comboDFG then
+				if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
+					CastItem(3128, ts.target)
+				end
+			end 
+
+			if Menu.combo.comboQ then
+				CastQ(ts.target)
+			end 
+
+			if canStun then
+				if ValidTarget(ts.target, 600) then
+					CastR(ts.target)
+				end 
+			else 
+				if Menu.combo.comboW then
+					CastW(ts.target)
+				end 
+			end 
+
+			if not CanUseSpell(_R) then
+				CastW(ts.target)
+			else 
+				if canStun then
+					CastR(ts.target)
+				else 
+					CastE()
+					if canStun then
+						CastR(ts.target)
+					end 
+				end 
+			end 
 		end 
-	end 
-	if Menu.combo.comboDFG then
-		if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
-			CastItem(3128, ts.target)
-		end
-	end 
-	if Menu.combo.comboQ then
-		CastQ(ts.target)
-	end 
-	if Menu.combo.comboW then
-		CastW(ts.target)
-	end 
+	end  
 end 
 
 function CastQ(target) 
@@ -191,6 +229,12 @@ function CastW(target)
    end
 end
 
+function CastE()
+	if CanUseSpell(_E) and myHero.canAttack then
+		CastSpell(_E)
+    end
+end
+
 function CastR(target)
 	if CanUseSpell(_R) and myHero.canAttack then
 		CastSpell(_R, target)
@@ -198,13 +242,35 @@ function CastR(target)
 end
 
 function Farm()
-	MinionManager.enemy:update()
-	if Menu.farm.farm then
+	EnemyMinions:update()
+	if Menu.farm.farm and not Menu.combo.combo then
 		if Menu.farm.farmQ then
 		FarmQ()
 		end 
 		if Menu.farm.farmW then
 			FarmW()
+		end 
+	end 
+end 
+
+function FarmW()
+	for i, minion in pairs(EnemyMinions.objects) do
+		if Menu.farm.farmW then
+			Qdmg = getDmg("Q", minion, myHero)
+			if minion ~= nil and not minion.dead and minion.visible and minion.health < Wdmg and OrbWalk:ValidTarget(minion, 625) then
+				CastW(minion)
+			end 
+		end 
+	end 
+end 
+
+function FarmQ()
+	for i, minion in pairs(EnemyMinions.objects) do
+		if Menu.farm.farmQ then
+			Qdmg = getDmg("Q", minion, myHero)
+			if minion ~= nil and not minion.dead and minion.visible and minion.health < Qdmg and OrbWalk:ValidTarget(minion, 625) then
+				CastQ(minion)
+			end 
 		end 
 	end 
 end 
@@ -215,7 +281,7 @@ function Zhonyas()
 			health = myHero.health
 			mana = myHero.mana
 			maxHealth = myHero.maxHealth
-			if (health / maxhealth) <= Menu.zhyonas.zhonyasunder then
+			if (health / maxHealth) <= Menu.zhonyas.zhonyasunder then
 				CastItem(3157)
 			end 
 		end 
@@ -223,25 +289,7 @@ function Zhonyas()
 end
 
 
-function FarmQ()
-	for i, minion in pairs() 
-	if Menu.killsteMinionManager.enemy.objects) do
-		Qdmg = getDmg("Q", champ, minion)
-		if not minion.dead and minion ~= nill and minion.visible and minion.health < Qdmg then
-			CastQ(minion)
-	end 
-end 
-
-function FarmW()
-	for i, minion in pairs(MinionManager.enemy.objects) do
-		Qdmg = getDmg("Q", champ, minion)
-		if not minion.dead and minion ~= nill and minion.visible and minion.health < Qdmg then
-			CastW(minion)
-	end 
-end 
-
-
-function KillSteal(
+function KillSteal()
 	if Menu.killsteal.killsteal then
 	 	for i = 1, heroManager.iCount, 1 do
 			 local champ = heroManager:getHero(i)
@@ -390,7 +438,6 @@ function DrawMenu()
  Menu.combo:addParam("comboR", "Use R", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboDFG", "Use DFG", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboRStun", "Use R if can stun", SCRIPT_PARAM_ONOFF, true)
- --Menu.combo:addParam("comboRStun", "", SCRIPT_PARAM_ONOFF, true)
 
  -- Harass
  Menu:addSubMenu("Harass", "harass")
@@ -401,8 +448,8 @@ function DrawMenu()
  Menu.harass:addParam("harassMana", "Mana Manager %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
 
  -- Farming
- Menu.addSubMenu("Farming", "farm")
- Menu.farm:addParam("farm", "Farming", SCRIPT_PARAM_ONOFF, false)
+ Menu:addSubMenu("Farming", "farm")
+ Menu.farm:addParam("farm", "Farming (K)", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("K"))
  Menu.farm:addParam("farmQ", "Farm using Q", SCRIPT_PARAM_ONOFF, false)
  Menu.farm:addParam("farmW", "Farm using W", SCRIPT_PARAM_ONOFF, false)
 
@@ -429,7 +476,7 @@ function DrawMenu()
  Menu.autopotions:addParam("health", "Health under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
  Menu.autopotions:addParam("mana", "Mana under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
 
- Menu.addSubMenu("Zhyonas", "zhonyas")
+ Menu:addSubMenu("Zhyonas", "zhonyas")
  Menu.zhonyas:addParam("zhonyas", "Auto Zhonyas", SCRIPT_PARAM_ONOFF, true)
  Menu.zhonyas:addParam("zhonyasunder", "Use Zhonyas under % health", SCRIPT_PARAM_SLICE, 0.20, 0, 1 ,2)
 
@@ -449,6 +496,8 @@ function DrawMenu()
  Menu.combo:permaShow("combo")
  Menu.harass:permaShow("harass")
  Menu.killsteal:permaShow("killsteal")
+ Menu.farm:permaShow("farm")
+ Menu.zhonyas:permaShow("zhonyas")
  Menu.drawings:permaShow("draw")
 
 end
