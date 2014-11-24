@@ -9,8 +9,9 @@ require "Spell Damage Library"
 require "SxOrbWalk"
 
 
-local version = "1.001"
+local version = "1.1"
 local author = "Nickieboy"
+local SCRIPT_NAME = "NAnnie"
 local lastLevel = myHero.level - 1
 local Qdmg = 0
 local Wdmg = 0
@@ -21,8 +22,35 @@ local mana = 0
 local maxHealth = 0
 local maxMana = 0
 local canStun = false
+local MinionManager = { enemy = minionManager(MINION_ENEMY, 625, myHero, MINION_SORT_HEALTH_ASC,
+						team =  minionManager(MINION_ALLY, 625, myHero, MINION_SORT_HEALTH_ASC)
 
 
+--[[		Auto Update		]]
+local AUTOUPDATE = true
+local UPDATE_HOST = "raw.github.com"
+local UPDATE_PATH = "/Nickieboy/BoL/blob/master/Nannie.lua".."?rand="..math.random(1,10000)
+local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
+local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
+
+function AutoupdaterMsg(msg) print("NAnnie by Nickieboy") end
+if AUTOUPDATE then
+	local ServerData = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/blol/master/version/NAnnie.version")
+	if ServerData then
+		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
+		if ServerVersion then
+			if tonumber(sversion) < ServerVersion then
+				AutoupdaterMsg("New version available"..ServerVersion)
+				AutoupdaterMsg("Updating, please don't press F9")
+				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () AutoupdaterMsg("Successfully updated. ("..sversion.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
+			else
+				AutoupdaterMsg("You have got the latest version ("..ServerVersion..")")
+			end
+		end
+	else
+		AutoupdaterMsg("Error downloading version info")
+	end
+end
 --Perform on load
 function OnLoad()
 
@@ -54,6 +82,8 @@ function OnTick()
  AutoLevel()
  DrinkPotions()
  canStun = HaveBuff(myHero, "pyromania_particle")
+ Farm()
+ Zhonyas()
 end
 
 function OnDraw()
@@ -103,21 +133,50 @@ end
 function Combo()
 	if (Menu.combo.combo) then
 		if ts.target ~= nil and ValidTarget(ts.target, 625) then
-			if (Menu.combo.comboQ) then
-				CastQ(ts.target)
-			end 
-			if (Menu.combo.comboW) then
-				CastW(ts.target)
-			end 
-			if (Menu.combo.comboR) then
-				if ValidTarget(ts.target, 600) then
-					CastR(ts.target)
-				end 
-			end 
+			if canStun and Menu.combo.comboRStun then
+				Combo2()
+			else	
+				Combo1()
+			end  
 		end 
 	end 
 end 
 
+function Combo1()
+	if Menu.combo.comboDFG then
+		CastItem(3128, ts.target)
+	end 
+	if (Menu.combo.comboQ) then
+		CastQ(ts.target)
+	end 
+	if (Menu.combo.comboW) then
+		CastW(ts.target)
+	end 
+	if (Menu.combo.comboR) then
+		if ValidTarget(ts.target, 600) then
+			CastR(ts.target)
+		end 
+	end 
+end 
+
+function Combo2()
+	if Menu.combo.comboR then
+		if ValidTarget(ts.target, 600) then
+			CastR(ts.target)
+		end 
+	end 
+	if Menu.combo.comboDFG then
+		if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
+			CastItem(3128, ts.target)
+		end
+	end 
+	if Menu.combo.comboQ then
+		CastQ(ts.target)
+	end 
+	if Menu.combo.comboW then
+		CastW(ts.target)
+	end 
+end 
 
 function CastQ(target) 
 	if CanUseSpell(_Q) and myHero.canAttack then
@@ -138,9 +197,51 @@ function CastR(target)
     end
 end
 
+function Farm()
+	MinionManager.enemy:update()
+	if Menu.farm.farm then
+		if Menu.farm.farmQ then
+		FarmQ()
+		end 
+		if Menu.farm.farmW then
+			FarmW()
+		end 
+	end 
+end 
+
+function Zhonyas()
+	if Menu.zhonyas.zhonyas then
+		if GetInventoryHaveItem(3157) and GetInventoryItemIsCastable(3157) then
+			health = myHero.health
+			mana = myHero.mana
+			maxHealth = myHero.maxHealth
+			if (health / maxhealth) <= Menu.zhyonas.zhonyasunder then
+				CastItem(3157)
+			end 
+		end 
+	end 
+end
 
 
-function KillSteal() 
+function FarmQ()
+	for i, minion in pairs() 
+	if Menu.killsteMinionManager.enemy.objects) do
+		Qdmg = getDmg("Q", champ, minion)
+		if not minion.dead and minion ~= nill and minion.visible and minion.health < Qdmg then
+			CastQ(minion)
+	end 
+end 
+
+function FarmW()
+	for i, minion in pairs(MinionManager.enemy.objects) do
+		Qdmg = getDmg("Q", champ, minion)
+		if not minion.dead and minion ~= nill and minion.visible and minion.health < Qdmg then
+			CastW(minion)
+	end 
+end 
+
+
+function KillSteal(
 	if Menu.killsteal.killsteal then
 	 	for i = 1, heroManager.iCount, 1 do
 			 local champ = heroManager:getHero(i)
@@ -287,15 +388,23 @@ function DrawMenu()
  Menu.combo:addParam("comboQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboW", "Use W", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboR", "Use R", SCRIPT_PARAM_ONOFF, true)
+ Menu.combo:addParam("comboDFG", "Use DFG", SCRIPT_PARAM_ONOFF, true)
+ Menu.combo:addParam("comboRStun", "Use R if can stun", SCRIPT_PARAM_ONOFF, true)
  --Menu.combo:addParam("comboRStun", "", SCRIPT_PARAM_ONOFF, true)
 
--- Harass
+ -- Harass
  Menu:addSubMenu("Harass", "harass")
  Menu.harass:addParam("harass", "Harass (T)", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
  Menu.harass:addParam("harass", "Harass Toggle (Y)", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("Y"))
  Menu.harass:addParam("harassQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
  Menu.harass:addParam("harassW", "Use W", SCRIPT_PARAM_ONOFF, true)
  Menu.harass:addParam("harassMana", "Mana Manager %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
+
+ -- Farming
+ Menu.addSubMenu("Farming", "farm")
+ Menu.farm:addParam("farm", "Farming", SCRIPT_PARAM_ONOFF, false)
+ Menu.farm:addParam("farmQ", "Farm using Q", SCRIPT_PARAM_ONOFF, false)
+ Menu.farm:addParam("farmW", "Farm using W", SCRIPT_PARAM_ONOFF, false)
 
  --Drawings
  Menu:addSubMenu("Drawings", "drawings")
@@ -320,6 +429,9 @@ function DrawMenu()
  Menu.autopotions:addParam("health", "Health under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
  Menu.autopotions:addParam("mana", "Mana under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
 
+ Menu.addSubMenu("Zhyonas", "zhonyas")
+ Menu.zhonyas:addParam("zhonyas", "Auto Zhonyas", SCRIPT_PARAM_ONOFF, true)
+ Menu.zhonyas:addParam("zhonyasunder", "Use Zhonyas under % health", SCRIPT_PARAM_SLICE, 0.20, 0, 1 ,2)
 
  -- Default Information
  Menu:addParam("Version", "Version", SCRIPT_PARAM_INFO, version)
