@@ -105,7 +105,8 @@ function Harass()
 		if Q:IsCharging() then
 			local castPosition, hitChance, nTargets = Q:GetPrediction(target)
 			if Q.range ~= Qrangemax and GetDistanceSqr(castPosition) < math.pow(Q.range - 200, 2) or Q.range == Q.rangemax and GetDistanceSqr(castPosition) < math.pow(Q.range, 2) then
-			Q:Cast(prediction.x, prediction.z) 
+				Q:Cast(prediction.x, prediction.z) 
+			end 
 		end 
 		
 	end 
