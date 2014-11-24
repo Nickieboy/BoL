@@ -93,7 +93,7 @@ function Harass()
 	target = STS:GetTarget(Qrangemax)
 	if target and Menu.harass.harassQ then
 		Q:Charge()
-		local prediction = Q:GetPrediction(target)
+		--local prediction = Q:GetPrediction(target)
 		--[[while Q:IsCharging() == true do
 			if (Q.range == myHero - target) then
 				Q:Cast(prediction.x, prediction.z) 
@@ -105,7 +105,7 @@ function Harass()
 		if Q:IsCharging() then
 			local castPosition, hitChance, nTargets = Q:GetPrediction(target)
 			if Q.range ~= Qrangemax and GetDistanceSqr(castPosition) < math.pow(Q.range - 200, 2) or Q.range == Q.rangemax and GetDistanceSqr(castPosition) < math.pow(Q.range, 2) then
-				Q:Cast(prediction.x, prediction.z) 
+				Q:Cast(castPosition.x, castPosition.z) 
 			end 
 		end 
 		
