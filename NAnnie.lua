@@ -29,14 +29,14 @@ local ignite = nil
 --[[		Auto Update		]]
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
-local UPDATE_PATH = "/Nickieboy/BoL/blob/master/NAnnie.lua".."?rand="..math.random(1,10000)
+local UPDATE_PATH = "/Nickieboy/BoL/master/NAnnie.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
 function AutoupdaterMsg(msg) print("NAnnie by Nickieboy") end
 if AUTOUPDATE then
-	local ServerData = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/blol/master/version/NAnnie.version")
-	if ServerData then
+	local ServerData = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/version/NAnnie.version")
+	if ServerData thene
 		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
 		if ServerVersion then
 			if tonumber(version) < ServerVersion then
