@@ -9,13 +9,14 @@ require "Spell Damage Library"
 require "SxOrbWalk"
 
 
-local version = "1.1"
+local version = "1.2"
 local author = "Nickieboy"
 local SCRIPT_NAME = "NAnnie"
 local lastLevel = myHero.level - 1
 local Qdmg = 0
 local Wdmg = 0
 local Rdmg = 0
+local igniteDmg = 0
 local totalDamage = 0
 local health = 0
 local mana = 0
@@ -23,12 +24,12 @@ local maxHealth = 0
 local maxMana = 0
 local canStun = false
 local EnemyMinions = minionManager(MINION_ENEMY, 625, myHero, MINION_SORT_HEALTH_ASC)
-
+local ignite = nil
 
 --[[		Auto Update		]]
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
-local UPDATE_PATH = "/Nickieboy/BoL/blob/master/Nannie.lua".."?rand="..math.random(1,10000)
+local UPDATE_PATH = "/Nickieboy/BoL/blob/master/NAnnie.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
@@ -68,7 +69,7 @@ levelSequences = {
  
  --Send in beginning
  PrintChat("Annie Script by Nickieboy loaded")
- PrintChat("This script does not automatically update. Visit the thread to stay updated")
+ PrintChat("Have fun and enjoy the game.")
 end 
 
 -- Perform every time
@@ -78,11 +79,16 @@ function OnTick()
  Harass()
  Combo()
  KillSteal()
+ KillIfKillable()
  AutoLevel()
  DrinkPotions()
- canStun = HaveBuff(myHero, "pyromania_particle")
  Farm()
  Zhonyas()
+
+ if Menu.misc.procE and canStun ~= true then
+ 	CastSpell(_E)
+ end 
+
 end
 
 function OnDraw()
@@ -117,6 +123,7 @@ end
 function Harass()
  if Menu.harass.harass then
  	if ManaManager() ~= false then
+
  		if ts.target ~= nil and ValidTarget(ts.target) then
  			if (Menu.harass.harassQ) then
  				CastQ(ts.target)
@@ -127,6 +134,12 @@ function Harass()
  		end
  	end 
  end 
+
+ if Menu.harass.autoQ and canStun then 
+ 			if ts.target ~= nil and ValidTarget(ts.target) then
+ 				CastQ(ts.target)
+ 			end 
+ 		end 
 end
 
 function Combo()
@@ -155,6 +168,17 @@ function Combo1()
 		if ValidTarget(ts.target, 600) then
 			CastR(ts.target)
 		end 
+	end 
+	if (Menu.combo.comboIgnite) then
+		if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then 
+			ignite = SUMMONER_1
+    	elseif 
+    		myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then 
+    		ignite = SUMMONER_2
+    	end 
+    	if ignite ~= nil and CanUseSpell(ignite) then
+    		CastSpell(ignite, ts.target)
+    	end 
 	end 
 end 
 
@@ -217,16 +241,24 @@ function Combo2()
 end 
 
 function CastQ(target) 
-	if CanUseSpell(_Q) and myHero.canAttack then
-    CastSpell(_Q, target)
+	if CanUseSpell(_Q) and myHero.canAttack and not VIP_user and not Menu.misc.usePackets then
+   	 CastSpell(_Q, target)
    end
+
+   if Menu.misc.usePackets and VIP_user and CanUseSpell(_Q) then
+   	Packet("S_CAST", {spellId = _Q}):send()
+   end 
 end
 
 
 function CastW(target) 
-	if CanUseSpell(_W) and myHero.canAttack then
-    CastSpell(_W, target)
-   end
+	if CanUseSpell(_W) and myHero.canAttack and not VIP_user and not Menu.misc.usePackets then
+    	CastSpell(_W, target)
+  	end
+
+   if Menu.misc.usePackets and VIP_user and CanUseSpell(_W) then
+   	Packet("S_CAST", {spellId = _W}):send()
+   end 
 end
 
 function CastE()
@@ -236,20 +268,36 @@ function CastE()
 end
 
 function CastR(target)
-	if CanUseSpell(_R) and myHero.canAttack then
+	if CanUseSpell(_R) and myHero.canAttack and not VIP_user and not Menu.misc.usePackets then
 		CastSpell(_R, target)
     end
+
+    if Menu.misc.usePackets and VIP_user and CanUseSpell(_R) then
+   		Packet("S_CAST", {spellId = _R}):send()
+   	end 
 end
 
 function Farm()
 	EnemyMinions:update()
+
 	if Menu.farm.farm and not Menu.combo.combo then
-		if Menu.farm.farmQ then
-		FarmQ()
-		end 
-		if Menu.farm.farmW then
-			FarmW()
-		end 
+		if Menu.farm.farmStun then
+			if not canStun then
+				if Menu.farm.farmQ then
+					FarmQ()
+				end 
+				if Menu.farm.farmW then
+					FarmW()
+				end 
+			end 
+		else
+			if Menu.farm.farmQ then
+				FarmQ()
+			end 
+			if Menu.farm.farmW then
+				FarmW()
+			end 
+		end
 	end 
 end 
 
@@ -258,7 +306,7 @@ function FarmW()
 		if Menu.farm.farmW then
 			Qdmg = getDmg("Q", minion, myHero)
 			if minion ~= nil and not minion.dead and minion.visible and minion.health < Wdmg and OrbWalk:ValidTarget(minion, 625) then
-				CastW(minion)
+				CastW(minion, minion.x, minion.y)
 			end 
 		end 
 	end 
@@ -327,10 +375,74 @@ function KillSteal()
 				 		end 
 				 	end
 				end
+
+				if Menu.killsteal.killstealIgnite then
+					local igniteDmg = getDmg("IGNITE", champ, myHero)
+					if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then 
+						ignite = SUMMONER_1
+    				elseif 
+    					myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then 
+    					ignite = SUMMONER_2
+    				end 
+    				if ValidTarget(champ, 600) then
+	    				if igniteDmg >= champ.health then
+	    					if ignite ~= nil and CanUseSpell(ignite) and not champ.dead then
+	    						CastSpell(ignite, champ)
+	    					end 
+	    				end 
+	    			end 
+				end 
 			end
 		end 
    end 
 end
+
+
+function KillIfKillable()
+	if Menu.autokill then
+		for i, enemy in ipairs(GetEnemyHeroes()) do 
+			local name = enemy.charName
+			if Menu.autokill[name] then
+				if (ValidTarget(enemy, 625)) then
+
+					if CanUseSpell(_Q) then
+						Qdmg = getDmg("Q", enemy, myHero)
+					else
+						Qdmg = 0
+					end 
+
+					if CanUseSpell(_W) then
+						Wdmg = getDmg("W", enemy, myHero)
+					else 
+						Wdmg = 0
+					end
+
+					if CanUseSpell(_R) then
+						Rdmg = getDmg("R", enemy, myHero)
+					else
+						Rdmg = 0
+					end 
+
+					if (Wdmg > Qdmg and Wdmg >= enemy.health and Qdmg < enemy.health) then
+						CastW(enemy)
+					end 
+
+					if (Qdmg >= enemy.health) and not enemy.dead and enemy.visible then 
+						CastQ(enemy)
+					elseif ((Qdmg + Wdmg) >= enemy.health) and not enemy.dead and enemy.visible then
+						CastQ(enemy)
+						CastW(enemy)
+					elseif ((Qdmg + Wdmg + Rdmg) >= enemy.health) and not enemy.dead and enemy.visible then
+						CastQ(enemy)
+						CastW(enemy)
+						CastR(enemy)
+					end 
+
+				end 
+			end 
+		end 
+	end 
+end 
 
 --[[
 NOT FUNCTIONABLE DUE TO IT NOT DRAWING CORRECTLY
@@ -367,14 +479,26 @@ end
 
 function HaveBuff(unit,buffname)
 	local result = false
-	for i = 1, 64, 1 do 
-		if unit:getBuff(i) ~= nil and unit:getBuff(i).name == buffname then 
+	for i = 1, unit.buffCount, 1 do 
+		if unit:getBuff(i) ~= nil and unit:getBuff(i).name == buffname and unit:getBuff(i).valid and BuffIsValid(unit:getBuff(i)) then 
 			result = true 
 			break 
 		end 
 	end 
 	return result
 end 
+
+function OnCreateObj(object)
+    if object.name == "StunReady.troy" then
+        canStun = true
+    end
+end
+ 
+function OnDeleteObj(object)
+    if object.name == "StunReady.troy" then
+        canStun = false
+    end
+end
 
 
 function DrinkPotions()
@@ -416,6 +540,7 @@ function ManaManager()
 	return true 
 end 
 
+
 function AutoLevel()
 
 	if Menu.autolevel.levelAuto == 1 or myHero.level <= lastLevel then return end
@@ -438,6 +563,7 @@ function DrawMenu()
  Menu.combo:addParam("comboR", "Use R", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboDFG", "Use DFG", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboRStun", "Use R if can stun", SCRIPT_PARAM_ONOFF, true)
+ Menu.combo:addParam("comboIgnite", "Use Ignite in combo", SCRIPT_PARAM_ONOFF, true)
 
  -- Harass
  Menu:addSubMenu("Harass", "harass")
@@ -445,6 +571,7 @@ function DrawMenu()
  Menu.harass:addParam("harass", "Harass Toggle (Y)", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("Y"))
  Menu.harass:addParam("harassQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
  Menu.harass:addParam("harassW", "Use W", SCRIPT_PARAM_ONOFF, true)
+ Menu.harass:addParam("autoQ", "Auto Q when stuns enemy", SCRIPT_PARAM_ONOFF, false)
  Menu.harass:addParam("harassMana", "Mana Manager %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
 
  -- Farming
@@ -452,6 +579,7 @@ function DrawMenu()
  Menu.farm:addParam("farm", "Farming (K)", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("K"))
  Menu.farm:addParam("farmQ", "Farm using Q", SCRIPT_PARAM_ONOFF, false)
  Menu.farm:addParam("farmW", "Farm using W", SCRIPT_PARAM_ONOFF, false)
+ Menu.farm:addParam("farmStun", "Farm until Stun is up", SCRIPT_PARAM_ONOFF, false)
 
  --Drawings
  Menu:addSubMenu("Drawings", "drawings")
@@ -466,6 +594,13 @@ function DrawMenu()
  Menu.killsteal:addParam("killstealQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
  Menu.killsteal:addParam("killstealW", "Use W", SCRIPT_PARAM_ONOFF, true)
  Menu.killsteal:addParam("killstealR", "Use R", SCRIPT_PARAM_ONOFF, true)
+ Menu.killsteal:addParam("killstealIgnite", "Use Ignite", SCRIPT_PARAM_ONOFF, true)
+
+ Menu:addSubMenu("Auto Kill when killable", "autokill")
+ Menu.autokill:addParam("autokill", "Auto Kill", SCRIPT_PARAM_ONOFF, false)
+ for i, enemy in ipairs(GetEnemyHeroes()) do
+	Menu.autokill:addParam(enemy.charName, "Kill " .. enemy.charName, SCRIPT_PARAM_ONOFF, false)
+ end 
 
  -- Auto Level
  Menu:addSubMenu("Auto Level", "autolevel")
@@ -480,7 +615,12 @@ function DrawMenu()
  Menu.zhonyas:addParam("zhonyas", "Auto Zhonyas", SCRIPT_PARAM_ONOFF, true)
  Menu.zhonyas:addParam("zhonyasunder", "Use Zhonyas under % health", SCRIPT_PARAM_SLICE, 0.20, 0, 1 ,2)
 
- -- Default Information
+ -- Misc
+ Menu:addSubMenu("Misc", "misc")
+ Menu.misc:addParam("usePackets", "Use Packets (VIP only)", SCRIPT_PARAM_ONOFF, false)
+ Menu.misc:addParam("procE", "Use E to get stacks", SCRIPT_PARAM_ONOFF, false)
+
+  -- Default Information
  Menu:addParam("Version", "Version", SCRIPT_PARAM_INFO, version)
  Menu:addParam("Author", "Author",  SCRIPT_PARAM_INFO, author)
 
@@ -496,6 +636,7 @@ function DrawMenu()
  Menu.combo:permaShow("combo")
  Menu.harass:permaShow("harass")
  Menu.killsteal:permaShow("killsteal")
+ Menu.autokill:permaShow("autokill")
  Menu.farm:permaShow("farm")
  Menu.zhonyas:permaShow("zhonyas")
  Menu.drawings:permaShow("draw")
