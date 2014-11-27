@@ -1,32 +1,64 @@
 --[[
-     Script Coded by Nickieboy.
-     
-    ]]
+
+	Changelog
+			1.0: Released Script
+
+
+			1.1
+			​	Added Farm
+				Added DFG and Zhyonas
+				Added auto downloading script (Not Libs)
+				Added another option in Combo to use R if the R stuns
+
+			1.2
+				​Added Auto Kill when Killable (Toggle)
+				Added Auto Q when Q will Stun (Inside Harass menu, but will still Cast even when Harass is Off)
+				Added Ignite
+				Added E cast until Stun is UP
+				Added Packet Casting 
+				Fixed a bug with AutoDownloading 
+
+			1.3
+				Added auto-downloading libraries
+				Rewrote combo (Combo where you use R only if it stuns)
+				Added auto E if being attacked
+				Added Harass option to Q > W if W will stun (so @ 3 stacks)
+
+		Script Coded by Nickieboy.
+	]]
+
 
 if myHero.charName ~= "Annie" then return end
 
-require "Spell Damage Library"
-require "SxOrbWalk"
+--[[ LINE 9 TO 14
+	  ARE LINES GENERATED AND DEDICATED TO bol.b00st
+	   ]]
+
+--- BoL Script Status Connector --- 
+local ScriptKey = "WJMJOPOPJNI" -- NAnnie auth key
+local ScriptVersion = "1.3" -- Your .version file content
+
+-- Thanks to Bilbao for his socket help & encryption
+assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIKAAAABgBAAEFAAAAdQAABBkBAAGUAAAAKQACBBkBAAGVAAAAKQICBHwCAAAQAAAAEBgAAAGNsYXNzAAQJAAAAQm9sQm9vc3QABAcAAABfX2luaXQABAkAAABTZW5kU3luYwACAAAAAgAAAAoAAAADAAs/AAAAxgBAAAZBQABAAYAAHYEAAViAQAIXQAGABkFAAEABAAEdgQABWIBAAhcAAIADQQAAAwGAAEHBAADdQIABCoAAggpAgILGwEEAAYEBAN2AAAEKwACDxgBAAAeBQQAHAUICHQGAAN2AAAAKwACExoBCAAbBQgBGAUMAR0HDAoGBAwBdgQABhgFDAIdBQwPBwQMAnYEAAcYBQwDHQcMDAQIEAN2BAAEGAkMAB0JDBEFCBAAdggABRgJDAEdCwwSBggQAXYIAAVZBggIdAQAB3YAAAArAgITMwEQAQwGAAN1AgAHGAEUAJQEAAN1AAAHGQEUAJUEAAN1AAAEfAIAAFgAAAAQHAAAAYXNzZXJ0AAQFAAAAdHlwZQAEBwAAAHN0cmluZwAEHwAAAEJvTGIwMHN0OiBXcm9uZyBhcmd1bWVudCB0eXBlLgAECAAAAHZlcnNpb24ABAUAAABya2V5AAQHAAAAc29ja2V0AAQIAAAAcmVxdWlyZQAEBAAAAHRjcAAEBQAAAGh3aWQABA0AAABCYXNlNjRFbmNvZGUABAkAAAB0b3N0cmluZwAEAwAAAG9zAAQHAAAAZ2V0ZW52AAQVAAAAUFJPQ0VTU09SX0lERU5USUZJRVIABAkAAABVU0VSTkFNRQAEDQAAAENPTVBVVEVSTkFNRQAEEAAAAFBST0NFU1NPUl9MRVZFTAAEEwAAAFBST0NFU1NPUl9SRVZJU0lPTgAECQAAAFNlbmRTeW5jAAQUAAAAQWRkQnVnc3BsYXRDYWxsYmFjawAEEgAAAEFkZFVubG9hZENhbGxiYWNrAAIAAAAJAAAACQAAAAAAAwUAAAAFAAAADABAAIMAAAAdQIABHwCAAAEAAAAECQAAAFNlbmRTeW5jAAAAAAABAAAAAQAQAAAAQG9iZnVzY2F0ZWQubHVhAAUAAAAJAAAACQAAAAkAAAAJAAAACQAAAAAAAAABAAAABQAAAHNlbGYACgAAAAoAAAAAAAMFAAAABQAAAAwAQACDAAAAHUCAAR8AgAABAAAABAkAAABTZW5kU3luYwAAAAAAAQAAAAEAEAAAAEBvYmZ1c2NhdGVkLmx1YQAFAAAACgAAAAoAAAAKAAAACgAAAAoAAAAAAAAAAQAAAAUAAABzZWxmAAEAAAAAABAAAABAb2JmdXNjYXRlZC5sdWEAPwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAQAAAAEAAAABAAAAAQAAAAEAAAABAAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAYAAAAGAAAABgAAAAYAAAAHAAAABwAAAAcAAAAHAAAACAAAAAgAAAAIAAAACAAAAAgAAAAIAAAACAAAAAgAAAAIAAAABQAAAAUAAAAIAAAACAAAAAgAAAAIAAAACQAAAAkAAAAJAAAACgAAAAoAAAAKAAAACgAAAAMAAAAFAAAAc2VsZgAAAAAAPwAAAAIAAABhAAAAAAA/AAAAAgAAAGIAAAAAAD8AAAABAAAABQAAAF9FTlYACwAAABIAAAACAA8iAAAAhwBAAIxAQAEBgQAAQcEAAJ1AAAJbAAAAF0AAgApAQYIXAACACoBBgocAQACMwEEBAQECAEdBQgCBgQIAxwFBAAGCAgBGwkIARwLDBIGCAgDHQkMAAYMCAEeDQwCBwwMAFoEDAp1AgAGHAEAAjABEAQFBBACdAIEBRwFAAEyBxAJdQQABHwCAABMAAAAEBAAAAHRjcAAECAAAAGNvbm5lY3QABA0AAABib2wuYjAwc3QuZXUAAwAAAAAAAFRABAcAAAByZXBvcnQABAIAAAAwAAQCAAAAMQAEBQAAAHNlbmQABA0AAABHRVQgL3VwZGF0ZS0ABAUAAABya2V5AAQCAAAALQAEBwAAAG15SGVybwAECQAAAGNoYXJOYW1lAAQIAAAAdmVyc2lvbgAEBQAAAGh3aWQABCIAAAAgSFRUUC8xLjANCkhvc3Q6IGJvbC5iMDBzdC5ldQ0KDQoABAgAAAByZWNlaXZlAAQDAAAAKmEABAYAAABjbG9zZQAAAAAAAQAAAAAAEAAAAEBvYmZ1c2NhdGVkLmx1YQAiAAAACwAAAAsAAAALAAAACwAAAAsAAAALAAAACwAAAAwAAAAMAAAADAAAAA0AAAANAAAADQAAAA0AAAAOAAAADwAAABAAAAAQAAAAEAAAABEAAAARAAAAEQAAABIAAAASAAAAEgAAAA0AAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAAAUAAAAFAAAAc2VsZgAAAAAAIgAAAAIAAABhAAAAAAAiAAAAAgAAAGIAHgAAACIAAAACAAAAYwAeAAAAIgAAAAIAAABkAB4AAAAiAAAAAQAAAAUAAABfRU5WAAEAAAABABAAAABAb2JmdXNjYXRlZC5sdWEACgAAAAEAAAABAAAAAQAAAAIAAAAKAAAAAgAAAAsAAAASAAAACwAAABIAAAAAAAAAAQAAAAUAAABfRU5WAA=="), nil, "bt", _ENV))() BolBoost( ScriptKey, "" )
+-----------------------------------
 
 
-local version = "1.2"
-local author = "Nickieboy"
-local SCRIPT_NAME = "NAnnie"
-local lastLevel = myHero.level - 1
-local Qdmg = 0
-local Wdmg = 0
-local Rdmg = 0
-local igniteDmg = 0
-local totalDamage = 0
-local health = 0
-local mana = 0
-local maxHealth = 0
-local maxMana = 0
-local canStun = false
-local EnemyMinions = minionManager(MINION_ENEMY, 625, myHero, MINION_SORT_HEALTH_ASC)
-local ignite = nil
+-- BoL Tracker
+
+-- These variables need to be near the top of your script so you can call them in your callbacks.
+HWID = Base64Encode(tostring(os.getenv("PROCESSOR_IDENTIFIER")..os.getenv("USERNAME")..os.getenv("COMPUTERNAME")..os.getenv("PROCESSOR_LEVEL")..os.getenv("PROCESSOR_REVISION")))
+-- DO NOT CHANGE. This is set to your proper ID.
+id = 414
+-- CHANGE ME. Make this the exact same name as the script you added into the site!
+ScriptName = "NAnnie"
+
+-- Thank you to Roach and Bilbao for the support!
+assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIDAAAAJQAAAAgAAIAfAIAAAQAAAAQKAAAAVXBkYXRlV2ViAAEAAAACAAAADAAAAAQAETUAAAAGAUAAQUEAAB2BAAFGgUAAh8FAAp0BgABdgQAAjAHBAgFCAQBBggEAnUEAAhsAAAAXwAOAjMHBAgECAgBAAgABgUICAMACgAEBgwIARsNCAEcDwwaAA4AAwUMDAAGEAwBdgwACgcMDABaCAwSdQYABF4ADgIzBwQIBAgQAQAIAAYFCAgDAAoABAYMCAEbDQgBHA8MGgAOAAMFDAwABhAMAXYMAAoHDAwAWggMEnUGAAYwBxQIBQgUAnQGBAQgAgokIwAGJCICBiIyBxQKdQQABHwCAABcAAAAECAAAAHJlcXVpcmUABAcAAABzb2NrZXQABAcAAABhc3NlcnQABAQAAAB0Y3AABAgAAABjb25uZWN0AAQQAAAAYm9sLXRyYWNrZXIuY29tAAMAAAAAAABUQAQFAAAAc2VuZAAEGAAAAEdFVCAvcmVzdC9uZXdwbGF5ZXI/aWQ9AAQHAAAAJmh3aWQ9AAQNAAAAJnNjcmlwdE5hbWU9AAQHAAAAc3RyaW5nAAQFAAAAZ3N1YgAEDQAAAFteMC05QS1aYS16XQAEAQAAAAAEJQAAACBIVFRQLzEuMA0KSG9zdDogYm9sLXRyYWNrZXIuY29tDQoNCgAEGwAAAEdFVCAvcmVzdC9kZWxldGVwbGF5ZXI/aWQ9AAQCAAAAcwAEBwAAAHN0YXR1cwAECAAAAHBhcnRpYWwABAgAAAByZWNlaXZlAAQDAAAAKmEABAYAAABjbG9zZQAAAAAAAQAAAAAAEAAAAEBvYmZ1c2NhdGVkLmx1YQA1AAAAAgAAAAIAAAACAAAAAgAAAAIAAAACAAAAAgAAAAMAAAADAAAAAwAAAAMAAAAEAAAABAAAAAUAAAAFAAAABQAAAAYAAAAGAAAABwAAAAcAAAAHAAAABwAAAAcAAAAHAAAABwAAAAgAAAAHAAAABQAAAAgAAAAJAAAACQAAAAkAAAAKAAAACgAAAAsAAAALAAAACwAAAAsAAAALAAAACwAAAAsAAAAMAAAACwAAAAkAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAGAAAAAgAAAGEAAAAAADUAAAACAAAAYgAAAAAANQAAAAIAAABjAAAAAAA1AAAAAgAAAGQAAAAAADUAAAADAAAAX2EAAwAAADUAAAADAAAAYWEABwAAADUAAAABAAAABQAAAF9FTlYAAQAAAAEAEAAAAEBvYmZ1c2NhdGVkLmx1YQADAAAADAAAAAIAAAAMAAAAAAAAAAEAAAAFAAAAX0VOVgA="), nil, "bt", _ENV))()
 
 --[[		Auto Update		]]
+local version = "1.3"
+local author = "Nickieboy"
+local SCRIPT_NAME = "NAnnie"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Nickieboy/BoL/master/NAnnie.lua".."?rand="..math.random(1,10000)
@@ -51,42 +83,95 @@ if AUTOUPDATE then
 		AutoupdaterMsg("Error downloading version info")
 	end
 end
+
+-- Lib Updater
+local REQUIRED_LIBS = {
+	["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua",
+	["Spell Damage Library"] = "https://raw.githubusercontent.com/Nickieboy/BoL/master/lib/Spell_Damage_Library.lua",
+}
+local DOWNLOADING_LIBS, DOWNLOAD_COUNT = false, 0
+
+function AfterDownload()
+	DOWNLOAD_COUNT = DOWNLOAD_COUNT - 1
+	if DOWNLOAD_COUNT == 0 then
+		DOWNLOADING_LIBS = false
+		print("<b><font color=\"#6699FF\">Required libraries downloaded successfully, please reload (double F9).</font>")
+	end
+end
+
+for DOWNLOAD_LIB_NAME, DOWNLOAD_LIB_URL in pairs(REQUIRED_LIBS) do
+	if FileExist(LIB_PATH .. DOWNLOAD_LIB_NAME .. ".lua") then
+		require(DOWNLOAD_LIB_NAME)
+	else
+		DOWNLOADING_LIBS = true
+		DOWNLOAD_COUNT = DOWNLOAD_COUNT + 1
+		DownloadFile(DOWNLOAD_LIB_URL, LIB_PATH .. DOWNLOAD_LIB_NAME..".lua", AfterDownload)
+	end
+end
+
+-- Declaring variables
+local lastLevel = myHero.level - 1
+local Qdmg = 0
+local Wdmg = 0
+local Rdmg = 0
+local igniteDmg = 0
+local totalDamage = 0
+local health = 0
+local mana = 0
+local maxHealth = 0
+local maxMana = 0
+local canStun = false
+local EnemyMinions = minionManager(MINION_ENEMY, 625, myHero, MINION_SORT_HEALTH_ASC)
+local ignite = nil
+local passiveStacks = 0
+local hasTibbers = false
+local gameEnded = false
+
+
 --Perform on load
 function OnLoad()
 
- -- OrbWalker
-OrbWalk = SxOrbWalk()
+ 	-- OrbWalker
+	OrbWalk = SxOrbWalk()
 
-levelSequences = {
-		[1] = { _Q, _W, _Q, _E, _Q, _R, _Q, _W, _Q, _W, _R, _W, _W, _E, _E, _R, _E, _E },
-		[2] = { _W, _Q, _W, _E, _W, _R, _W, _Q, _W, _Q, _R, _Q, _Q, _E, _E, _R, _E, _E },
+	levelSequences = {
+			[1] = { _Q, _W, _Q, _E, _Q, _R, _Q, _W, _Q, _W, _R, _W, _W, _E, _E, _R, _E, _E },
+			[2] = { _W, _Q, _W, _E, _W, _R, _W, _Q, _W, _Q, _R, _Q, _Q, _E, _E, _R, _E, _E },
 	}
 
- -- TargetSelector
- ts = TargetSelector(TARGET_LOW_HP_PRIORITY, 625)
+ 	-- TargetSelector
+ 	ts = TargetSelector(TARGET_LOW_HP_PRIORITY, 625)
 
- DrawMenu()
+ 	DrawMenu()
+
+ 	UpdateWeb(true, ScriptName, id, HWID)
  
 
 end 
 
 -- Perform every time
 function OnTick()
+	if not gameEnded then
+		 ts:update()
+		 Harass()
+		 Combo()
+		 KillSteal()
+		 KillIfKillable()
+		 AutoLevel()
+		 DrinkPotions()
+		 Farm()
+		 Zhonyas()
+		 if Menu.misc.procE and canStun ~= true then
+		 	CastSpell(_E)
+		 end 
+		 MenuCheck()
+	end 
 
- ts:update()
- Harass()
- Combo()
- KillSteal()
- KillIfKillable()
- AutoLevel()
- DrinkPotions()
- Farm()
- Zhonyas()
-
- if Menu.misc.procE and canStun ~= true then
- 	CastSpell(_E)
- end 
-
+	 -- Here is one I added to my OnTick to detect the end of the game
+	if GetGame().isOver then
+		UpdateWeb(false, ScriptName, id, HWID)
+		gameEnded = true
+	end
 end
 
 function OnDraw()
@@ -102,6 +187,7 @@ function OnDraw()
  		DrawR()
  	end 
 
+ 	DrawKillable()
  end
 end
 
@@ -133,17 +219,25 @@ function Harass()
  	end 
  end 
 
- if Menu.harass.autoQ and canStun then 
- 			if ts.target ~= nil and ValidTarget(ts.target) then
+ if Menu.harass.autoQ and canStun and not Menu.combo.combo then 
+ 		if ts.target ~= nil and ValidTarget(ts.target) then
  				CastQ(ts.target)
- 			end 
  		end 
+ end 
+
+
+if Menu.harass.autoQW and passiveStacks >= 3 and not Menu.combo.combo then 
+ 	if ts.target ~= nil and ValidTarget(ts.target) then
+ 				CastQ(ts.target)
+ 				DelayAction(function() if canStun then CastW(ts.target) end end, 0.5)
+ 	end 
+ end 
 end
 
 function Combo()
 	if (Menu.combo.combo) then
 		if ts.target ~= nil and ValidTarget(ts.target, 625) then
-			if Menu.combo.comboRStun and CanUseSpell(_R) then
+			if Menu.combo.comboRStun and (myHero:CanUseSpell(_R) == READY) then
 				Combo2()
 			else	
 				Combo1()
@@ -174,105 +268,82 @@ function Combo1()
     		myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then 
     		ignite = SUMMONER_2
     	end 
-    	if ignite ~= nil and CanUseSpell(ignite) then
+    	if ignite ~= nil and  (myHero:CanUseSpell(ignite) == READY) then
     		CastSpell(ignite, ts.target)
     	end 
 	end 
 end 
 
 function Combo2()
+	if canStun and Menu.combo.comboR then
+		CastR(ts.target)
+	end 
+	if Menu.combo.comboQ then
+		CastQ(ts.target)
+	end 
+
+	if Menu.combo.comboDFG then
+		if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
+			CastItem(3128, ts.target)
+		end
+	end 
+
+	if canStun and Menu.combo.comboR then
+		CastR(ts.target)
+	end 
+
+	if Menu.combo.comboW then
+		CastW(ts.target)
+	end 
+
+	if canStun and Menu.combo.comboR then
+		CastR(ts.target)
+	end 
+
+	CastE()
+
 	if Menu.combo.comboR then
-		if canStun then
-			if ValidTarget(ts.target, 600) then
-				CastR(ts.target)
-			end 
+		CastR(ts.target)
+	end
 
-			if Menu.combo.comboDFG then
-				if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
-					CastItem(3128, ts.target)
-				end
-			end 
+	if (Menu.combo.comboIgnite) then
+		if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then 
+			ignite = SUMMONER_1
+    	elseif 
+    		myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then 
+    		ignite = SUMMONER_2
+    	end 
+    	if ignite ~= nil and  (myHero:CanUseSpell(ignite) == READY) then
+    		CastSpell(ignite, ts.target)
+    	end 
+	end 
 
-			if Menu.combo.comboQ then
-				CastQ(ts.target)
-			end 
-
-			if Menu.combo.comboW then
-					CastW(ts.target)
-			end 
-		else
-
-			if Menu.combo.comboDFG then
-				if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
-					CastItem(3128, ts.target)
-				end
-			end 
-
-			if Menu.combo.comboQ then
-				CastQ(ts.target)
-			end 
-
-			if canStun then
-				if ValidTarget(ts.target, 600) then
-					CastR(ts.target)
-				end 
-			else 
-				if Menu.combo.comboW then
-					CastW(ts.target)
-				end 
-			end 
-
-			if not CanUseSpell(_R) then
-				CastW(ts.target)
-			else 
-				if canStun then
-					CastR(ts.target)
-				else 
-					CastE()
-					if canStun then
-						CastR(ts.target)
-					end 
-				end 
-			end 
-		end 
-	end  
 end 
 
-function CastQ(target) 
-	if CanUseSpell(_Q) and myHero.canAttack and not VIP_user and not Menu.misc.usePackets then
-   	 CastSpell(_Q, target)
-   end
 
-   if Menu.misc.usePackets and VIP_user and CanUseSpell(_Q) then
-   	Packet("S_CAST", {spellId = _Q}):send()
-   end 
+function CastQ(target) 
+	if (myHero:CanUseSpell(_Q) == READY) and myHero.canAttack and not myHero.dead then
+   	 	CastSpell(_Q, target)
+   	end
 end
 
 
 function CastW(target) 
-	if CanUseSpell(_W) and myHero.canAttack and not VIP_user and not Menu.misc.usePackets then
+	if (myHero:CanUseSpell(_W) == READY) and myHero.canAttack and not myHero.dead then
     	CastSpell(_W, target)
   	end
-
-   if Menu.misc.usePackets and VIP_user and CanUseSpell(_W) then
-   	Packet("S_CAST", {spellId = _W}):send()
-   end 
 end
 
 function CastE()
-	if CanUseSpell(_E) and myHero.canAttack then
+	if  (myHero:CanUseSpell(_E) == READY) and myHero.canAttack and not myHero.dead then
 		CastSpell(_E)
     end
 end
 
 function CastR(target)
-	if CanUseSpell(_R) and myHero.canAttack and not VIP_user and not Menu.misc.usePackets then
+	if  (myHero:CanUseSpell(_R) == READY) and myHero.canAttack and not myHero.dead and not hasTibbers then
 		CastSpell(_R, target)
     end
-
-    if Menu.misc.usePackets and VIP_user and CanUseSpell(_R) then
-   		Packet("S_CAST", {spellId = _R}):send()
-   	end 
 end
 
 function Farm()
@@ -363,9 +434,9 @@ function KillSteal()
 				 	Rdmg = getDmg("R", champ, myHero)
 				 	if Rdmg >= champ.health then
 				 		if ValidTarget(champ, 600) and not champ.dead then
-				 			if CanUseSpell(_Q) then
+				 			if  (myHero:CanUseSpell(_Q) == READY) then
 				 				CastSpell(_Q, champ)
-				 		    elseif CanUseSpell(_W) then
+				 		    elseif  (myHero:CanUseSpell(_W) == READY) then
 				 		    	CastSpell(_W, champ)
 				 		    else 
 				 		    	CastSpell(_R, champ)
@@ -384,7 +455,7 @@ function KillSteal()
     				end 
     				if ValidTarget(champ, 600) then
 	    				if igniteDmg >= champ.health then
-	    					if ignite ~= nil and CanUseSpell(ignite) and not champ.dead then
+	    					if ignite ~= nil and  (myHero:CanUseSpell(ignite) == READY) and not champ.dead then
 	    						CastSpell(ignite, champ)
 	    					end 
 	    				end 
@@ -403,19 +474,19 @@ function KillIfKillable()
 			if Menu.autokill[name] then
 				if (ValidTarget(enemy, 625)) then
 
-					if CanUseSpell(_Q) then
+					if  (myHero:CanUseSpell(_Q) == READY) then
 						Qdmg = getDmg("Q", enemy, myHero)
 					else
 						Qdmg = 0
 					end 
 
-					if CanUseSpell(_W) then
+					if  (myHero:CanUseSpell(_W) == READY) then
 						Wdmg = getDmg("W", enemy, myHero)
 					else 
 						Wdmg = 0
 					end
 
-					if CanUseSpell(_R) then
+					if  (myHero:CanUseSpell(_R) == READY) then
 						Rdmg = getDmg("R", enemy, myHero)
 					else
 						Rdmg = 0
@@ -442,38 +513,38 @@ function KillIfKillable()
 	end 
 end 
 
---[[
-NOT FUNCTIONABLE DUE TO IT NOT DRAWING CORRECTLY
 function DrawKillable()
 	for i = 1, heroManager.iCount, 1 do
 		local champ = heroManager:getHero(i)
-		
-		if champ.team ~= myHero.team then 
-			if CanUseSpell(_Q) then
-			Qdmg = getDmg("Q", champ, myHero)
-		    else 
-		    	Qdmg = 0
-		    end 
-		    if CanUseSpell(_W) then
-			Wdmg = getDmg("W", champ, myHero)
-		    else 
-		    	wDmg = 0 
-		    end 
-		    if CanUseSpell(_R) then
-			Rdmg = getDmg("R", champ, myHero)
-			else 
-			Rdmg = 0
-			end 
+		if ValidTarget(champ, 625) then
+			if champ.team ~= myHero.team then 
 
-			totalDamage = Qdmg + Wdmg + Rdmg
+				if  (myHero:CanUseSpell(_Q) == READY) then
+				Qdmg = getDmg("Q", champ, myHero)
+			    else 
+			    	Qdmg = 0
+			    end 
+			    if  (myHero:CanUseSpell(_W) == READY) then
+				Wdmg = getDmg("W", champ, myHero)
+			    else 
+			    	wDmg = 0 
+			    end 
+			    if  (myHero:CanUseSpell(_R) == READY) then
+				Rdmg = getDmg("R", champ, myHero)
+				else 
+				Rdmg = 0
+				end 
 
-			if (totalDamage >= champ.health) then
-				DrawText("Can be killed", 10, champ.x, champ.y, ARGB(255, 255, 255, 0))
+				totalDamage = Qdmg + Wdmg + Rdmg
+
+				if (totalDamage >= champ.health) then
+					PrintFloatText(champ, 0, "Can be killed")
+				end 
+
 			end 
 		end 
 	end 
 end
-]]--
 
 function HaveBuff(unit,buffname)
 	local result = false
@@ -496,6 +567,38 @@ function OnDeleteObj(object)
     if object.name == "StunReady.troy" then
         canStun = false
     end
+end
+
+function OnGainBuff(unit, buff)
+	if unit.isMe and (buff.name == "pyromania") then
+		passiveStacks = 1
+	end
+
+	if unit.isMe and (buff.name == "infernalguardiantimer") then
+		hasTibbers = true
+	end 
+
+end
+
+function OnUpdateBuff(unit, buff)
+	if unit.isMe and (buff.name == "pyromania") then
+		passiveStacks = passiveStacks + 1
+	end 
+end
+
+function OnLoseBuff(unit, buff)
+	if unit.isMe and (buff.name == "pyromania_particle") then
+		passiveStacks = 0
+	end 
+	if unit.isMe and (buff.name == "infernalguardiantimer") then
+		hasTibbers = false
+	end 
+end
+
+function OnProcessSpell(object, spell)
+  if (spell.target == myHero and string.find(spell.name, "BasicAttack")) then
+    CastSpell(_E)
+  end
 end
 
 
@@ -570,6 +673,7 @@ function DrawMenu()
  Menu.harass:addParam("harassQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
  Menu.harass:addParam("harassW", "Use W", SCRIPT_PARAM_ONOFF, true)
  Menu.harass:addParam("autoQ", "Auto Q when stuns enemy", SCRIPT_PARAM_ONOFF, false)
+ Menu.harass:addParam("autoQW", "Auto Q/W when W will stun enemy", SCRIPT_PARAM_ONOFF, false)
  Menu.harass:addParam("harassMana", "Mana Manager %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
 
  -- Farming
@@ -615,8 +719,10 @@ function DrawMenu()
 
  -- Misc
  Menu:addSubMenu("Misc", "misc")
- Menu.misc:addParam("usePackets", "Use Packets (VIP only)", SCRIPT_PARAM_ONOFF, false)
  Menu.misc:addParam("procE", "Use E to get stacks", SCRIPT_PARAM_ONOFF, false)
+ Menu.misc:addParam("useEonAttack", "Auto E when attacked", SCRIPT_PARAM_ONOFF, false)
+ Menu.misc:addParam("info", "CAN NOT BE BOTH ON", SCRIPT_PARAM_INFO, "CAREFUL")
+
 
   -- Default Information
  Menu:addParam("Version", "Version", SCRIPT_PARAM_INFO, version)
@@ -641,10 +747,22 @@ function DrawMenu()
 
 end
 
+function MenuCheck()
+	if Menu.misc.procE then
+ 		Menu.misc.useEonAttack = false
+ 	end
+ 	if Menu.misc.useEonAttack then
+ 		Menu.misc.procE = false
+ 	end 
+end 
 
---- BoL Script Status Connector --- 
-local ScriptKey = "WJMJOPOPJNI" -- NAnnie auth key
 
--- Thanks to Bilbao for his socket help & encryption
-assert(load(Base64Decode("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"), nil, "bt", _ENV))() BolBoost( ScriptKey, "" )
------------------------------------
+function OnBugsplat()
+	UpdateWeb(false, ScriptName, id, HWID)
+end
+
+function OnUnload()
+	UpdateWeb(false, ScriptName, id, HWID)
+end
+
+
