@@ -27,6 +27,10 @@
 			1.4
 				Fixed bol.boost link
 
+			1.5
+				Disabled usage of E when hero is recalling
+				Disabled BoL tracker for faster runtime
+
 		Script Coded by Nickieboy.
 	]]
 
@@ -39,26 +43,15 @@ if myHero.charName ~= "Annie" then return end
 
 --- BoL Script Status Connector --- 
 local ScriptKey = "XKNKQKPMJPN" -- NAnnie auth key
-local ScriptVersion = "1.4" -- Your .version file content
+local ScriptVersion = "1.5" -- Your .version file content
 
 -- Thanks to Bilbao for his socket help & encryption
 assert(load(Base64Decode("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"), nil, "bt", _ENV))() BolBoost( ScriptKey, ScriptVersion )
 -----------------------------------
 
--- BoL Tracker
-
--- These variables need to be near the top of your script so you can call them in your callbacks.
-HWID = Base64Encode(tostring(os.getenv("PROCESSOR_IDENTIFIER")..os.getenv("USERNAME")..os.getenv("COMPUTERNAME")..os.getenv("PROCESSOR_LEVEL")..os.getenv("PROCESSOR_REVISION")))
--- DO NOT CHANGE. This is set to your proper ID.
-id = 414
--- CHANGE ME. Make this the exact same name as the script you added into the site!
-ScriptName = "NAnnie"
-
--- Thank you to Roach and Bilbao for the support!
-assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIDAAAAJQAAAAgAAIAfAIAAAQAAAAQKAAAAVXBkYXRlV2ViAAEAAAACAAAADAAAAAQAETUAAAAGAUAAQUEAAB2BAAFGgUAAh8FAAp0BgABdgQAAjAHBAgFCAQBBggEAnUEAAhsAAAAXwAOAjMHBAgECAgBAAgABgUICAMACgAEBgwIARsNCAEcDwwaAA4AAwUMDAAGEAwBdgwACgcMDABaCAwSdQYABF4ADgIzBwQIBAgQAQAIAAYFCAgDAAoABAYMCAEbDQgBHA8MGgAOAAMFDAwABhAMAXYMAAoHDAwAWggMEnUGAAYwBxQIBQgUAnQGBAQgAgokIwAGJCICBiIyBxQKdQQABHwCAABcAAAAECAAAAHJlcXVpcmUABAcAAABzb2NrZXQABAcAAABhc3NlcnQABAQAAAB0Y3AABAgAAABjb25uZWN0AAQQAAAAYm9sLXRyYWNrZXIuY29tAAMAAAAAAABUQAQFAAAAc2VuZAAEGAAAAEdFVCAvcmVzdC9uZXdwbGF5ZXI/aWQ9AAQHAAAAJmh3aWQ9AAQNAAAAJnNjcmlwdE5hbWU9AAQHAAAAc3RyaW5nAAQFAAAAZ3N1YgAEDQAAAFteMC05QS1aYS16XQAEAQAAAAAEJQAAACBIVFRQLzEuMA0KSG9zdDogYm9sLXRyYWNrZXIuY29tDQoNCgAEGwAAAEdFVCAvcmVzdC9kZWxldGVwbGF5ZXI/aWQ9AAQCAAAAcwAEBwAAAHN0YXR1cwAECAAAAHBhcnRpYWwABAgAAAByZWNlaXZlAAQDAAAAKmEABAYAAABjbG9zZQAAAAAAAQAAAAAAEAAAAEBvYmZ1c2NhdGVkLmx1YQA1AAAAAgAAAAIAAAACAAAAAgAAAAIAAAACAAAAAgAAAAMAAAADAAAAAwAAAAMAAAAEAAAABAAAAAUAAAAFAAAABQAAAAYAAAAGAAAABwAAAAcAAAAHAAAABwAAAAcAAAAHAAAABwAAAAgAAAAHAAAABQAAAAgAAAAJAAAACQAAAAkAAAAKAAAACgAAAAsAAAALAAAACwAAAAsAAAALAAAACwAAAAsAAAAMAAAACwAAAAkAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAGAAAAAgAAAGEAAAAAADUAAAACAAAAYgAAAAAANQAAAAIAAABjAAAAAAA1AAAAAgAAAGQAAAAAADUAAAADAAAAX2EAAwAAADUAAAADAAAAYWEABwAAADUAAAABAAAABQAAAF9FTlYAAQAAAAEAEAAAAEBvYmZ1c2NhdGVkLmx1YQADAAAADAAAAAIAAAAMAAAAAAAAAAEAAAAFAAAAX0VOVgA="), nil, "bt", _ENV))()
 
 --[[		Auto Update		]]
-local version = "1.4"
+local version = "1.5"
 local author = "Nickieboy"
 local SCRIPT_NAME = "NAnnie"
 local AUTOUPDATE = true
@@ -127,7 +120,7 @@ local EnemyMinions = minionManager(MINION_ENEMY, 625, myHero, MINION_SORT_HEALTH
 local ignite = nil
 local passiveStacks = 0
 local hasTibbers = false
-local gameEnded = false
+local isRecalling = false
 
 
 --Perform on load
@@ -146,34 +139,29 @@ function OnLoad()
 
  	DrawMenu()
 
- 	UpdateWeb(true, ScriptName, id, HWID)
  
 
 end 
 
 -- Perform every time
 function OnTick()
-	if not gameEnded then
-		 ts:update()
-		 Harass()
-		 Combo()
-		 KillSteal()
-		 KillIfKillable()
-		 AutoLevel()
-		 DrinkPotions()
-		 Farm()
-		 Zhonyas()
-		 if Menu.misc.procE and canStun ~= true then
-		 	CastSpell(_E)
-		 end 
-		 MenuCheck()
+	ts:update()
+	Harass()
+	Combo()
+	KillSteal()
+	KillIfKillable()
+	AutoLevel()
+	DrinkPotions()
+	Farm()
+	Zhonyas()
+
+	if Menu.misc.procE and canStun ~= true and isRecalling ~= true then
+		CastSpell(_E)
 	end 
 
-	 -- Here is one I added to my OnTick to detect the end of the game
-	if GetGame().isOver then
-		UpdateWeb(false, ScriptName, id, HWID)
-		gameEnded = true
-	end
+	MenuCheck()
+ 
+
 end
 
 function OnDraw()
@@ -470,7 +458,7 @@ end
 
 
 function KillIfKillable()
-	if Menu.autokill then
+	if Menu.autokill and not Menu.combo.combo then
 		for i, enemy in ipairs(GetEnemyHeroes()) do 
 			local name = enemy.charName
 			if Menu.autokill[name] then
@@ -522,19 +510,19 @@ function DrawKillable()
 			if champ.team ~= myHero.team then 
 
 				if  (myHero:CanUseSpell(_Q) == READY) then
-				Qdmg = getDmg("Q", champ, myHero)
+					Qdmg = getDmg("Q", champ, myHero)
 			    else 
 			    	Qdmg = 0
 			    end 
 			    if  (myHero:CanUseSpell(_W) == READY) then
-				Wdmg = getDmg("W", champ, myHero)
+					Wdmg = getDmg("W", champ, myHero)
 			    else 
 			    	wDmg = 0 
 			    end 
 			    if  (myHero:CanUseSpell(_R) == READY) then
-				Rdmg = getDmg("R", champ, myHero)
+					Rdmg = getDmg("R", champ, myHero)
 				else 
-				Rdmg = 0
+					Rdmg = 0
 				end 
 
 				totalDamage = Qdmg + Wdmg + Rdmg
@@ -563,13 +551,17 @@ function OnCreateObj(object)
     if object.name == "StunReady.troy" then
         canStun = true
     end
-end
- 
+
+
+end 
+
+
 function OnDeleteObj(object)
     if object.name == "StunReady.troy" then
         canStun = false
     end
 end
+ 
 
 function OnGainBuff(unit, buff)
 	if unit.isMe and (buff.name == "pyromania") then
@@ -578,6 +570,10 @@ function OnGainBuff(unit, buff)
 
 	if unit.isMe and (buff.name == "infernalguardiantimer") then
 		hasTibbers = true
+	end 
+
+	if unit.isMe and (buff.name == "recall") then
+		isRecalling = true
 	end 
 
 end
@@ -595,12 +591,15 @@ function OnLoseBuff(unit, buff)
 	if unit.isMe and (buff.name == "infernalguardiantimer") then
 		hasTibbers = false
 	end 
+	if unit.isMe and (buff.name == "recall") then
+		isRecalling = false
+	end 
 end
 
 function OnProcessSpell(object, spell)
-  if (spell.target == myHero and string.find(spell.name, "BasicAttack")) then
-    CastSpell(_E)
-  end
+  	if (spell.target == myHero and string.find(spell.name, "BasicAttack")) and Menu.misc.useEonAttack then
+   	 	CastSpell(_E)
+  	end
 end
 
 
@@ -758,13 +757,5 @@ function MenuCheck()
  	end 
 end 
 
-
-function OnBugsplat()
-	UpdateWeb(false, ScriptName, id, HWID)
-end
-
-function OnUnload()
-	UpdateWeb(false, ScriptName, id, HWID)
-end
 
 
