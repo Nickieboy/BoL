@@ -5,7 +5,7 @@
 if myHero.charName ~= "Varus" then return end
 
 -- Download script
-local version = 1.5
+local version = 1.6
 local author = "Nickieboy"
 local SCRIPT_NAME = "NVarus"
 local AUTOUPDATE = true
@@ -62,7 +62,7 @@ end
 
 --- BoL Script Status Connector --- 
 local ScriptKey = "WJMJPJQKQLP" -- NVarus auth key
-local ScriptVersion = "1.5" -- Your .version file content
+local ScriptVersion = "1.6" -- Your .version file content
 
 -- Thanks to Bilbao for his socket help & encryption
 assert(load(Base64Decode("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"), nil, "bt", _ENV))() BolBoost( ScriptKey, ScriptVersion )
@@ -76,9 +76,7 @@ local Wspell = {name = "Blighted Quiver"}
 local Espell = {name = "Hail Of Arrows", duration = 0, range = 925, speed = 1750, width = 50, delay = 0.240}
 local Rspell = {name = "Chain of Corruption", duration = 0, range = 1075, speed = 2000, width = 100, delay = 0.250}
 local AA = 600
-local Qready = (myHero:CanUseSpell(_Q) == READY)
-local Eready = (myHero:CanUseSpell(_E) == READY)
-local Rready = (myHero:CanUseSpell(_Q) == READY)
+local Qready, Eready, Rready = false, false, false
 local Qtarget, Etarget, Rtarget, AAtarget = nil
 local EnemyMinions = minionManager(MINION_ENEMY, 625, myHero, MINION_SORT_HEALTH_ASC)
 local farmMinions = 0
@@ -133,6 +131,8 @@ end
 
 -- Checks frequently
 function OnTick()
+	PerformChecks()
+
 	if Menu.harass.harass then
 		Harass()
 	end 
@@ -156,9 +156,10 @@ function OnTick()
 	if Menu.laneclear.laneclear then 
 		LaneClear()
 	end 
-
-	if Menu.misc.autoheal.useHeal and healPosition ~= nil then
-		UseSummoner()
+	if healPosition ~= nil then
+		if Menu.misc.autoheal.useHeal then
+			UseSummoner()
+		end 
 	end 
 
 	CheckMenu()
@@ -182,8 +183,13 @@ function OnDraw()
 	end 
 end
 
-function Combo()
+function PerformChecks()
+	Qready = (myHero:CanUseSpell(_Q) == READY)
+	Eready = (myHero:CanUseSpell(_E) == READY)
+	Rready = (myHero:CanUseSpell(_R) == READY)
+end 
 
+function Combo()
 	Qtarget = STS:GetTarget(Qrangemax)
 	Etarget = STS:GetTarget(Espell.range)
 	Rtarget = STS:GetTarget(Rspell.range)
@@ -202,6 +208,20 @@ function Combo()
 					end 
 					
 				end
+			end 
+
+			if Menu.combo.comboQ.comboQmax then
+				if Qtarget and Qready then
+					if Q:IsCharging() then
+
+						local castPosition, hitChance, nTargets = Q:GetPrediction(Qtarget)
+						if Q.range == Qrangemax and GetDistanceSqr(castPosition) < math.pow(Q.range - 200, 2) then
+							Send2ndQPacket(castPosition)
+						end 
+					else
+						Q:Charge()
+					end 
+				end 
 			end 
 		end 
 
@@ -249,8 +269,8 @@ end
 function LaneClear()
 	if Menu.laneclear.laneclear then
 		EnemyMinions:update()
-		if #EnemyMinions.objects >= 3 then
-		farmMinions = SelectUnits(EnemyMinions.objects, function(t) return ValidTarget(t) end)
+		if #EnemyMinions.objects >= 2 then
+			farmMinions = SelectUnits(EnemyMinions.objects, function(t) return ValidTarget(t) end)
 			if Menu.laneclear.laneclearQ and Qready then
 				if Q:IsCharging() then
 					local farmPos, farmHit = GetBestLineFarmPosition(Qrangemax, Qspell.width, farmMinions)
@@ -265,7 +285,7 @@ function LaneClear()
 			end 
 		
 			if Menu.laneclear.laneclearE and Eready then
-				local farmPos2, farmHit2 = GetBestCircularFarmPosition(Espell.range, 50, EnemyMinions.objects)
+				local farmPos2, farmHit2 = GetBestCircularFarmPosition(Espell.range, Espell.width, farmMinions)
 				if farmPos2 then
 					E:Cast(farmPos2.x, farmPos2.z)
 				end 
@@ -487,6 +507,33 @@ function GenModelPacket(champ, skinId)
         RecvPacket(p)
 end
 
+--[[ function OnGainBuff(unit, buff)
+	if unit.isValid and (buff.name == "varuswdebuff") then
+		passiveStacks = 1
+	end
+
+	if unit.isMe and (buff.name == "infernalguardiantimer") then
+		hasTibbers = true
+	end 
+
+end
+
+function OnUpdateBuff(unit, buff)
+	if unit.isMe and (buff.name == "pyromania") then
+		passiveStacks = passiveStacks + 1
+	end 
+end
+
+function OnLoseBuff(unit, buff)
+	if unit.isMe and (buff.name == "pyromania_particle") then
+		passiveStacks = 0
+	end 
+	if unit.isMe and (buff.name == "infernalguardiantimer") then
+		hasTibbers = false
+	end 
+end
+
+--]]
 
 -- Draw Menu
 function Menu()
@@ -500,7 +547,7 @@ function Menu()
  		-- Use Q in combo
  	Menu.combo:addSubMenu(Qspell.name .. " (Q)", "comboQ")
  	Menu.combo.comboQ:addParam("comboQ", "Use " .. Qspell.name .. " (Q)", SCRIPT_PARAM_ONOFF, true)
- 	--Menu.combo.comboQ:addParam("comboQmax", "Cast in full range", SCRIPT_PARAM_ONOFF, false)
+ 	Menu.combo.comboQ:addParam("comboQmax", "Cast in full range", SCRIPT_PARAM_ONOFF, false)
  	Menu.combo.comboQ:addParam("comboQinstant", "Cast Q immediately", SCRIPT_PARAM_ONOFF, true)
 
  		-- Use E in combo
@@ -586,6 +633,14 @@ function CheckMenu()
 
 	if Menu.combo.comboE.comboEinstant then
 		Menu.combo.comboE.comboEFurther = false
+	end 
+
+	if Menu.combo.comboQ.comboQmax then
+		Menu.combo.comboQ.comboQinstant = false
+	end 
+
+	if Menu.combo.comboQ.comboQinstant then
+		Menu.combo.comboQ.comboQmax = false
 	end 
 end 
 
