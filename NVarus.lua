@@ -5,7 +5,7 @@
 if myHero.charName ~= "Varus" then return end
 
 -- Download script
-local version = 1.6
+local version = 1.7
 local author = "Nickieboy"
 local SCRIPT_NAME = "NVarus"
 local AUTOUPDATE = true
@@ -38,7 +38,8 @@ end
 local REQUIRED_LIBS = {
 	["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua",
 	["VPrediction"] = "https://raw.githubusercontent.com/Hellsing/BoL/master/common/VPrediction.lua",
-	["SourceLib"] = "https://raw.githubusercontent.com/Dienofail/BoL/master/common/SourceLib.lua"
+	["SourceLib"] = "https://raw.githubusercontent.com/Dienofail/BoL/master/common/SourceLib.lua",
+	["SOW"] = "https://raw.github.com/Hellsing/BoL/master/common/SOW.lua"
 }
 local DOWNLOADING_LIBS, DOWNLOAD_COUNT = false, 0
 
@@ -62,7 +63,7 @@ end
 
 --- BoL Script Status Connector --- 
 local ScriptKey = "WJMJPJQKQLP" -- NVarus auth key
-local ScriptVersion = "1.6" -- Your .version file content
+local ScriptVersion = "1.7" -- Your .version file content
 
 -- Thanks to Bilbao for his socket help & encryption
 assert(load(Base64Decode("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"), nil, "bt", _ENV))() BolBoost( ScriptKey, ScriptVersion )
@@ -80,7 +81,6 @@ local Qready, Eready, Rready = false, false, false
 local Qtarget, Etarget, Rtarget, AAtarget = nil
 local EnemyMinions = minionManager(MINION_ENEMY, 625, myHero, MINION_SORT_HEALTH_ASC)
 local farmMinions = 0
-local healPosition = nil
 
 local myPos = myHero.pos
 local targetPos = nil
@@ -88,12 +88,19 @@ local newPos = nil
 local newTargetPos = nil
 local xFurther = 0
 
+local healPosition = nil
+local ignite = nil
+local barrier = nil
+
+local Orbwalker = nil
+local loaded = false
+
+local passiveStacks = {}
+
 
 -- Load when game loads
 function OnLoad()
 	VP = VPrediction()
-	SxOrb = SxOrbWalk(VP)
-    print("NVarus succesfully loaded")
 	STS = SimpleTS(STS_LESS_CAST_PHYSICAL)
 	DMG = DamageLib()
 
@@ -108,11 +115,29 @@ function OnLoad()
     	healPosition = SUMMONER_2
     end 
 
+    if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then 
+		ignite = SUMMONER_1
+    elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then 
+    	ignite = SUMMONER_2
+    end 
+
+    if myHero:GetSpellData(SUMMONER_1).name:find("summonerbarrier") then 
+		barrier = SUMMONER_1
+    elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerbarrier") then 
+    	barrier = SUMMONER_2
+    end 
+
+    for i, enemy in ipairs(GetEnemyHeroes()) do 
+    	passiveStacks[enemy.networkID] = 0
+    end 
+
+
+
     -- Draw Menu
     Menu()
 
 	--Setting skillshots through SourceLib
-	Q = Spell(_Q, Qrangemin, true)
+	Q = Spell(_Q, Qrangemin, false)
 	Q:SetSkillshot(VP, SKILLSHOT_LINEAR, Qspell.width, Q.delay, Qspell.speed, false)
 	Q:SetCharged("VarusQ", 4, Qrangemax, 1.3)
 	Q:SetAOE(true)
@@ -133,6 +158,10 @@ end
 function OnTick()
 	PerformChecks()
 
+	if not loaded then
+		CheckOrbWalker()
+	end 
+
 	if Menu.harass.harass then
 		Harass()
 	end 
@@ -144,10 +173,12 @@ function OnTick()
 		KillSteal()
 	end 
 
-	if Menu.misc.skinChanger.skinChanger and skinChanged() then
-		GenModelPacket("Varus", Menu.misc.skinChanger.skinChangerSlice)
-        lastSkin = Menu.misc.skinChanger.skinChangerSlice
-	end 
+	if VIP_USER then
+		if Menu.misc.skinChanger.skinChanger and skinChanged()  then
+			GenModelPacket("Varus", Menu.misc.skinChanger.skinChangerSlice)
+	        lastSkin = Menu.misc.skinChanger.skinChangerSlice
+		end 
+ 	end 
 
 	if Menu.misc.autopotions.usePotion then
 		DrinkPotions()
@@ -156,9 +187,22 @@ function OnTick()
 	if Menu.laneclear.laneclear then 
 		LaneClear()
 	end 
+
 	if healPosition ~= nil then
 		if Menu.misc.autoheal.useHeal then
-			UseSummoner()
+			UseHeal()
+		end 
+	end 
+
+	if ignite ~= nil then
+		if Menu.misc.autoignite.useIgnite then
+			UseIgnite()
+		end 
+	end 
+
+	if barrier ~= nil then
+		if Menu.misc.autobarrier.useBarrier then
+			UseBarrier()
 		end 
 	end 
 
@@ -181,6 +225,10 @@ function OnDraw()
 		end
 		STS:OnDraw()
 	end 
+
+	if not loaded then
+		DrawText3D("Choose an orbwalker", myHero.x, myHero.y + 50, myHero.z, 50, 4294967295, true)
+	end
 end
 
 function PerformChecks()
@@ -195,34 +243,76 @@ function Combo()
 	Rtarget = STS:GetTarget(Rspell.range)
 	if Menu.combo.combo then
 		if Menu.combo.comboQ.comboQ then
-			if Menu.combo.comboQ.comboQinstant then
-				if Qtarget and Qready then
-					if Q:IsCharging() then
 
-						local castPosition, hitChance, nTargets = Q:GetPrediction(Qtarget)
-						if Q.range ~= Qrangemax and GetDistanceSqr(castPosition) < math.pow(Q.range - 200, 2) then
-							Send2ndQPacket(castPosition)
+			if VIP_USER then
+				if Menu.combo.comboQ.comboQinstant then
+					if Qtarget and Qready then
+						if passiveStacks[Qtarget.networkID] >= Menu.combo.comboQ.stacks then
+							if Q:IsCharging() then
+
+								local castPosition, hitChance, nTargets = Q:GetPrediction(Qtarget)
+								if Q.range ~= Qrangemax and GetDistanceSqr(castPosition) < math.pow(Q.range - 200, 2) then
+									Send2ndQPacket(castPosition)
+								end 
+							else
+								Q:Charge()
+							end 
 						end 
-					else
-						Q:Charge()
-					end 
-					
-				end
-			end 
+					end
+				end 
 
-			if Menu.combo.comboQ.comboQmax then
-				if Qtarget and Qready then
-					if Q:IsCharging() then
+				if Menu.combo.comboQ.comboQmax then
+					if Qtarget and Qready then
+						if passiveStacks[Qtarget.networkID] >= Menu.combo.comboQ.stacks then
+							if Q:IsCharging() then
 
-						local castPosition, hitChance, nTargets = Q:GetPrediction(Qtarget)
-						if Q.range == Qrangemax and GetDistanceSqr(castPosition) < math.pow(Q.range - 200, 2) then
-							Send2ndQPacket(castPosition)
+								local castPosition, hitChance, nTargets = Q:GetPrediction(Qtarget)
+								if Q.range == Qrangemax and GetDistanceSqr(castPosition) < math.pow(Q.range - 200, 2) then
+									Send2ndQPacket(castPosition)
+								end 
+							else
+								Q:Charge()
+							end 
 						end 
-					else
-						Q:Charge()
 					end 
 				end 
+
+			else
+
+				if Menu.combo.comboQ.comboQinstant then
+					if Qtarget and Qready then
+						if passiveStacks[Qtarget.networkID] >= Menu.combo.comboQ.stacks then
+							if Q:IsCharging() then
+
+								local castPosition, hitChance, nTargets = Q:GetPrediction(Qtarget)
+								if Q.range ~= Qrangemax and GetDistanceSqr(castPosition) < math.pow(Q.range - 200, 2) then
+									CastSpell(_Q, castPosition.x, castPosition.z)
+								end 
+							else
+								Q:Charge()
+							end 
+						end 
+					end
+				end 
+
+				if Menu.combo.comboQ.comboQmax then
+					if Qtarget and Qready then
+						if passiveStacks[Qtarget.networkID] >= Menu.combo.comboQ.stacks then
+							if Q:IsCharging() then
+
+								local castPosition, hitChance, nTargets = Q:GetPrediction(Qtarget)
+								if Q.range == Qrangemax and GetDistanceSqr(castPosition) < math.pow(Q.range - 200, 2) then
+									CastSpell(_Q, castPosition.x, castPosition.z)
+								end 
+							else
+								Q:Charge()
+							end 
+						end 
+					end 
+				end 
+
 			end 
+
 		end 
 
 		if Menu.combo.comboE.comboE then
@@ -251,7 +341,8 @@ end
 function Harass()
 	if Menu.harass.harass then 
 		Qtarget = STS:GetTarget(Qrangemax)
-		if Qtarget and Menu.harass.harassQ then
+		Etarget = STS:GetTarget(E.range)
+		if Qtarget and Menu.harass.harassQ and Qready then
 			if Q:IsCharging() then
 				local castPosition, hitChance, nTargets = Q:GetPrediction(Qtarget)
 				if Q.range ~= Qrangemax and GetDistanceSqr(castPosition) < math.pow(Q.range - 200, 2) then
@@ -261,6 +352,10 @@ function Harass()
 				Q:Charge()
 			end 
 			
+		end 
+
+		if Etarget and Menu.harass.harassE and Eready then
+			E:Cast(Etarget.x, Etarget.z) 
 		end 
 	end 
 end 
@@ -299,10 +394,10 @@ end
 function KillSteal()
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		if Menu.killsteal.killstealAA then
-			if ValidTarget(enemy, AA) then
+			AATarget = STS:GetTarget(AA)
+			if ValidTarget(enemy, AA) and AATarget then
 				if DMG:IsKillable(enemy, {_AA}) then
-					SxOrb:ForceTarget(enemy)
-					SxOrb:AttackSelectedTarget()
+					CastSpell(_AA, AATarget)
 				end 
 			end 
 		end 
@@ -349,7 +444,7 @@ function EnemyMovingFurtherAwayCastE(range, target)
 				if (xFurther >= 5) then
 					xFurther = 0
 				end 
-				if (myHero:CanUseSpell(_E) == READY) and xFurther >= 4 and ValidTarget(target, range)  then
+				if (myHero:CanUseSpell(_E) == READY) and xFurther >= 4 and ValidTarget(target, range) then
 					E:Cast(target.x, target.z)
 				end
 			end
@@ -423,7 +518,7 @@ function castStunInterruptable(unit, spell)
 	end
 end 
 
-function UseSummoner()
+function UseHeal()
 	health = myHero.health
 	maxHealth = myHero.maxHealth
 
@@ -445,6 +540,28 @@ function UseSummoner()
 					end 
 				end 
 			end 
+		end 
+	end 
+end 
+
+function UseIgnite()
+	local igniteT = STS:GetTarget(600)
+	local igniteDMG = (50 + (20 * myHero.level)) * 5
+
+	if igniteT ~= nil and (myHero:CanUseSpell(ignite) == READY) then
+		if igniteT.health < igniteDMG then
+			CastSpell(ignite, target)
+		end 
+	end 
+end 
+
+function UseBarrier()
+	health = myHero.health
+	maxHealth = myHero.maxHealth
+
+	if (myHero:CanUseSpell(barrier) == READY) then
+		if ((health / maxHealth) <= Menu.misc.autobarrier.amountOfHealth) then
+			CastSpell(barrier)
 		end 
 	end 
 end 
@@ -507,30 +624,25 @@ function GenModelPacket(champ, skinId)
         RecvPacket(p)
 end
 
---[[ function OnGainBuff(unit, buff)
-	if unit.isValid and (buff.name == "varuswdebuff") then
-		passiveStacks = 1
+---[[ 
+function OnGainBuff(unit, buff)
+	if unit.isValid and unit.team ~= myHero.team and (buff.name == "varuswdebuff") and buff.valid then
+		passiveStacks[unit.networkID] = 1
 	end
 
-	if unit.isMe and (buff.name == "infernalguardiantimer") then
-		hasTibbers = true
-	end 
-
+	--]]
 end
 
 function OnUpdateBuff(unit, buff)
-	if unit.isMe and (buff.name == "pyromania") then
-		passiveStacks = passiveStacks + 1
-	end 
+	if unit.isValid and unit.team ~= myHero.team and (buff.name == "varuswdebuff") and buff.valid then
+		passiveStacks[unit.networkID] = buff.stack
+	end
 end
 
 function OnLoseBuff(unit, buff)
-	if unit.isMe and (buff.name == "pyromania_particle") then
-		passiveStacks = 0
-	end 
-	if unit.isMe and (buff.name == "infernalguardiantimer") then
-		hasTibbers = false
-	end 
+	if unit.isValid and unit.team ~= myHero.team and (buff.name == "varuswdebuff") and buff.valid then
+		passiveStacks[unit.networkID] = 0
+	end
 end
 
 --]]
@@ -549,6 +661,7 @@ function Menu()
  	Menu.combo.comboQ:addParam("comboQ", "Use " .. Qspell.name .. " (Q)", SCRIPT_PARAM_ONOFF, true)
  	Menu.combo.comboQ:addParam("comboQmax", "Cast in full range", SCRIPT_PARAM_ONOFF, false)
  	Menu.combo.comboQ:addParam("comboQinstant", "Cast Q immediately", SCRIPT_PARAM_ONOFF, true)
+ 	Menu.combo.comboQ:addParam("stacks", "Use Q if x of passive", SCRIPT_PARAM_SLICE, 0, 0, 3, 0)
 
  		-- Use E in combo
  	Menu.combo:addSubMenu(Espell.name .. " (E)", "comboE")
@@ -593,6 +706,7 @@ function Menu()
  	Menu.misc.autopotions:addParam("usePotion", "Use Potions Automatically", SCRIPT_PARAM_ONOFF, false)
  	Menu.misc.autopotions:addParam("health", "Health under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
  	Menu.misc.autopotions:addParam("mana", "Mana under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
+
  	if healPosition ~= nil then
 	Menu.misc:addSubMenu("Auto Heal", "autoheal")
 	Menu.misc.autoheal:addParam("useHeal", "Use Summoner Heal", SCRIPT_PARAM_ONOFF, false)
@@ -600,9 +714,22 @@ function Menu()
 	Menu.misc.autoheal:addParam("helpHeal", "Use Heal to save teammates", SCRIPT_PARAM_ONOFF, false)
 	end 
 
-	Menu.misc:addSubMenu("Skin Changer", "skinChanger")
-	Menu.misc.skinChanger:addParam("skinChanger", "Change Skin (VIP)", SCRIPT_PARAM_ONOFF, false)
-	Menu.misc.skinChanger:addParam("skinChangerSlice", "Change Skin", SCRIPT_PARAM_SLICE, 1, 1, 4, 0)
+	if ignite ~= nil then
+	Menu.misc:addSubMenu("Auto Ignite", "autoignite")
+	Menu.misc.autoignite:addParam("useIgnite", "Use Summoner Ignite", SCRIPT_PARAM_ONOFF, false)
+	end 
+
+	if barrier ~= nil then
+	Menu.misc:addSubMenu("Auto Barrier", "autobarrier")
+	Menu.misc.autobarrier:addParam("useBarrier", "Use Summoner Barrier", SCRIPT_PARAM_ONOFF, false)
+	Menu.misc.autobarrier:addParam("amountOfHealth", "Under % of health", SCRIPT_PARAM_SLICE, 0, 0, 1, 2)
+	end 
+
+	if VIP_USER then
+		Menu.misc:addSubMenu("Skin Changer", "skinChanger")
+		Menu.misc.skinChanger:addParam("skinChanger", "Change Skin (VIP)", SCRIPT_PARAM_ONOFF, false)
+		Menu.misc.skinChanger:addParam("skinChangerSlice", "Change Skin", SCRIPT_PARAM_SLICE, 1, 1, 4, 0)
+	end
 
  	Menu.misc:addSubMenu("Gapcloser", "gc")
 	AntiGapcloser(Menu.misc.gc, castStunGapClosing)
@@ -613,8 +740,9 @@ function Menu()
 	STS:AddToMenu(Menu.sts)
 
 	--Orbwalker
- 	Menu:addSubMenu("OrbWalker", "orbwalker")
- 	SxOrb:LoadToMenu(Menu.orbwalker)
+	Menu:addSubMenu("OrbWalker", "orbwalker")
+	Menu.orbwalker:addParam("sxorbwalk", "Use SxOrbWalk", SCRIPT_PARAM_ONOFF, false)
+	Menu.orbwalker:addParam("sow", "Use SOW", SCRIPT_PARAM_ONOFF, false)
 
 
 	-- Permashow
@@ -625,6 +753,22 @@ function Menu()
   	Menu.misc:permaShow("gc")
   	Menu.misc:permaShow("ai")
 end
+
+function CheckOrbWalker()
+
+	if Menu.orbwalker.sxorbwalk then
+		Orbwalker = SxOrbWalk(VP)
+		Orbwalker:LoadToMenu(Menu.orbwalker)
+		loaded = true
+	end 
+
+	if Menu.orbwalker.sow then
+		Orbwalker = SOW(VP)
+		Orbwalker:LoadToMenu(Menu.orbwalker, STS)
+		loaded = true
+	end 
+end 
+
 
 function CheckMenu()
 	if Menu.combo.comboE.comboEFurther then
@@ -641,6 +785,16 @@ function CheckMenu()
 
 	if Menu.combo.comboQ.comboQinstant then
 		Menu.combo.comboQ.comboQmax = false
+	end 
+
+	if Menu.orbwalker.sxorbwalk then
+		Menu.orbwalker.sow = false
+		Menu.orbwalker.sxorbwalk = true
+	end
+
+	if Menu.orbwalker.sow then
+		Menu.orbwalker.sxorbwalk = false
+		Menu.orbwalker.sow = true
 	end 
 end 
 
