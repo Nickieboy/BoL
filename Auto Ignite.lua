@@ -25,7 +25,7 @@ function UseIgnite()
 		for i, enemy in ipairs(GetEnemyHeroes()) do
 			if Menu[enemy.charName] then
 				if ValidTarget(enemy, 600) then
-					local dmg = (50 + (20 * myHero.level)) * 5
+					local dmg = (50 + (20 * myHero.level)) 
 
 					if enemy.health < dmg then
 						CastSpell(ignite, enemy)
