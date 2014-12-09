@@ -6,7 +6,7 @@
 
 			1.1
 			​	Added Farm
-				Added DFG and Zhyonas
+				Added DFG and Zhonyas
 				Added auto downloading script (Not Libs)
 				Added another option in Combo to use R if the R stuns
 
@@ -15,7 +15,6 @@
 				Added Auto Q when Q will Stun (Inside Harass menu, but will still Cast even when Harass is Off)
 				Added Ignite
 				Added E cast until Stun is UP
-				Added Packet Casting 
 				Fixed a bug with AutoDownloading 
 
 			1.3
@@ -42,6 +41,21 @@
 				Added DFG support
 				Now Draws Killable (with which spells) on ALL enemies
 
+			1.7
+				Added more Combo Ways
+					QWR
+					WQR
+					RQW
+					RWQ
+				Added Zhonyas support for
+					Karthus Ult
+					Zed Ult if the mark will kill you
+					Will add more if requested
+				Improved Drawing Killable with which spells text
+				Made the AutoUlt a little bit smoother/faster
+				Cleaned up Code
+
+
 
 		Script Coded by Nickieboy.
 	]]
@@ -52,7 +66,7 @@ if myHero.charName ~= "Annie" then return end
 
 --- BoL Script Status Connector --- 
 local ScriptKey = "XKNKQKPMJPN" -- NAnnie auth key
-local ScriptVersion = "1.6" -- Your .version file content
+local ScriptVersion = "1.7" -- Your .version file content
 
 -- Thanks to Bilbao for his socket help & encryption
 assert(load(Base64Decode("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"), nil, "bt", _ENV))() BolBoost( ScriptKey, ScriptVersion )
@@ -60,7 +74,7 @@ assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIKAAAABgBAAEFAAA
 
 
 --[[		Auto Update		]]
-local version = "1.6"
+local version = "1.7"
 local author = "Nickieboy"
 local SCRIPT_NAME = "NAnnie"
 local AUTOUPDATE = true
@@ -145,31 +159,48 @@ function OnLoad()
  	ts = TargetSelector(TARGET_LOW_HP_PRIORITY, 625)
 
  	DrawMenu()
-
- 	FillResetEnemyTable()
-
 end 
 
 -- Perform every time
 function OnTick()
+
 	ts:update()
 
 	SpellChecks()
 
-	Harass()
+	if Menu.harass.harass or Menu.harass.harassT then
+		Harass()
+	end 
 
-	Combo()
+	if Menu.combo.combo then
+		Combo()
+	end 
 
-	AutoUlt()
+	AutoHarass()
 
-	--KillSteal()
-	KillStealPrecise() 
+	if Menu.combo.RUsage.autoUlt then
+		AutoUlt()
+	end 
 
-	--KillIfKillable()
-	AutoLevel()
-	DrinkPotions()
-	Farm()
-	Zhonyas()
+	if Menu.autokill.autokill and not Menu.combo.combo then
+		KillStealPrecise() 
+	end 
+
+	if Menu.misc.autolevel.levelAuto then
+		AutoLevel()
+	end 
+
+	if Menu.misc.autopotions.usePotions then
+		DrinkPotions()
+	end 
+
+	if Menu.farm.farm and not Menu.combo.combo then
+		Farm()
+	end 
+
+	if Menu.misc.zhonyas.zhonyas then
+		Zhonyas()
+	end 
 
 	if Menu.misc.procE and canStun ~= true and isRecalling ~= true then
 		CastSpell(_E)
@@ -231,20 +262,20 @@ end
 
 
 function Harass()
- 	if Menu.harass.harass then
- 		if ManaManager() then
 
- 			if ts.target ~= nil and ValidTarget(ts.target) then
-	 			if (Menu.harass.harassQ) then
-	 				CastQ(ts.target)
-	 			end 
-	 			if (Menu.harass.harassW) then
-	 				CastW(ts.target)
-	 			end 
- 			end
- 		end 
- 	end 
+ 	if ManaManager() then
+ 		if ts.target ~= nil and ValidTarget(ts.target) then
+	 		if (Menu.harass.harassQ) then
+	 			CastQ(ts.target)
+	 		end 
+	 		if (Menu.harass.harassW) then
+	 			CastW(ts.target)
+	 		end 
+ 		end
+ 	end  
+end
 
+function AutoHarass()
 	if Menu.harass.autoQ and canStun and not Menu.combo.combo and ManaManager() then 
  		if ts.target ~= nil and ValidTarget(ts.target) then
  			CastQ(ts.target)
@@ -258,21 +289,27 @@ function Harass()
  			DelayAction(function() if canStun then CastW(ts.target) end end, 0.5)
  		end 
  	end 
-end
-
-function Combo()
-	if Menu.combo.combo then
-		if ts.target ~= nil and ValidTarget(ts.target, 625) then
-			if Menu.combo.comboRStun and Rready then
-				ComboRStun()
-			else	
-				Combo1()
-			end  
-		end 
-	end 
 end 
 
-function Combo1()
+function Combo()
+	if ts.target ~= nil and ValidTarget(ts.target, 625) then
+		if Menu.combo.comboRStun and Rready then	
+			ComboRStun()
+		else
+			if Menu.combo.comboWay == 1 then
+				ComboQ()
+			elseif Menu.combo.comboWay == 2 then
+				ComboW()
+			elseif Menu.combo.comboWay == 3 then
+				ComboRQ()
+			elseif Menu.combo.comboWay == 4 then
+				ComboRW()
+			end  
+		end  
+	end  
+end 
+
+function ComboQ()
 	if Menu.combo.comboDFG then
 		if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
 			local DFGslot = GetInventoryHaveItem(3128)
@@ -284,18 +321,98 @@ function Combo1()
 	if Menu.combo.comboQ then
 		CastQ(ts.target)
 	end 
+
 	if Menu.combo.comboW then
 		CastW(ts.target)
 	end 
+
 	if Menu.combo.comboR and Menu.combo.RUsage[ts.target.charName] then
 		if ValidTarget(ts.target, 600) then
 			CastR(ts.target)
 		end  
+	end  
+end
+
+function ComboW()
+	if Menu.combo.comboDFG then
+		if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
+			local DFGslot = GetInventoryHaveItem(3128)
+			if myHero:CanUseSpell(DFGslot) == READY then
+				CastItem(DFGslot, ts.target)
+			end 
+		end
+	end 
+
+	if Menu.combo.comboW then
+		CastW(ts.target)
+	end 
+
+	if Menu.combo.comboQ then
+		CastQ(ts.target)
+	end 
+
+	
+
+	if Menu.combo.comboR and Menu.combo.RUsage[ts.target.charName] then
+		if ValidTarget(ts.target, 600) then
+			CastR(ts.target)
+		end  
+	end
+end 
+
+function ComboRQ()
+	if Menu.combo.comboDFG then
+		if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
+			local DFGslot = GetInventoryHaveItem(3128)
+			if myHero:CanUseSpell(DFGslot) == READY then
+				CastItem(DFGslot, ts.target)
+			end 
+		end
+	end 
+
+	if Menu.combo.comboR and Menu.combo.RUsage[ts.target.charName] then
+		if ValidTarget(ts.target, 600) then
+			CastR(ts.target)
+		end  
+	end
+	
+	if Menu.combo.comboQ then
+		CastQ(ts.target)
+	end 
+
+	if Menu.combo.comboW then
+		CastW(ts.target)
+	end 
+end 
+
+function ComboRW()
+	if Menu.combo.comboDFG then
+		if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
+			local DFGslot = GetInventoryHaveItem(3128)
+			if myHero:CanUseSpell(DFGslot) == READY then
+				CastItem(DFGslot, ts.target)
+			end 
+		end
+	end 
+
+	if Menu.combo.comboR and Menu.combo.RUsage[ts.target.charName] then
+		if ValidTarget(ts.target, 600) then
+			CastR(ts.target)
+		end  
+	end
+	
+	if Menu.combo.comboW then
+		CastW(ts.target)
+	end 
+
+	if Menu.combo.comboQ then
+		CastQ(ts.target)
 	end 
 
 end 
 
 function ComboRStun()
+
 	if canStun and Menu.combo.comboR then
 		CastR(ts.target)
 	end 
@@ -303,23 +420,36 @@ function ComboRStun()
 	if Menu.combo.comboDFG then
 		if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
 			local DFGslot = GetInventoryHaveItem(3128)
-			if myHero:CanUseSpell(ZhonyaSlot) == READY then
+			if myHero:CanUseSpell(DFGslot) == READY then
 				CastItem(3128, ts.target)
 			end 
 		end
 	end
-
-	if Menu.combo.comboQ then
-		CastQ(ts.target)
-	end 	 
+	if Menu.combo.comboWay == 1 then
+		if Menu.combo.comboQ then
+			CastQ(ts.target)
+		end 
+	else
+		if Menu.combo.comboW then
+			CastW(ts.target)
+		end 
+	end 
 
 	if canStun and Menu.combo.comboR then
 		CastR(ts.target)
 	end 
 
-	if Menu.combo.comboW then
-		CastW(ts.target)
+	if Menu.combo.comboWay == 1 then
+		if Menu.combo.comboW then
+			CastW(ts.target)
+		end  
+	else
+		if Menu.combo.comboQ then
+			CastQ(ts.target)
+		end
 	end 
+
+	CastE()
 
 	if canStun and Menu.combo.comboR then
 		CastR(ts.target)
@@ -327,7 +457,7 @@ function ComboRStun()
 
 	CastE()
 
-	if Menu.combo.comboR then
+	if Menu.combo.comboR and canStun then
 		CastR(ts.target)
 	end
 
@@ -367,25 +497,22 @@ end
 
 function Farm()
 	EnemyMinions:update()
-
-	if Menu.farm.farm and not Menu.combo.combo then
-		if Menu.farm.farmStun then
-			if not canStun then
-				if Menu.farm.farmQ then
-					FarmQ()
-				end 
-				if Menu.farm.farmW then
-					FarmW()
-				end 
-			end 
-		else
+	if Menu.farm.farmStun then
+		if not canStun then
 			if Menu.farm.farmQ then
 				FarmQ()
 			end 
 			if Menu.farm.farmW then
 				FarmW()
 			end 
-		end
+		end 
+	else
+		if Menu.farm.farmQ then
+			FarmQ()
+		end 
+		if Menu.farm.farmW then
+			FarmW()
+		end 
 	end 
 end 
 
@@ -412,14 +539,12 @@ function FarmQ()
 end 
 
 function Zhonyas()
-	if Menu.misc.zhonyas.zhonyas then
-		if GetInventoryHaveItem(3157) and GetInventoryItemIsCastable(3157) then
-			health = myHero.health
-			mana = myHero.mana
-			maxHealth = myHero.maxHealth
-			if (health / maxHealth) <= Menu.misc.zhonyas.zhonyasunder then
-				CastItem(3157)
-			end 
+	if GetInventoryHaveItem(3157) and GetInventoryItemIsCastable(3157) then
+		health = myHero.health
+		mana = myHero.mana
+		maxHealth = myHero.maxHealth
+		if (health / maxHealth) <= Menu.misc.zhonyas.zhonyasunder then
+			CastItem(3157)
 		end 
 	end 
 end
@@ -523,182 +648,118 @@ function FindSummoners()
 end 
 
 function KillStealPrecise()
-	if Menu.autokill.autokill and not Menu.combo.combo then
+	SpellChecks()
 
-		SpellChecks()
-
-		local useQ = Menu.autokill.autokillQ
-		local useW = Menu.autokill.autokillW
-		local useR = Menu.autokill.autokillR
-		local useDFG = Menu.autokill.autokillDFG
-		local DFGSlot = GetInventorySlotItem(3128)
-		local DFGready = (DFGSlot ~= nil and myHero:CanUseSpell(DFGSlot) == READY)
+	local useQ = Menu.autokill.autokillQ
+	local useW = Menu.autokill.autokillW
+	local useR = Menu.autokill.autokillR
+	local useDFG = Menu.autokill.autokillDFG
+	local DFGSlot = GetInventorySlotItem(3128)
+	local DFGready = (DFGSlot ~= nil and myHero:CanUseSpell(DFGSlot) == READY)
 		
-
-		for i, enemy in ipairs(GetEnemyHeroes()) do
-			if Menu.autokill[enemy.charName] then
-				if ValidTarget(enemy, 625) then
-					if useDFG then
-						if GetInventoryItemIsCastable(3128) then
-							if DFGready then
-								DFGdmg = getDmg("DFG", enemy, myHero)
-							end 
-						end
-					end 
-					if useDFG and DFGready then
-						if useQ and Qready then
-							Qdmg = getDmg("Q", enemy, myHero) + ((getDmg("Q", enemy, myHero) / 100) * 20)
+	for i, enemy in ipairs(GetEnemyHeroes()) do
+		if Menu.autokill[enemy.charName] then
+			if ValidTarget(enemy, 625) then
+				if useDFG then
+					if GetInventoryItemIsCastable(3128) then
+						if DFGready then
+							DFGdmg = getDmg("DFG", enemy, myHero)
 						end 
-						if useW and Wready then
-							Wdmg = getDmg("W", enemy, myHero) + ((getDmg("W", enemy, myHero) / 100) * 20)
-						end 
-						if useR and Rready then
-							Rdmg = getDmg("R", enemy, myHero) + ((getDmg("R", enemy, myHero) / 100) * 20)
-						end 
-					else
-						if useQ and Qready then
-							Qdmg = getDmg("Q", enemy, myHero)
-						end 
-						if useW and Wready then
-							Wdmg = getDmg("W", enemy, myHero)
-						end 
-						if useR and Rready then
-							Rdmg = getDmg("R", enemy, myHero)
-						end 
-					end 
-
-					if useDFG and DFGready then
-						if Qdmg > Wdmg and Wready and useW and Wdmg + DFGdmg > enemy.health then
-							CastItem(DFGSlot, enemy)
-							CastW(enemy)
-						elseif Wdmg > Qdmg and Qready and useQ and Qdmg + DFGdmg > enemy.health then
-							CastItem(DFGSlot, enemy)
-							CastQ(enemy)
-						elseif Qready and Wready and useQ and useW and Qdmg + Wdmg + DFGdmg > enemy.health then
-							CastItem(DFGSlot, enemy)
-							CastQ(enemy)
-							CastW(enemy)
-						elseif Qready and Rready and useQ and useR and Qdmg + Rdmg + DFGdmg > enemy.health then
-							CastItem(DFGSlot, enemy)
-							CastQ(enemy)	
-							CastR(enemy)
-						elseif Qready and Wready and Rready and useQ and useW and useR and Qdmg + Wdmg + Rdmg + DFGdmg > enemy.health then
-							CastItem(DFGSlot, enemy)
-							CastQ(enemy)
-							CastW(enemy)
-							CastR(enemy)
-						end 
-					else
-						if Qdmg > Wdmg and useW and Wready and Wdmg > enemy.health then
-							CastW(enemy)
-						elseif Wdmg > Qdmg and useQ and Qready and Qdmg > enemy.health then
-							CastQ(enemy)
-						elseif Qready and Wready and useQ and useW and Qdmg + Wdmg > enemy.health then
-							CastQ(enemy)
-							CastW(enemy)
-						elseif Qready and Rready and useQ and useR and Qdmg + Rdmg > enemy.health then
-							CastQ(enemy)
-							CastR(enemy)
-						elseif Qready and Wready and Rready and useQ and useW and useR and Qdmg + Wdmg + Rdmg > enemy.health then
-							CastQ(enemy)
-							CastW(enemy)
-							CastR(enemy)
-						end 
-					end  
+					end
 				end 
-			end 		
-		end
+				if useDFG and DFGready then
+					if useQ and Qready then
+						Qdmg = getDmg("Q", enemy, myHero) + ((getDmg("Q", enemy, myHero) / 100) * 20)
+					end 
+					if useW and Wready then
+						Wdmg = getDmg("W", enemy, myHero) + ((getDmg("W", enemy, myHero) / 100) * 20)
+					end 
+					if useR and Rready then
+						Rdmg = getDmg("R", enemy, myHero) + ((getDmg("R", enemy, myHero) / 100) * 20)
+					end 
+				else
+					if useQ and Qready then
+						Qdmg = getDmg("Q", enemy, myHero)
+					end 
+					if useW and Wready then
+						Wdmg = getDmg("W", enemy, myHero)
+					end 
+					if useR and Rready then	
+						Rdmg = getDmg("R", enemy, myHero)
+					end 
+				end 
+
+				if useDFG and DFGready then
+					if Qdmg > Wdmg and Wready and useW and Wdmg + DFGdmg > enemy.health then
+						CastItem(DFGSlot, enemy)
+						CastW(enemy)
+					elseif Wdmg > Qdmg and Qready and useQ and Qdmg + DFGdmg > enemy.health then
+						CastItem(DFGSlot, enemy)
+						CastQ(enemy)
+					elseif Qready and Wready and useQ and useW and Qdmg + Wdmg + DFGdmg > enemy.health then
+						CastItem(DFGSlot, enemy)
+						CastQ(enemy)
+						CastW(enemy)
+					elseif Qready and Rready and useQ and useR and Qdmg + Rdmg + DFGdmg > enemy.health then
+						CastItem(DFGSlot, enemy)
+						CastQ(enemy)	
+						CastR(enemy)
+					elseif Qready and Wready and Rready and useQ and useW and useR and Qdmg + Wdmg + Rdmg + DFGdmg > enemy.health then
+						CastItem(DFGSlot, enemy)
+						CastQ(enemy)
+						CastW(enemy)
+						CastR(enemy)
+					end 
+				else
+					if Qdmg > Wdmg and useW and Wready and Wdmg > enemy.health then
+						CastW(enemy)
+					elseif Wdmg > Qdmg and useQ and Qready and Qdmg > enemy.health then
+						CastQ(enemy)
+					elseif Qready and Wready and useQ and useW and Qdmg + Wdmg > enemy.health then
+						CastQ(enemy)
+						CastW(enemy)
+					elseif Qready and Rready and useQ and useR and Qdmg + Rdmg > enemy.health then
+						CastQ(enemy)
+						CastR(enemy)
+					elseif Qready and Wready and Rready and useQ and useW and useR and Qdmg + Wdmg + Rdmg > enemy.health then
+						CastQ(enemy)
+						CastW(enemy)
+						CastR(enemy)
+					end 
+				end  
+			end 
+		end 		
 	end
 end 
 
 
 function ReturnBestUltTarget(amountOfTargets)
 	local targ = nil
-	FillResetEnemyTable()
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		if GetDistance(enemy, myHero) <= 600 then
+			local count = 0
 			for i, Tenemy in ipairs(GetEnemyHeroes()) do
 				if enemy ~= Tenemy then
 					if GetDistance(Tenemy, enemy) < 150 then
-						Rtargets[enemy] = Rtargets[enemy] + 1
+						count = count + 1
 					end 
 				end 
 			end
 
-			if Rtargets[enemy] >= amountOfTargets and Menu.combo.RUsage[enemy.charName] then
+			if count >= amountOfTargets and Menu.combo.RUsage[enemy.charName] then
 				targ = enemy
 				break
 			end
 		end 
 	end 
 	return targ
-	--table.sort(Rtargets[enemy])
-	--if Rtargets[#enemy] > amountOfTargets then
-	--return Rtargets[#Rtargets]
-	--end 
 end 
-
-function FillResetEnemyTable()
-	for i, enemy in ipairs(GetEnemyHeroes()) do
- 		Rtargets[enemy] = 0
- 	end 
-end 
-
-
---[[
-function KillIfKillable()
-	if Menu.autokill and not Menu.combo.combo then
-		for i, enemy in ipairs(GetEnemyHeroes()) do 
-			local name = enemy.charName
-			if Menu.autokill[name] then
-				if (ValidTarget(enemy, 625)) then
-
-					if  Qready then
-						Qdmg = getDmg("Q", enemy, myHero)
-					else
-						Qdmg = 0
-					end 
-
-					if  Wready then
-						Wdmg = getDmg("W", enemy, myHero)
-					else 
-						Wdmg = 0
-					end
-
-					if  Rready then
-						Rdmg = getDmg("R", enemy, myHero)
-					else
-						Rdmg = 0
-					end 
-
-					if (Wdmg > Qdmg and Wdmg >= enemy.health and Qdmg < enemy.health) then
-						CastW(enemy)
-					end 
-
-					if (Qdmg >= enemy.health) and not enemy.dead and enemy.visible then 
-						CastQ(enemy)
-					elseif ((Qdmg + Wdmg) >= enemy.health) and not enemy.dead and enemy.visible then
-						CastQ(enemy)
-						CastW(enemy)
-					elseif ((Qdmg + Wdmg + Rdmg) >= enemy.health) and not enemy.dead and enemy.visible then
-						CastQ(enemy)
-						CastW(enemy)
-						CastR(enemy)
-					end 
-
-				end 
-			end 
-		end 
-	end 
-end 
---]]
 
 function DrawKillable()
 	for i = 1, heroManager.iCount, 1 do
 		local enemy = heroManager:getHero(i)
-		--if ValidTarget(champ, 625) then
+		if ValidTarget(enemy) then
 			if enemy.team ~= myHero.team then 
-
 				if Qready then
 					Qdmg = getDmg("Q", enemy, myHero)
 				end
@@ -709,19 +770,23 @@ function DrawKillable()
 					Rdmg = getDmg("R", enemy, myHero)
 				end 
 
+				local barPos = WorldToScreen(D3DXVECTOR3(enemy.x, enemy.y, enemy.z))
+                local PosX = barPos.x - 35
+                local PosY = barPos.y - 50
+
 				if Qready and Qdmg > enemy.health then
-					DrawText3D("Q = kill", enemy.x, enemy.y + 25, enemy.z, 0, 4294967295, true)
+					DrawText("Q = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif Qready and Wready and Qdmg + Wdmg > enemy.health then
-					DrawText3D("QW = kill", enemy.x, enemy.y + 25, enemy.z, 0, 4294967295, true)
+					DrawText("QW = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif Qready and Wready and Rready and Qdmg + Wdmg + Rdmg > enemy.health then
-					DrawText3D("QWR = kill", enemy.x, enemy.y + 25, enemy.z, 0, 4294967295, true)
+					DrawText("QWR = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif Qready and Wready and Rready and Qdmg + Wdmg + Rdmg + Qdmg > enemy.health then
-					DrawText3D("QQWWR = kill", enemy.x, enemy.y + 25, enemy.z, 0, 4294967295, true)
+					DrawText("QQWWR = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif Qready and Wready and Rready and Qdmg + Wdmg + Rdmg + Qdmg + Wdmg > enemy.health then
-					DrawText3D("QQWWR = kill", enemy.x, enemy.y + 25, enemy.z, 0, 4294967295, true)
+					DrawText("QQWWR = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				end 
 			end 
-		--end 
+		end 
 	end 
 end
 
@@ -765,6 +830,8 @@ function OnGainBuff(unit, buff)
 		isRecalling = true
 	end 
 
+
+
 end
 
 function OnUpdateBuff(unit, buff)
@@ -790,6 +857,59 @@ function OnProcessSpell(object, spell)
   	if (spell.target == myHero and string.find(spell.name, "BasicAttack")) and Menu.misc.useEonAttack then
    	 	CastSpell(_E)
   	end
+
+  	if (spell.target == myHero and spell.name == "ZedUlt") and Menu.misc.zhonyas.zhonyas then
+  		local health = myhero.health
+  		local ad = object.damage;
+  		local percentage = 20
+  		if spell.level == 1 then
+  			DelayAction(function(health, ad)  
+  				if myHero.dead then return end
+		  		local percentage = 20
+		  		local damageDealth = health - myHero.health
+		  		local totalDamage = ((damageDealth / 100) * percentage) + ad
+		  		if totalDamage > myHero.health then
+		  			if GetInventoryHaveItem(3157) and GetInventoryItemIsCastable(3157) and myHero:CanUseSpell(GetInventoryHaveItem(3157)) == READY then
+						CastItem(3157)
+					end 
+				end  
+  			end, 3, {health, ad})
+  		elseif spell.level == 2 then
+  			DelayAction(function(health, ad) 
+  				if myHero.dead then return end
+	  			local percentage = 35
+	  			local damageDealth = health - myHero.health
+		  		local totalDamage = ((damageDealth / 100) * percentage) + ad
+		  		if totalDamage > myHero.health then
+		  			if GetInventoryHaveItem(3157) and GetInventoryItemIsCastable(3157) and myHero:CanUseSpell(GetInventoryHaveItem(3157)) == READY then
+						CastItem(3157)
+					end 
+				end  
+  			end, 3, {health, ad})
+  		elseif spell.level == 3 then
+  			local percentage = 50
+  			DelayAction(function(health, ad) 
+  				if myHero.dead then return end
+	  			local percentage = 20
+	  			local damageDealth = health - myHero.health
+		  		local totalDamage = ((damageDealth / 100) * percentage) + ad
+		  		if totalDamage > myHero.health then
+		  			if GetInventoryHaveItem(3157) and GetInventoryItemIsCastable(3157) and myHero:CanUseSpell(GetInventoryHaveItem(3157)) == READY then
+						CastItem(3157)
+					end 
+				end  
+  			end, 3, {health, ad})
+  		end 
+  	end 
+
+  	if spell.name == "KarthusFallenOne" and object.team ~= myHero.team and Menu.misc.zhonyas.zhonyas then
+  		local karthusRdmg = getDmg("R", myHero, object, 3)
+  		if karthusRdmg > myHero.health and not myHero.dead then
+  			if GetInventoryHaveItem(3157) and GetInventoryItemIsCastable(3157) and myHero:CanUseSpell(GetInventoryHaveItem(3157)) == READY then
+				DelayAction(function() CastItem(3157) end, 2) 
+			end 
+  		end 
+  	end 
 end
 
 
@@ -900,22 +1020,24 @@ function DrawMenu()
 
  -- Combo
  Menu:addSubMenu("Combo", "combo")
+ Menu.combo:addParam("comboWay", "Cast Combo", SCRIPT_PARAM_LIST, 1, {"QWR", "WQR", "RQW", "RWQ"})
  Menu.combo:addParam("combo", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, 32)
  Menu.combo:addParam("comboQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboW", "Use W", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboR", "Use R", SCRIPT_PARAM_ONOFF, true)
-  Menu.combo:addSubMenu("R Usage", "RUsage")
+ Menu.combo:addParam("comboDFG", "Use DFG", SCRIPT_PARAM_ONOFF, true)
+ Menu.combo:addParam("comboRStun", "Only R if R stuns", SCRIPT_PARAM_ONOFF, true)
+ Menu.combo:addSubMenu("R Usage", "RUsage")
  for i, enemy in ipairs(GetEnemyHeroes()) do
 	Menu.combo.RUsage:addParam(enemy.charName, "Use R on " .. enemy.charName, SCRIPT_PARAM_ONOFF, true)
  end 
+ Menu.combo.RUsage:addParam("autoUlt", "Use Auto Ult", SCRIPT_PARAM_ONOFF, false)
  Menu.combo.RUsage:addParam("hitX", "Auto R if hit x enemies", SCRIPT_PARAM_SLICE, 3, 0, 5, 0)
- Menu.combo:addParam("comboDFG", "Use DFG", SCRIPT_PARAM_ONOFF, true)
- Menu.combo:addParam("comboRStun", "Only R if R stuns", SCRIPT_PARAM_ONOFF, true)
 
  -- Harass
  Menu:addSubMenu("Harass", "harass")
  Menu.harass:addParam("harass", "Harass (T)", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
- Menu.harass:addParam("harass", "Harass Toggle (Y)", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("Y"))
+ Menu.harass:addParam("harassT", "Harass Toggle (Y)", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("Y"))
  Menu.harass:addParam("harassQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
  Menu.harass:addParam("harassW", "Use W", SCRIPT_PARAM_ONOFF, true)
  Menu.harass:addParam("autoQ", "Auto Q when stuns enemy", SCRIPT_PARAM_ONOFF, false)
@@ -937,18 +1059,6 @@ function DrawMenu()
  Menu.drawings:addParam("drawR", "Draw R Range", SCRIPT_PARAM_ONOFF, true)
  Menu.drawings:addParam("drawKillable", "Draw Killable", SCRIPT_PARAM_ONOFF, true)
 
-
- -- KillSteal
- --[[
- Menu:addSubMenu("Killsteal", "killsteal")
- Menu.killsteal:addParam("killsteal", "KillSteal", SCRIPT_PARAM_ONOFF, false)
- Menu.killsteal:addParam("killstealQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
- Menu.killsteal:addParam("killstealW", "Use W", SCRIPT_PARAM_ONOFF, true)
- Menu.killsteal:addParam("killstealR", "Use R", SCRIPT_PARAM_ONOFF, true)
- Menu.killsteal:addParam("killstealIgnite", "Use Ignite", SCRIPT_PARAM_ONOFF, true)
- Menu.killsteal:addParam("killstealDFG", "Use DFG", SCRIPT_PARAM_ONOFF, true)
---]]
-
  Menu:addSubMenu("Auto Kill when killable", "autokill")
  Menu.autokill:addParam("autokill", "Auto Kill - KillSteal", SCRIPT_PARAM_ONOFF, false)
  Menu.autokill:addParam("autokillDFG", "Use DFG", SCRIPT_PARAM_ONOFF, true)
@@ -967,14 +1077,16 @@ function DrawMenu()
 
   -- Auto Level
  Menu.misc:addSubMenu("Auto Level", "autolevel")
+ Menu.misc.autolevel:addParam("autoLevel", "Auto Level Spells", SCRIPT_PARAM_ONOFF, false)
  Menu.misc.autolevel:addParam("levelAuto", "Auto Level Spells", SCRIPT_PARAM_LIST, 1, { "Off", "QWER", "WQER"})
 
  -- Auto Potions
  Menu.misc:addSubMenu("Auto Potions", "autopotions")
+ Menu.misc.autopotions:addParam("usePotions", "Drink Potions", SCRIPT_PARAM_ONOFF, true)
  Menu.misc.autopotions:addParam("health", "Health under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
  Menu.misc.autopotions:addParam("mana", "Mana under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
 
- Menu.misc:addSubMenu("Zhyonas", "zhonyas")
+ Menu.misc:addSubMenu("Zhonyas", "zhonyas")
  Menu.misc.zhonyas:addParam("zhonyas", "Auto Zhonyas", SCRIPT_PARAM_ONOFF, true)
  Menu.misc.zhonyas:addParam("zhonyasunder", "Use Zhonyas under % health", SCRIPT_PARAM_SLICE, 0.20, 0, 1 ,2)
 
@@ -1012,6 +1124,7 @@ end
  -- Always show
  Menu.combo:permaShow("combo")
  Menu.harass:permaShow("harass")
+ Menu.harass:permaShow("harassT")
  --Menu.killsteal:permaShow("killsteal")
  Menu.autokill:permaShow("autokill")
  Menu.farm:permaShow("farm")
@@ -1028,6 +1141,4 @@ function MenuCheck()
  		Menu.misc.procE = false
  	end 
 end 
-
-
 
