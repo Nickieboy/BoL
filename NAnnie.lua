@@ -55,9 +55,17 @@
 				Made the AutoUlt a little bit smoother/faster
 				Cleaned up Code
 
+			1.8
+				Little Tweaks to improve performance
+				Few bug fixes / mistypes
+				Hopefully fixed random bugsplats
+
 
 
 		Script Coded by Nickieboy.
+		If you have any questions, please post in the thread of send me an PM. You are always free to send me a PM regarding this script or regarding another.
+		If you use this script, please give me feedback on how it works and how to improve. If something doesn't work, don't just go to another script. Tell me 
+			what went wrong and I'll try my best to fix it as soon as possible.
 	]]
 
 
@@ -66,7 +74,7 @@ if myHero.charName ~= "Annie" then return end
 
 --- BoL Script Status Connector --- 
 local ScriptKey = "XKNKQKPMJPN" -- NAnnie auth key
-local ScriptVersion = "1.7" -- Your .version file content
+local ScriptVersion = "1.8" -- Your .version file content
 
 -- Thanks to Bilbao for his socket help & encryption
 assert(load(Base64Decode("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"), nil, "bt", _ENV))() BolBoost( ScriptKey, ScriptVersion )
@@ -74,7 +82,7 @@ assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIKAAAABgBAAEFAAA
 
 
 --[[		Auto Update		]]
-local version = "1.7"
+local version = "1.8"
 local author = "Nickieboy"
 local SCRIPT_NAME = "NAnnie"
 local AUTOUPDATE = true
@@ -311,12 +319,10 @@ end
 
 function ComboQ()
 	if Menu.combo.comboDFG then
-		if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
-			local DFGslot = GetInventoryHaveItem(3128)
-			if myHero:CanUseSpell(DFGslot) == READY then
-				CastItem(DFGslot, ts.target)
-			end 
-		end
+		local DFGslot = GetInventorySlotItem(3128)
+		if DFGslot ~= nil and myHero:CanUseSpell(DFGslot) == READY then
+			CastItem(3128, ts.target)
+		end 
 	end 
 	if Menu.combo.comboQ then
 		CastQ(ts.target)
@@ -335,12 +341,10 @@ end
 
 function ComboW()
 	if Menu.combo.comboDFG then
-		if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
-			local DFGslot = GetInventoryHaveItem(3128)
-			if myHero:CanUseSpell(DFGslot) == READY then
-				CastItem(DFGslot, ts.target)
-			end 
-		end
+		local DFGslot = GetInventorySlotItem(3128)
+		if DFGslot ~= nil and myHero:CanUseSpell(DFGslot) == READY then
+			CastItem(3128, ts.target)
+		end 
 	end 
 
 	if Menu.combo.comboW then
@@ -362,12 +366,10 @@ end
 
 function ComboRQ()
 	if Menu.combo.comboDFG then
-		if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
-			local DFGslot = GetInventoryHaveItem(3128)
-			if myHero:CanUseSpell(DFGslot) == READY then
-				CastItem(DFGslot, ts.target)
-			end 
-		end
+		local DFGslot = GetInventorySlotItem(3128)
+		if DFGslot ~= nil and myHero:CanUseSpell(DFGslot) == READY then
+			CastItem(3128, ts.target)
+		end 
 	end 
 
 	if Menu.combo.comboR and Menu.combo.RUsage[ts.target.charName] then
@@ -387,12 +389,10 @@ end
 
 function ComboRW()
 	if Menu.combo.comboDFG then
-		if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
-			local DFGslot = GetInventoryHaveItem(3128)
-			if myHero:CanUseSpell(DFGslot) == READY then
-				CastItem(DFGslot, ts.target)
-			end 
-		end
+		local DFGslot = GetInventorySlotItem(3128)
+		if DFGslot ~= nil and myHero:CanUseSpell(DFGslot) == READY then
+			CastItem(3128, ts.target)
+		end 
 	end 
 
 	if Menu.combo.comboR and Menu.combo.RUsage[ts.target.charName] then
@@ -418,12 +418,10 @@ function ComboRStun()
 	end 
 
 	if Menu.combo.comboDFG then
-		if GetInventoryHaveItem(3128) and GetInventoryItemIsCastable(3128) then
-			local DFGslot = GetInventoryHaveItem(3128)
-			if myHero:CanUseSpell(DFGslot) == READY then
-				CastItem(3128, ts.target)
-			end 
-		end
+		local DFGslot = GetInventorySlotItem(3128)
+		if DFGslot ~= nil and myHero:CanUseSpell(DFGslot) == READY then
+			CastItem(3128, ts.target)
+		end 
 	end
 	if Menu.combo.comboWay == 1 then
 		if Menu.combo.comboQ then
@@ -539,7 +537,8 @@ function FarmQ()
 end 
 
 function Zhonyas()
-	if GetInventoryHaveItem(3157) and GetInventoryItemIsCastable(3157) then
+	local zSlot = GetInventorySlotItem(3157)
+	if zSlot ~= nil and myHero:CanUseSpell(zSlot) == READY then
 		health = myHero.health
 		mana = myHero.mana
 		maxHealth = myHero.maxHealth
@@ -549,67 +548,6 @@ function Zhonyas()
 	end 
 end
 
---[[
-function KillSteal()
-	if Menu.killsteal.killsteal then
-	 	for i = 1, heroManager.iCount, 1 do
-			local champ = heroManager:getHero(i)
-			if champ.team ~= myHero.team then 
-			 	if Menu.killsteal.killstealQ then
-			 		Qdmg = getDmg("Q", champ, myHero)
-			 		if Qdmg >= champ.health then
-			 			if ValidTarget(champ, 625) and not champ.dead then
-			 				CastQ(champ)
-				 		end
-			 		end
-				end
-
-				if Menu.killsteal.killstealW then
- 
-				 	Wdmg = getDmg("W", champ, myHero)
-					if Wdmg >= champ.health then
-						if ValidTarget(champ, 625) and not champ.dead  then
-				 			CastW(champ)
-				 		end
-				 	end
-				end 
-
-				if Menu.killsteal.killstealR then
-				 	Rdmg = getDmg("R", champ, myHero)
-				 	if Rdmg >= champ.health then
-				 		if ValidTarget(champ, 600) and not champ.dead then
-				 			if  Qready then
-				 				CastSpell(_Q, champ)
-				 		    elseif  Wready then
-				 		    	CastSpell(_W, champ)
-				 		    else 
-				 		    	CastSpell(_R, champ)
-				 			end
-				 		end 
-				 	end
-				end
-
-				if Menu.killsteal.killstealIgnite then
-					local igniteDmg = getDmg("IGNITE", champ, myHero)
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then 
-						ignite = SUMMONER_1
-    				elseif 
-    					myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then 
-    					ignite = SUMMONER_2
-    				end 
-    				if ValidTarget(champ, 600) then
-	    				if igniteDmg >= champ.health then
-	    					if ignite ~= nil and  (myHero:CanUseSpell(ignite) == READY) and not champ.dead then
-	    						CastSpell(ignite, champ)
-	    					end 
-	    				end 
-	    			end 
-				end 
-			end
-		end 
-   end 
-end
---]]
 
 function SpellChecks()
 	Qready = (myHero:CanUseSpell(_Q) == READY)
@@ -660,13 +598,9 @@ function KillStealPrecise()
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		if Menu.autokill[enemy.charName] then
 			if ValidTarget(enemy, 625) then
-				if useDFG then
-					if GetInventoryItemIsCastable(3128) then
-						if DFGready then
-							DFGdmg = getDmg("DFG", enemy, myHero)
-						end 
-					end
-				end 
+				if useDFG and DFGready then
+						DFGdmg = getDmg("DFG", enemy, myHero)
+				end
 				if useDFG and DFGready then
 					if useQ and Qready then
 						Qdmg = getDmg("Q", enemy, myHero) + ((getDmg("Q", enemy, myHero) / 100) * 20)
@@ -675,7 +609,7 @@ function KillStealPrecise()
 						Wdmg = getDmg("W", enemy, myHero) + ((getDmg("W", enemy, myHero) / 100) * 20)
 					end 
 					if useR and Rready then
-						Rdmg = getDmg("R", enemy, myHero) + ((getDmg("R", enemy, myHero) / 100) * 20)
+						Rdmg = getDmg("R", enemy, myHero, 1) + ((getDmg("R", enemy, myHero, 1) / 100) * 20)
 					end 
 				else
 					if useQ and Qready then
@@ -685,27 +619,27 @@ function KillStealPrecise()
 						Wdmg = getDmg("W", enemy, myHero)
 					end 
 					if useR and Rready then	
-						Rdmg = getDmg("R", enemy, myHero)
+						Rdmg = getDmg("R", enemy, myHero, 1)
 					end 
 				end 
 
 				if useDFG and DFGready then
 					if Qdmg > Wdmg and Wready and useW and Wdmg + DFGdmg > enemy.health then
-						CastItem(DFGSlot, enemy)
+						CastItem(3128, enemy)
 						CastW(enemy)
 					elseif Wdmg > Qdmg and Qready and useQ and Qdmg + DFGdmg > enemy.health then
-						CastItem(DFGSlot, enemy)
+						CastItem(3128, enemy)
 						CastQ(enemy)
 					elseif Qready and Wready and useQ and useW and Qdmg + Wdmg + DFGdmg > enemy.health then
-						CastItem(DFGSlot, enemy)
+						CastItem(3128, enemy)
 						CastQ(enemy)
 						CastW(enemy)
 					elseif Qready and Rready and useQ and useR and Qdmg + Rdmg + DFGdmg > enemy.health then
-						CastItem(DFGSlot, enemy)
+						CastItem(3128, enemy)
 						CastQ(enemy)	
 						CastR(enemy)
 					elseif Qready and Wready and Rready and useQ and useW and useR and Qdmg + Wdmg + Rdmg + DFGdmg > enemy.health then
-						CastItem(DFGSlot, enemy)
+						CastItem(3128, enemy)
 						CastQ(enemy)
 						CastW(enemy)
 						CastR(enemy)
@@ -763,26 +697,26 @@ function DrawKillable()
 				if Qready then
 					Qdmg = getDmg("Q", enemy, myHero)
 				end
-			    if  Wready then
+			    if Wready then
 					Wdmg = getDmg("W", enemy, myHero)
 			    end 
-			    if  Rready then
-					Rdmg = getDmg("R", enemy, myHero)
+			    if Rready then
+					Rdmg = getDmg("R", enemy, myHero, 1)
 				end 
 
 				local barPos = WorldToScreen(D3DXVECTOR3(enemy.x, enemy.y, enemy.z))
                 local PosX = barPos.x - 35
                 local PosY = barPos.y - 50
 
-				if Qready and Qdmg > enemy.health then
+				if Qdmg > enemy.health then
 					DrawText("Q = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif Qready and Wready and Qdmg + Wdmg > enemy.health then
+				elseif Qdmg + Wdmg > enemy.health then
 					DrawText("QW = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif Qready and Wready and Rready and Qdmg + Wdmg + Rdmg > enemy.health then
+				elseif Qdmg + Wdmg + Rdmg > enemy.health then
 					DrawText("QWR = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif Qready and Wready and Rready and Qdmg + Wdmg + Rdmg + Qdmg > enemy.health then
+				elseif Qdmg + Wdmg + Rdmg + Qdmg > enemy.health then
 					DrawText("QQWWR = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif Qready and Wready and Rready and Qdmg + Wdmg + Rdmg + Qdmg + Wdmg > enemy.health then
+				elseif Qdmg + Wdmg + Rdmg + Qdmg + Wdmg > enemy.health then
 					DrawText("QQWWR = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				end 
 			end 
@@ -869,7 +803,8 @@ function OnProcessSpell(object, spell)
 		  		local damageDealth = health - myHero.health
 		  		local totalDamage = ((damageDealth / 100) * percentage) + ad
 		  		if totalDamage > myHero.health then
-		  			if GetInventoryHaveItem(3157) and GetInventoryItemIsCastable(3157) and myHero:CanUseSpell(GetInventoryHaveItem(3157)) == READY then
+		  			local zSlot = GetInventorySlotItem(3157)
+  					if zSlot ~= nil and myHero:CanUseSpell(zSlot) == READY then
 						CastItem(3157)
 					end 
 				end  
@@ -881,8 +816,9 @@ function OnProcessSpell(object, spell)
 	  			local damageDealth = health - myHero.health
 		  		local totalDamage = ((damageDealth / 100) * percentage) + ad
 		  		if totalDamage > myHero.health then
-		  			if GetInventoryHaveItem(3157) and GetInventoryItemIsCastable(3157) and myHero:CanUseSpell(GetInventoryHaveItem(3157)) == READY then
-						CastItem(3157)
+					local zSlot = GetInventorySlotItem(3157)
+  					if zSlot ~= nil and myHero:CanUseSpell(zSlot) == READY then						
+  						CastItem(3157)
 					end 
 				end  
   			end, 3, {health, ad})
@@ -894,7 +830,8 @@ function OnProcessSpell(object, spell)
 	  			local damageDealth = health - myHero.health
 		  		local totalDamage = ((damageDealth / 100) * percentage) + ad
 		  		if totalDamage > myHero.health then
-		  			if GetInventoryHaveItem(3157) and GetInventoryItemIsCastable(3157) and myHero:CanUseSpell(GetInventoryHaveItem(3157)) == READY then
+		  			local zSlot = GetInventorySlotItem(3157)
+  					if zSlot ~= nil and myHero:CanUseSpell(zSlot) == READY then
 						CastItem(3157)
 					end 
 				end  
@@ -903,9 +840,10 @@ function OnProcessSpell(object, spell)
   	end 
 
   	if spell.name == "KarthusFallenOne" and object.team ~= myHero.team and Menu.misc.zhonyas.zhonyas then
-  		local karthusRdmg = getDmg("R", myHero, object, 3)
+  		local karthusRdmg = getDmg("R", myHero, object)
   		if karthusRdmg > myHero.health and not myHero.dead then
-  			if GetInventoryHaveItem(3157) and GetInventoryItemIsCastable(3157) and myHero:CanUseSpell(GetInventoryHaveItem(3157)) == READY then
+  			local zSlot = GetInventorySlotItem(3157)
+  			if zSlot ~= nil and myHero:CanUseSpell(zSlot) == READY then
 				DelayAction(function() CastItem(3157) end, 2) 
 			end 
   		end 
@@ -925,7 +863,8 @@ end
 
 function DrinkHealth(h, mH) 
 	if not HaveBuff(myHero, "RegenerationPotion") then
-		if GetInventoryHaveItem(2003) then
+		local hSlot = GetInventorySlotItem(2003)
+		if hSlot ~= nil then
 			if (h / mH <= Menu.misc.autopotions.health) then
 				CastItem(2003)
 			end 
@@ -935,7 +874,8 @@ end
 
 function DrinkMana(m, mM) 
 	if not HaveBuff(myHero, "FlaskOfCrystalWater") then
-		if GetInventoryHaveItem(2004) then
+		local mSlot = GetInventorySlotItem(2004)
+		if mSlot ~= nil then
 			if (m / mM <= Menu.misc.autopotions.mana) then
 				CastItem(2004)
 			end 
