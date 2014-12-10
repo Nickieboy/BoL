@@ -5,7 +5,7 @@
 if myHero.charName ~= "Varus" then return end
 
 -- Download script
-local version = 1.8
+local version = 1.9
 local author = "Nickieboy"
 local SCRIPT_NAME = "NVarus"
 local AUTOUPDATE = true
@@ -63,7 +63,7 @@ end
 
 --- BoL Script Status Connector --- 
 local ScriptKey = "WJMJPJQKQLP" -- NVarus auth key
-local ScriptVersion = "1.8" -- Your .version file content
+local ScriptVersion = "1.9" -- Your .version file content
 
 -- Thanks to Bilbao for his socket help & encryption
 assert(load(Base64Decode("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"), nil, "bt", _ENV))() BolBoost( ScriptKey, ScriptVersion )
@@ -207,6 +207,10 @@ function OnTick()
 		Combo()
 	end 
 
+	if Menu.comb.comboR.comboR then
+		CastR()
+	end 
+
 	if Menu.killsteal.killsteal then
 		KillSteal()
 	end 
@@ -326,16 +330,13 @@ function Combo()
 				end 
 			end 
 		end 
-		
-
-		if Menu.combo.comboR.comboR then
-			if target and Rready then
-				if Menu.combo.comboR.comboRinstant then
-					R:Cast(target)
-				end 
-			end 
-		end 
 	end
+end 
+
+function CastR()
+	if target ~= nil and Rready then
+		R:Cast(target)
+	end 
 end 
 
 -- Harass
@@ -401,7 +402,7 @@ function KillSteal()
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		if Menu.killsteal.killstealAA then
 			if ValidTarget(enemy, AA) then
-				if enemy.health < myHero.damage then
+				if enemy.health < myHero:CalcDamage(enemy, myHero.damage) then
 					if SOWloaded then
 						SOWOrb:ForceTarget(enemy)
 					end 
@@ -421,6 +422,14 @@ function KillSteal()
 				end 
 			end 
 		end 
+
+		if Menu.killsteal.killstealR then
+			if (ValidTarget(enemy, Rspell.range)) then
+				if DMG:IsKillable(enemy, {_R}) then
+					R:Cast()
+				end 
+			end 
+		end
 	end 
 end 
 
@@ -455,52 +464,13 @@ function EnemyMovingFurtherAwayCastE(range, target)
 				if (xFurther >= 5) then
 					xFurther = 0
 				end 
-				if (myHero:CanUseSpell(_E) == READY) and xFurther >= 4 and ValidTarget(target, range) then
+				if Eready and xFurther >= 4 and ValidTarget(target, range) then
 					E:Cast(target.x, target.z)
 				end
 			end
 		end, 1, {range, target})
 	end
 end
-
--- Works, but gives error with LIB_PATH
---[[function EnemyMovingFurtherAway(range, target) 
-	print("Going in function")
-	myPos = myHero.pos
-
-	if target then -- Don't need to check if target is valid because STS:GetTarget() does it automatically so you can just make sure it returned something.
-		targetPos = target.pos
-		--print("myPos = " .. myPos .. "  targetPos = " .. targetPos)
-		print("Target = true, going into DelayAction")
-		DelayAction(newPosition(target), 0.5)
-		print("Ended function")
-	end 
-end 
-
-function newPosition(target)
-if (ValidTarget(target, range)) then --Check to make sure target is valid because if he isn't you WILL be spammed with errors.
-				print ("Entered ValidTarget")
-				newPos = myHero.pos
-				newTargetPos = target.pos
-
-				print("myPos " .. myPos.z)
-				print("MyNewPos " .. newPos.z)
-				print("oldEnemyPos " .. targetPos.z)
-				print("newEnemyPos " .. newTargetPos.z)
-				print("OldDistance " .. GetDistance(newTargetPos, newPos))
-				print("NewDistance " .. GetDistance(targetPos, myPos))
-
-				if GetDistance(newTargetPos, newPos) >= GetDistance(targetPos, myPos) then
-					print("Entered Distance grows bigger")
-					if (myHero:CanUseSpell(_E) == READY) then
-						print("Casted E")
-						E:Cast(target.x, target.z)
-					end 
-				end
-			end
-end 
-]]
-
 
 
 function HaveBuff(unit,buffname)
@@ -517,14 +487,14 @@ end
 
 -- Gapcloser (SourceLib TriggerCallbacks)
 function castStunGapClosing(unit, spell)
-	if Rready and GetDistance(unit) <= R.range then
+	if Rready and GetDistance(unit) < R.range then
 		R:Cast(unit)
 	end
 end 
 
 --Interuptable (SourceLib TriggerCallbacks)
 function castStunInterruptable(unit, spell) 
-	if Rready and GetDistance(unit) <= R.range then
+	if Rready and GetDistance(unit) < R.range then
 		R:Cast(unit)
 	end
 end 
@@ -643,10 +613,32 @@ end
 function OnGainBuff(unit, buff)
 	if unit.isValid and unit.team ~= myHero.team and (buff.name == "varuswdebuff") then
 		passiveStacks[unit.charName] = buff.stack
-		print(unit.charName .. " heeft " .. passiveStacks[unit.charName] .. " stacks")
+		--print(unit.charName .. " heeft " .. passiveStacks[unit.charName] .. " stacks")
 	end
 
-	--]]
+	if unit.isMe and buff.name == "zedulttargetmark" then
+		local qss = GetInventorySlot(3140)
+		if qss ~= nil and myHero:CanUseSpell(qss) == READY then
+			CastSpell(qss)
+		end
+		local merc = GetInventorySlot(3139)
+		if merc ~= nil and myHero:CanUseSpell(merc) == READY then
+			CastSpell(merc)
+		end
+	end 
+
+	if unit.isMe and buff.name == "suppression" then
+		local qss = GetInventorySlot(3140)
+		if qss ~= nil and myHero:CanUseSpell(qss) == READY then
+			CastSpell(qss)
+		end
+
+		local merc = GetInventorySlot(3139)
+		if merc ~= nil and myHero:CanUseSpell(merc) == READY then
+			CastSpell(merc)
+		end
+	end 
+
 end
 
 function OnUpdateBuff(unit, buff)
@@ -693,8 +685,7 @@ function Menu()
  	
  		-- Use R in combo
  	Menu.combo:addSubMenu(Rspell.name .. " (R)", "comboR")
- 	Menu.combo.comboR:addParam("comboR", "Use " .. Rspell.name .. " (R)", SCRIPT_PARAM_ONOFF, true)
- 	Menu.combo.comboR:addParam("comboRinstant", "Use instantly", SCRIPT_PARAM_ONOFF, true)
+ 	Menu.combo.comboR:addParam("comboR", "Cast " .. Rspell.name .. " (R)", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("R"))
 
  	 -- Harass
 	Menu:addSubMenu("Harass", "harass")
@@ -712,6 +703,7 @@ function Menu()
  	Menu.killsteal:addParam("killsteal", "KillSteal", SCRIPT_PARAM_ONOFF, false)
  	Menu.killsteal:addParam("killstealAA", "Use AA", SCRIPT_PARAM_ONOFF, false)
  	Menu.killsteal:addParam("killstealE", "Use " .. Espell.name .. " (E)", SCRIPT_PARAM_ONOFF, false)
+ 	Menu.killsteal:addParam("killstealR", "Use " .. Rspell.name .. " (R)", SCRIPT_PARAM_ONOFF, false)
 
  	--Drawings
  	Menu:addSubMenu("Drawings", "drawings")
