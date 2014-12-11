@@ -207,7 +207,7 @@ function OnTick()
 		Combo()
 	end 
 
-	if Menu.comb.comboR.comboR then
+	if Menu.combo.comboR.comboR then
 		CastR()
 	end 
 
