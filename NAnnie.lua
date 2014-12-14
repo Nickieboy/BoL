@@ -59,8 +59,29 @@
 				Little Tweaks to improve performance
 				Few bug fixes / mistypes
 				Hopefully fixed random bugsplats
+
 			1.85
 				Disabled AutoLeveling
+--------------------------------------------------------------------------------------------
+
+			2.0
+				Added Ignite in AutoKill
+				Added Ignite in Draw KillAble
+				Added Flash in AutoR
+					Adjustable settings:
+						Enemies nearby
+						Range between you and enemies
+						Allies nearby
+						Range between you and allies
+				Added Gapcloser/Interrupter
+					Will cast Q/W if it'll stun
+				No longers farms while recalling
+				There is now a possibility to cast EW in fountain to stack Stun
+				Jungle Steal
+					There is no prediction added into this, so it'll just use abilites when the damage is higher than the health of the jungle creep.
+					Only works with big minions
+					Blue&Red: Cast Q
+					Dragon&Baron: Cast Q or Cast Q/R - Not adjustable, so be careful
 
 
 
@@ -76,7 +97,7 @@ if myHero.charName ~= "Annie" then return end
 
 --- BoL Script Status Connector --- 
 local ScriptKey = "XKNKQKPMJPN" -- NAnnie auth key
-local ScriptVersion = "1.85" -- Your .version file content
+local ScriptVersion = "2.0" -- Your .version file content
 
 -- Thanks to Bilbao for his socket help & encryption
 assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIKAAAABgBAAEFAAAAdQAABBkBAAGUAAAAKQACBBkBAAGVAAAAKQICBHwCAAAQAAAAEBgAAAGNsYXNzAAQJAAAAQm9sQm9vc3QABAcAAABfX2luaXQABAkAAABTZW5kU3luYwACAAAAAgAAAAoAAAADAAs/AAAAxgBAAAZBQABAAYAAHYEAAViAQAIXQAGABkFAAEABAAEdgQABWIBAAhcAAIADQQAAAwGAAEHBAADdQIABCoAAggpAgILGwEEAAYEBAN2AAAEKwACDxgBAAAeBQQAHAUICHQGAAN2AAAAKwACExoBCAAbBQgBGAUMAR0HDAoGBAwBdgQABhgFDAIdBQwPBwQMAnYEAAcYBQwDHQcMDAQIEAN2BAAEGAkMAB0JDBEFCBAAdggABRgJDAEdCwwSBggQAXYIAAVZBggIdAQAB3YAAAArAgITMwEQAQwGAAN1AgAHGAEUAJQEAAN1AAAHGQEUAJUEAAN1AAAEfAIAAFgAAAAQHAAAAYXNzZXJ0AAQFAAAAdHlwZQAEBwAAAHN0cmluZwAEHwAAAEJvTGIwMHN0OiBXcm9uZyBhcmd1bWVudCB0eXBlLgAECAAAAHZlcnNpb24ABAUAAABya2V5AAQHAAAAc29ja2V0AAQIAAAAcmVxdWlyZQAEBAAAAHRjcAAEBQAAAGh3aWQABA0AAABCYXNlNjRFbmNvZGUABAkAAAB0b3N0cmluZwAEAwAAAG9zAAQHAAAAZ2V0ZW52AAQVAAAAUFJPQ0VTU09SX0lERU5USUZJRVIABAkAAABVU0VSTkFNRQAEDQAAAENPTVBVVEVSTkFNRQAEEAAAAFBST0NFU1NPUl9MRVZFTAAEEwAAAFBST0NFU1NPUl9SRVZJU0lPTgAECQAAAFNlbmRTeW5jAAQUAAAAQWRkQnVnc3BsYXRDYWxsYmFjawAEEgAAAEFkZFVubG9hZENhbGxiYWNrAAIAAAAJAAAACQAAAAAAAwUAAAAFAAAADABAAIMAAAAdQIABHwCAAAEAAAAECQAAAFNlbmRTeW5jAAAAAAABAAAAAQAQAAAAQG9iZnVzY2F0ZWQubHVhAAUAAAAJAAAACQAAAAkAAAAJAAAACQAAAAAAAAABAAAABQAAAHNlbGYACgAAAAoAAAAAAAMFAAAABQAAAAwAQACDAAAAHUCAAR8AgAABAAAABAkAAABTZW5kU3luYwAAAAAAAQAAAAEAEAAAAEBvYmZ1c2NhdGVkLmx1YQAFAAAACgAAAAoAAAAKAAAACgAAAAoAAAAAAAAAAQAAAAUAAABzZWxmAAEAAAAAABAAAABAb2JmdXNjYXRlZC5sdWEAPwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAQAAAAEAAAABAAAAAQAAAAEAAAABAAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAYAAAAGAAAABgAAAAYAAAAHAAAABwAAAAcAAAAHAAAACAAAAAgAAAAIAAAACAAAAAgAAAAIAAAACAAAAAgAAAAIAAAABQAAAAUAAAAIAAAACAAAAAgAAAAIAAAACQAAAAkAAAAJAAAACgAAAAoAAAAKAAAACgAAAAMAAAAFAAAAc2VsZgAAAAAAPwAAAAIAAABhAAAAAAA/AAAAAgAAAGIAAAAAAD8AAAABAAAABQAAAF9FTlYACwAAABIAAAACAA8iAAAAhwBAAIxAQAEBgQAAQcEAAJ1AAAJbAAAAF0AAgApAQYIXAACACoBBgocAQACMwEEBAQECAEdBQgCBgQIAxwFBAAGCAgBGwkIARwLDBIGCAgDHQkMAAYMCAEeDQwCBwwMAFoEDAp1AgAGHAEAAjABEAQFBBACdAIEBRwFAAEyBxAJdQQABHwCAABMAAAAEBAAAAHRjcAAECAAAAGNvbm5lY3QABA0AAABib2wuYjAwc3QuZXUAAwAAAAAAAFRABAcAAAByZXBvcnQABAIAAAAwAAQCAAAAMQAEBQAAAHNlbmQABA0AAABHRVQgL3VwZGF0ZS0ABAUAAABya2V5AAQCAAAALQAEBwAAAG15SGVybwAECQAAAGNoYXJOYW1lAAQIAAAAdmVyc2lvbgAEBQAAAGh3aWQABCIAAAAgSFRUUC8xLjANCkhvc3Q6IGJvbC5iMDBzdC5ldQ0KDQoABAgAAAByZWNlaXZlAAQDAAAAKmEABAYAAABjbG9zZQAAAAAAAQAAAAAAEAAAAEBvYmZ1c2NhdGVkLmx1YQAiAAAACwAAAAsAAAALAAAACwAAAAsAAAALAAAACwAAAAwAAAAMAAAADAAAAA0AAAANAAAADQAAAA0AAAAOAAAADwAAABAAAAAQAAAAEAAAABEAAAARAAAAEQAAABIAAAASAAAAEgAAAA0AAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAAAUAAAAFAAAAc2VsZgAAAAAAIgAAAAIAAABhAAAAAAAiAAAAAgAAAGIAHgAAACIAAAACAAAAYwAeAAAAIgAAAAIAAABkAB4AAAAiAAAAAQAAAAUAAABfRU5WAAEAAAABABAAAABAb2JmdXNjYXRlZC5sdWEACgAAAAEAAAABAAAAAQAAAAIAAAAKAAAAAgAAAAsAAAASAAAACwAAABIAAAAAAAAAAQAAAAUAAABfRU5WAA=="), nil, "bt", _ENV))() BolBoost( ScriptKey, ScriptVersion )
@@ -84,7 +105,7 @@ assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIKAAAABgBAAEFAAA
 
 
 --[[		Auto Update		]]
-local version = "1.85"
+local version = "2.0"
 local author = "Nickieboy"
 local SCRIPT_NAME = "NAnnie"
 local AUTOUPDATE = true
@@ -117,6 +138,7 @@ local REQUIRED_LIBS = {
 	["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua",
 	["Spell Damage Library"] = "https://raw.githubusercontent.com/Nickieboy/BoL/master/lib/Spell_Damage_Library.lua",
 }
+
 local DOWNLOADING_LIBS, DOWNLOAD_COUNT = false, 0
 
 function AfterDownload()
@@ -139,17 +161,20 @@ end
 
 -- Declaring variables
 local lastLevel = myHero.level - 1
-local Qdmg, Wdmg, Rdmg, DFGdmg, igniteDmg, totalDamage, health, mana, maxHealth, maxMana = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+local Qdmg, Wdmg, Rdmg, DFGdmg, iDmg, totalDamage, health, mana, maxHealth, maxMana = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 local canStun = false
-local EnemyMinions = minionManager(MINION_ENEMY, 625, myHero, MINION_SORT_HEALTH_ASC)
-local ignite, heal, barrier = nil, nil, nil
+local EnemyMinions = minionManager(MINION_ENEMY, 600, myHero, MINION_SORT_HEALTH_ASC)
+local JungleMinions = minionManager(MINION_JUNGLE, 600, myHero, MINION_SORT_HEALTH_ASC)
+local minionsSteal = {"Blue Sentinel", "Red Brambleback", "Dragon", "Baron Nashor"}
+local ignite, heal, barrier, flash = nil, nil, nil, nil
 local passiveStacks = 0
 local hasTibbers = false
 local isRecalling = false
-local Rtargets = {}
 local Rtarget = nil
 local Qready, Wready, Eready, Rready = false, false, false, false
-local Hready, Bready, Iready = false, false, false
+local Hready, Bready, Iready, Fready = false, false, false
+local flashTarget = nil
+local useFlash = false
 
 
 --Perform on load
@@ -167,7 +192,6 @@ function OnLoad()
 
  	-- TargetSelector
  	ts = TargetSelector(TARGET_LOW_HP_PRIORITY, 625)
-
  	DrawMenu()
 end 
 
@@ -188,7 +212,7 @@ function OnTick()
 
 	AutoHarass()
 
-	if Menu.combo.RUsage.autoUlt then
+	if Menu.autoR.autoUlt then
 		AutoUlt()
 	end 
 
@@ -204,8 +228,12 @@ function OnTick()
 		DrinkPotions()
 	end 
 
-	if Menu.farm.farm and not Menu.combo.combo then
+	if Menu.farm.farm and not Menu.combo.combo and isRecalling ~= true then
 		Farm()
+	end 
+
+	if Menu.jungle.useJungle then
+		JungleSteal()
 	end 
 
 	if Menu.misc.zhonyas.zhonyas then
@@ -213,7 +241,12 @@ function OnTick()
 	end 
 
 	if Menu.misc.procE and canStun ~= true and isRecalling ~= true then
-		CastSpell(_E)
+		CastE()
+	end 
+
+	if Menu.misc.procEW and InFountain() and Eready and Wready and canStun ~= true then
+		CastSpell(_W, mousePos.x, mousePos.z)
+		CastE()
 	end 
 
 	if heal ~= nil then
@@ -253,9 +286,17 @@ function OnDraw()
 	 	if Menu.drawings.drawKillable then
 	 		DrawKillable()
 	 	end 
+	 	--[[
+	 	if Menu.drawings["drawDamage"] then 
+    		for i, enemy in ipairs(GetEnemyHeroes()) do
+       			if ValidTarget(enemy) then
+           			DrawIndicator(enemy)
+        		end
+			end
+ 		end
 
- 	end
-
+ 		--]]
+ 	end 
 end
 
 function DrawQ()
@@ -292,13 +333,14 @@ function AutoHarass()
  		end 
 	end 
 
-
-	if Menu.harass.autoQW and passiveStacks >= 3 and not Menu.combo.combo and ManaManager()then 
- 		if ts.target ~= nil and ValidTarget(ts.target) then
- 			CastQ(ts.target)
- 			DelayAction(function() if canStun then CastW(ts.target) end end, 0.5)
- 		end 
- 	end 
+	if VIP_USER then
+		if Menu.harass.autoQW and passiveStacks >= 3 and not Menu.combo.combo and ManaManager() then 
+	 		if ts.target ~= nil and ValidTarget(ts.target) then
+	 			CastQ(ts.target)
+	 			DelayAction(function() if canStun then CastW(ts.target) end end, 0.5)
+	 		end 
+	 	end 
+	end 
 end 
 
 function Combo()
@@ -464,10 +506,32 @@ function ComboRStun()
 end 
 
 function AutoUlt()
-	Rtarget = ReturnBestUltTarget(Menu.combo.RUsage.hitX)
-	if Rtarget ~= nil and ValidTarget(Rtarget, 600) then
-		CastR(Rtarget)
-	end 
+
+	useFlash = FlashSettings()
+
+	Rtarget = ReturnBestUltTarget(Menu.autoR.hitX, useFlash)
+	if Rtarget ~= nil then
+		if GetDistance(Rtarget) < 600 then
+			CastR(Rtarget)
+		elseif GetDistance(Rtarget) > 600 and GetDistance(Rtarget) < 1000 and Fready and Rready then
+			CastSpell(flash, Rtarget)
+			DelayAction(CastR(Rtarget), 0.5)
+		end 
+	end  
+end
+
+function FlashSettings()
+	local menuFlash = Menu.flash.useFlash
+	local allies = Menu.flash.allies
+	local alliesrange = Menu.flash.alliesrange
+	local enemies = Menu.flash.enemies
+	local enemiesrange = Menu.flash.enemiesrange
+
+	if menuFlash and CountEnemyHeroInRange(enemiesrange) > enemies and CountAllyHeroInRange(alliesrange) > allies and Fready then
+		return true
+	end
+
+	return false
 end
 
 function CastQ(target) 
@@ -497,6 +561,7 @@ end
 
 function Farm()
 	EnemyMinions:update()
+
 	if Menu.farm.farmStun then
 		if not canStun then
 			if Menu.farm.farmQ then
@@ -519,8 +584,8 @@ end
 function FarmW()
 	for i, minion in pairs(EnemyMinions.objects) do
 		if Menu.farm.farmW then
-			Wmg = getDmg("W", minion, myHero)
-			if minion ~= nil and not minion.dead and minion.visible and minion.health < Wdmg and OrbWalk:ValidTarget(minion, 625) then
+			local Qdmg, Wmg = CalcSpellDamage(minion)
+			if minion ~= nil and not minion.dead and minion.visible and minion.health < Wdmg and ValidTarget(minion, 625) then
 				CastW(minion, minion.x, minion.y)
 			end 
 		end 
@@ -530,22 +595,107 @@ end
 function FarmQ()
 	for i, minion in pairs(EnemyMinions.objects) do
 		if Menu.farm.farmQ then
-			Qdmg = getDmg("Q", minion, myHero)
-			if minion ~= nil and not minion.dead and minion.visible and minion.health < Qdmg and OrbWalk:ValidTarget(minion, 625) then
+			local Qdmg, Wmg = CalcSpellDamage(minion)
+			if minion ~= nil and not minion.dead and minion.visible and minion.health < Qdmg and ValidTarget(minion, 625) then
 				CastQ(minion)
 			end 
 		end 
 	end 
 end 
 
+function JungleSteal()
+	JungleMinions:update()
+
+ 	for i, minion in ipairs(JungleMinions.objects) do
+	 	if GetDistance(minion) < 600 then
+	 		local Qdmg, Wdmg, Rdmg = CalcSpellDamage(minion)
+	 		if Menu.jungle.stealTeam == 1 then --Both Teams
+	 			if minion.charName == minionsSteal[1] and Menu.jungle.stealBlue then
+	 				if minion.health < Qdmg and not minion.dead and minion.visible then
+	 					CastQ(minion)
+	 				end 
+	 			elseif minion.charName == minionsSteal[2] and Menu.jungle.stealRed then
+	 				 if minion.health < Qdmg and not minion.dead and minion.visible then
+	 					CastQ(minion)
+	 				end 
+	 			elseif minion.charName == minionsSteal[4] and Menu.jungle.stealBaron then
+	 				if minion.health < Qdmg and not minion.dead and minion.visible then
+	 					CastQ(minion)
+	 				elseif minion.health < Qdmg + Rdmg and not minion.dead and minion.visible then
+	 					CastQ(minion)
+	 					CastR(minion)
+	 				end
+	 			elseif minion.charName == minionsSteal[3] and Menu.jungle.stealDragon then
+	 				if minion.health < Qdmg and not minion.dead and minion.visible then
+	 					CastQ(minion)
+	 				elseif minion.health < Qdmg + Rdmg and not minion.dead and minion.visible then
+	 					CastQ(minion)
+	 					CastR(minion)
+	 				end
+	 			end 
+
+	 		elseif Menu.jungle.stealTeam == 2 then -- Enemy team
+	 			if minion.team ~= myHero.team and minion.charName == minionsSteal[1] and Menu.jungle.stealBlue then
+		 			if minion.health < Qdmg and not minion.dead and minion.visible then
+		 				CastQ(minion)
+		 			end 
+	 			elseif minion.team ~= myHero.team and minion.charName == minionsSteal[2] and Menu.jungle.stealRed then
+	 				if minion.health < Qdmg and not minion.dead and minion.visible then
+	 					CastQ(minion)
+	 				end 
+		 		elseif minion.charName == minionsSteal[3] and Menu.jungle.stealBaron then
+		 			if minion.health < Qdmg and not minion.dead and minion.visible then
+		 				CastQ(minion)
+		 			elseif minion.health < Qdmg + Rdmg and not minion.dead and minion.visible then
+		 				CastQ(minion)
+		 				CastR(minion)
+		 			end
+		 		elseif minion.charName == minionsSteal[4] and Menu.jungle.stealDragon then
+		 			if minion.health < Qdmg and not minion.dead and minion.visible then
+		 				CastQ(minion)
+		 			elseif minion.health < Qdmg + Rdmg and not minion.dead and minion.visible then
+		 				CastQ(minion)
+		 				CastR(minion)
+		 			end
+		 		end   
+
+	 		elseif Menu.jungle.stealTeam == 3 then  -- Own team
+	 			if minion.team == myHero.team and minion.charName == minionsSteal[1] and Menu.jungle.stealBlue then
+		 			if minion.health < Qdmg and not minion.dead and minion.visible then
+		 				CastQ(minion)
+		 			end 
+	 			elseif minion.team == myHero.team and minion.charName == minionsSteal[2] and Menu.jungle.stealRed then
+	 				if minion.health < Qdmg and not minion.dead and minion.visible then
+	 					CastQ(minion)
+	 				end 
+		 		elseif minion.charName == minionsSteal[3] and Menu.jungle.stealBaron then
+		 			if minion.health < Qdmg and not minion.dead and minion.visible then
+		 				CastQ(minion)
+		 			elseif minion.health < Qdmg + Rdmg and not minion.dead and minion.visible then
+		 				CastQ(minion)
+		 				CastR(minion)
+		 			end
+		 		elseif minion.charName == minionsSteal[4] and Menu.jungle.stealDragon then
+		 			if minion.health < Qdmg and not minion.dead and minion.visible then
+		 				CastQ(minion)
+		 			elseif minion.health < Qdmg + Rdmg and not minion.dead and minion.visible then
+		 				CastQ(minion)
+		 				CastR(minion)
+		 			end
+		 		end  
+	 		end 
+	 	end 
+ 	end 
+end 
+
 function Zhonyas()
 	local zSlot = GetInventorySlotItem(3157)
 	if zSlot ~= nil and myHero:CanUseSpell(zSlot) == READY then
-		health = myHero.health
-		mana = myHero.mana
-		maxHealth = myHero.maxHealth
+		local health = myHero.health
+		local mana = myHero.mana
+		local maxHealth = myHero.maxHealth
 		if (health / maxHealth) <= Menu.misc.zhonyas.zhonyasunder then
-			CastItem(3157)
+			CastSpell(zSlot)
 		end 
 	end 
 end
@@ -564,6 +714,10 @@ function SpellChecks()
 	end 
 	if ignite ~= nil then
 		Iready = (myHero:CanUseSpell(ignite) == READY)
+	end 
+
+	if flash ~= nil then
+		Fready = (myHero:CanUseSpell(flash) == READY)
 	end 
 end 
 
@@ -585,94 +739,160 @@ function FindSummoners()
     elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerbarrier") then 
     	barrier = SUMMONER_2
     end
+
+    if myHero:GetSpellData(SUMMONER_1).name:find("summonerflash") then 
+		flash = SUMMONER_1
+    elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerflash") then 
+    	flash = SUMMONER_2
+    end
 end 
 
 function KillStealPrecise()
+
 	SpellChecks()
 
 	local useQ = Menu.autokill.autokillQ
 	local useW = Menu.autokill.autokillW
 	local useR = Menu.autokill.autokillR
+	if ignite ~= nil then
+		local useIgnite = Menu.autokill.autokillIgnite
+	end 
 	local useDFG = Menu.autokill.autokillDFG
 	local DFGSlot = GetInventorySlotItem(3128)
 	local DFGready = (DFGSlot ~= nil and myHero:CanUseSpell(DFGSlot) == READY)
+	local Qmana = myHero:GetSpellData(_Q).mana
+	local Wmana = myHero:GetSpellData(_W).mana
+	local Rmana = myHero:GetSpellData(_R).mana
 		
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		if Menu.autokill[enemy.charName] then
-			if ValidTarget(enemy, 625) then
+			if ValidTarget(enemy, 600) then
+
+				local Qdmg, Wdmg, Rdmg = CalcSpellDamage(enemy)
+
 				if useDFG and DFGready then
-						DFGdmg = getDmg("DFG", enemy, myHero)
+					DFGdmg = getDmg("DFG", enemy, myHero)
 				end
-				if useDFG and DFGready then
-					if useQ and Qready then
-						Qdmg = getDmg("Q", enemy, myHero) + ((getDmg("Q", enemy, myHero) / 100) * 20)
-					end 
-					if useW and Wready then
-						Wdmg = getDmg("W", enemy, myHero) + ((getDmg("W", enemy, myHero) / 100) * 20)
-					end 
-					if useR and Rready then
-						Rdmg = getDmg("R", enemy, myHero, 1) + ((getDmg("R", enemy, myHero, 1) / 100) * 20)
-					end 
-				else
-					if useQ and Qready then
-						Qdmg = getDmg("Q", enemy, myHero)
-					end 
-					if useW and Wready then
-						Wdmg = getDmg("W", enemy, myHero)
-					end 
-					if useR and Rready then	
-						Rdmg = getDmg("R", enemy, myHero, 1)
-					end 
+
+				if ignite ~= nil and useIgnite and Iready then
+					iDmg = getDmg("IGNITE", enemy, myHero)
 				end 
 
 				if useDFG and DFGready then
-					if Qdmg > Wdmg and Wready and useW and Wdmg + DFGdmg > enemy.health then
-						CastItem(3128, enemy)
-						CastW(enemy)
-					elseif Wdmg > Qdmg and Qready and useQ and Qdmg + DFGdmg > enemy.health then
-						CastItem(3128, enemy)
-						CastQ(enemy)
-					elseif Qready and Wready and useQ and useW and Qdmg + Wdmg + DFGdmg > enemy.health then
-						CastItem(3128, enemy)
-						CastQ(enemy)
-						CastW(enemy)
-					elseif Qready and Rready and useQ and useR and Qdmg + Rdmg + DFGdmg > enemy.health then
-						CastItem(3128, enemy)
-						CastQ(enemy)	
-						CastR(enemy)
-					elseif Qready and Wready and Rready and useQ and useW and useR and Qdmg + Wdmg + Rdmg + DFGdmg > enemy.health then
-						CastItem(3128, enemy)
-						CastQ(enemy)
-						CastW(enemy)
-						CastR(enemy)
+					if useQ and Qready then
+						Qdmg = Qdmg + ((Qmg / 100) * 20)
 					end 
+					if useW and Wready then
+						Wdmg = Wdmg + ((Wdmg / 100) * 20)
+					end 
+					if useR and Rready then
+						Rdmg = Rdmg + ((Rdmg / 100) * 20)
+					end 
+				end 
+
+				if ignite ~= nil and useIgnite and Iready then
+					if useDFG and DFGready then
+						if Qdmg > Wdmg and Wready and useW and Wdmg + DFGdmg + iDmg > enemy.health and myHero.mana > Wmana then
+							CastItem(3128, enemy)
+							CastW(enemy)
+							CastSpell(ignite, enemy)
+						elseif Wdmg > Qdmg and Qready and useQ and Qdmg + DFGdmg + iDmg > enemy.health and myHero.mana > Qmana then
+							CastItem(3128, enemy)
+							CastQ(enemy)
+							CastSpell(ignite, enemy)
+						elseif Qready and Wready and useQ and useW and Qdmg + Wdmg + DFGdmg + iDmg > enemy.health and myHero.mana > (Qmana + Wmana) then
+							CastItem(3128, enemy)
+							CastQ(enemy)
+							CastW(enemy)
+							CastSpell(ignite, enemy)
+						elseif Qready and Rready and useQ and useR and Qdmg + Rdmg + DFGdmg + iDmg > enemy.health and myHero.mana > (Rmana + Qmana) then
+							CastItem(3128, enemy)
+							CastQ(enemy)	
+							CastR(enemy)
+							CastSpell(ignite, enemy)
+						elseif Qready and Wready and Rready and useQ and useW and useR and Qdmg + Wdmg + Rdmg + DFGdmg + iDmg > enemy.health and myHero.mana > (Qmana + Wmana + Rmana) then
+							CastItem(3128, enemy)
+							CastQ(enemy)
+							CastW(enemy)
+							CastR(enemy)
+							CastSpell(ignite, enemy)
+						end 
+					else
+						if Qdmg > Wdmg and useW and Wready and Wdmg + iDmg > enemy.health and myHero.mana > Wmana then
+							CastW(enemy)
+							CastSpell(ignite, enemy)
+						elseif Wdmg > Qdmg and useQ and Qready and Qdmg + iDmg > enemy.health and myHero.mana > Qmana then
+							CastQ(enemy)
+							CastSpell(ignite, enemy)
+						elseif Qready and Wready and useQ and useW and Qdmg + Wdmg + iDmg > enemy.health and myHero.mana > (Wmana + Qmana) then
+							CastQ(enemy)
+							CastW(enemy)
+							CastSpell(ignite, enemy)
+						elseif Qready and Rready and useQ and useR and Qdmg + Rdmg + iDmg > enemy.health and myHero.mana > (Qmana + Rmana) then
+							CastQ(enemy)
+							CastR(enemy)
+							CastSpell(ignite, enemy)
+						elseif Qready and Wready and Rready and useQ and useW and useR and Qdmg + Wdmg + Rdmg + iDmg > enemy.health and myHero.mana > (Qmana + Wmana + Rmana) then
+							CastQ(enemy)
+							CastW(enemy)
+							CastR(enemy)
+							CastSpell(ignite, enemy)
+						end 
+					end
 				else
-					if Qdmg > Wdmg and useW and Wready and Wdmg > enemy.health then
-						CastW(enemy)
-					elseif Wdmg > Qdmg and useQ and Qready and Qdmg > enemy.health then
-						CastQ(enemy)
-					elseif Qready and Wready and useQ and useW and Qdmg + Wdmg > enemy.health then
-						CastQ(enemy)
-						CastW(enemy)
-					elseif Qready and Rready and useQ and useR and Qdmg + Rdmg > enemy.health then
-						CastQ(enemy)
-						CastR(enemy)
-					elseif Qready and Wready and Rready and useQ and useW and useR and Qdmg + Wdmg + Rdmg > enemy.health then
-						CastQ(enemy)
-						CastW(enemy)
-						CastR(enemy)
-					end 
-				end  
+					if useDFG and DFGready then
+						if Qdmg > Wdmg and Wready and useW and Wdmg + DFGdmg > enemy.health and myHero.mana > Wmana then
+							CastItem(3128, enemy)
+							CastW(enemy)
+						elseif Wdmg > Qdmg and Qready and useQ and Qdmg + DFGdmg > enemy.health and myHero.mana > Qmana then
+							CastItem(3128, enemy)
+							CastQ(enemy)
+						elseif Qready and Wready and useQ and useW and Qdmg + Wdmg + DFGdmg > enemy.health and myHero.mana > (Qmana + Wmana) then
+							CastItem(3128, enemy)
+							CastQ(enemy)
+							CastW(enemy)
+						elseif Qready and Rready and useQ and useR and Qdmg + Rdmg + DFGdmg > enemy.health and myHero.mana > (Qmana + Rmana) then
+							CastItem(3128, enemy)
+							CastQ(enemy)	
+							CastR(enemy)
+						elseif Qready and Wready and Rready and useQ and useW and useR and Qdmg + Wdmg + Rdmg + DFGdmg > enemy.health and myHero.mana > (Qmana + Wmana + Rmana) then
+							CastItem(3128, enemy)
+							CastQ(enemy)
+							CastW(enemy)
+							CastR(enemy)
+						end 
+					else
+						if Qdmg > Wdmg and useW and Wready and Wdmg > enemy.health and myHero.mana > Wmana then
+							CastW(enemy)
+						elseif Wdmg > Qdmg and useQ and Qready and Qdmg > enemy.health and myHero.mana > Qmana then
+							CastQ(enemy)
+						elseif Qready and Wready and useQ and useW and Qdmg + Wdmg > enemy.health and myHero.mana > (Qmana + Wmana) then
+							CastQ(enemy)
+							CastW(enemy)
+						elseif Qready and Rready and useQ and useR and Qdmg + Rdmg > enemy.health and myHero.mana > (Qmana + Rmana) then
+							CastQ(enemy)
+							CastR(enemy)
+						elseif Qready and Wready and Rready and useQ and useW and useR and Qdmg + Wdmg + Rdmg > enemy.health and myHero.mana > (Qmana + Wmana + Rmana) then
+							CastQ(enemy)
+							CastW(enemy)
+							CastR(enemy)
+						end 
+					end  
+				end 
 			end 
 		end 		
 	end
 end 
 
 
-function ReturnBestUltTarget(amountOfTargets)
+function ReturnBestUltTarget(amountOfTargets, flashTrue)
 	local targ = nil
+	local range = 600
+	if flashTrue then
+		range = 1000
+	end
 	for i, enemy in ipairs(GetEnemyHeroes()) do
-		if GetDistance(enemy, myHero) <= 600 then
+		if GetDistance(enemy, myHero) <= range then
 			local count = 0
 			for i, Tenemy in ipairs(GetEnemyHeroes()) do
 				if enemy ~= Tenemy then
@@ -682,7 +902,7 @@ function ReturnBestUltTarget(amountOfTargets)
 				end 
 			end
 
-			if count >= amountOfTargets and Menu.combo.RUsage[enemy.charName] then
+			if count >= amountOfTargets and Menu.autoR[enemy.charName] then
 				targ = enemy
 				break
 			end
@@ -696,30 +916,29 @@ function DrawKillable()
 		local enemy = heroManager:getHero(i)
 		if ValidTarget(enemy) then
 			if enemy.team ~= myHero.team then 
-				if Qready then
-					Qdmg = getDmg("Q", enemy, myHero)
+				if ignite ~= nil and Iready then
+					iDmg = getDmg("IGNITE", enemy, myHero)
 				end
-			    if Wready then
-					Wdmg = getDmg("W", enemy, myHero)
-			    end 
-			    if Rready then
-					Rdmg = getDmg("R", enemy, myHero, 1)
-				end 
+
+				local Qdmg, Wdmg, Rdmg = CalcSpellDamage(enemy)
 
 				local barPos = WorldToScreen(D3DXVECTOR3(enemy.x, enemy.y, enemy.z))
                 local PosX = barPos.x - 35
                 local PosY = barPos.y - 50
-
-				if Qdmg > enemy.health then
+                if ignite ~= nil and iDmg > enemy.health then
+                	DrawText("Ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+				elseif Qdmg > enemy.health then
 					DrawText("Q = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+				elseif ignite ~= nil and  Qdmg + iDmg > enemy.health then
+					DrawText("Q + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif Qdmg + Wdmg > enemy.health then
 					DrawText("QW = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+				elseif ignite ~= nil and Qdmg + Wdmg + Idmg > enemy.health then
+					DrawText("QW + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif Qdmg + Wdmg + Rdmg > enemy.health then
 					DrawText("QWR = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif Qdmg + Wdmg + Rdmg + Qdmg > enemy.health then
-					DrawText("QQWWR = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif Qdmg + Wdmg + Rdmg + Qdmg + Wdmg > enemy.health then
-					DrawText("QQWWR = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+				elseif ignite ~= nil and Qdmg + Wdmg + Rdmg + iDmg > enemy.health then
+					DrawText("QWR + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				end 
 			end 
 		end 
@@ -742,6 +961,10 @@ function OnCreateObj(object)
         canStun = true
     end
 
+    if object.name == "TeleportHome.troy" and GetDistance(object, myHero) < 50 then
+    	isRecalling = true
+    end 
+
 
 end 
 
@@ -750,6 +973,10 @@ function OnDeleteObj(object)
     if object.name == "StunReady.troy" and GetDistance(object, myHero) < 50 then
         canStun = false
     end
+
+    if object.name == "TeleportHome.troy" and GetDistance(object, myHero) < 50 then
+    	isRecalling = false
+    end 
 end
  
 
@@ -761,11 +988,6 @@ function OnGainBuff(unit, buff)
 	if unit.isMe and (buff.name == "infernalguardiantimer") then
 		hasTibbers = true
 	end 
-
-	if unit.isMe and (buff.name == "recall") then
-		isRecalling = true
-	end 
-
 
 
 end
@@ -783,9 +1005,7 @@ function OnLoseBuff(unit, buff)
 	if unit.isMe and (buff.name == "infernalguardiantimer") then
 		hasTibbers = false
 	end 
-	if unit.isMe and (buff.name == "recall") then
-		isRecalling = false
-	end 
+
 end
 
 
@@ -846,7 +1066,7 @@ function OnProcessSpell(object, spell)
   		if karthusRdmg > myHero.health and not myHero.dead then
   			local zSlot = GetInventorySlotItem(3157)
   			if zSlot ~= nil and myHero:CanUseSpell(zSlot) == READY then
-				DelayAction(function() CastItem(3157) end, 2) 
+				DelayAction(function() CastSpell(zSlot) end, 2) 
 			end 
   		end 
   	end 
@@ -859,8 +1079,8 @@ function DrinkPotions()
 	maxHealth = myHero.maxHealth
 	maxMana = myHero.maxMana
 	
-		DrinkHealth(health, maxHealth)
-		DrinkMana(mana, maxMana)
+	DrinkHealth(health, maxHealth)
+	DrinkMana(mana, maxMana)
 end 
 
 function DrinkHealth(h, mH) 
@@ -912,11 +1132,11 @@ function UseHeal()
 end 
 
 function UseIgnite()
-	local igniteDMG = (50 + (20 * myHero.level))
+	local iDmg = (50 + (20 * myHero.level))
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		if GetDistance(enemy, myHero) < 600 and ValidTarget(enemy, 600) and Menu.misc.autoignite[enemy.charName] then
 			if Iready then
-				if enemy.health < igniteDMG then
+				if enemy.health < iDmg then
 					CastSpell(ignite, enemy)
 				end 
 			end 
@@ -973,8 +1193,25 @@ function DrawMenu()
  for i, enemy in ipairs(GetEnemyHeroes()) do
 	Menu.combo.RUsage:addParam(enemy.charName, "Use R on " .. enemy.charName, SCRIPT_PARAM_ONOFF, true)
  end 
- Menu.combo.RUsage:addParam("autoUlt", "Use Auto Ult", SCRIPT_PARAM_ONOFF, false)
- Menu.combo.RUsage:addParam("hitX", "Auto R if hit x enemies", SCRIPT_PARAM_SLICE, 3, 0, 5, 0)
+ 
+ -- Flash Settings --[[ IN PROGRESS ]]
+ if flash ~= nil then
+ 	Menu:addSubMenu("Flash", "flash")
+ 	Menu.flash:addParam("useFlash", "Use Flash in AutoR", SCRIPT_PARAM_ONOFF, false)
+ 	Menu.flash:addParam("allies", "Min allies nearby to flash", SCRIPT_PARAM_SLICE, 0, 0, #GetAllyHeroes(), 0)
+ 	Menu.flash:addParam("alliesrange", "Distance between you and allies", SCRIPT_PARAM_SLICE, 300, 0, 2000, 0)
+ 	Menu.flash:addParam("enemies", "Max enemies nearby to flash", SCRIPT_PARAM_SLICE, 0, 0, #GetAllyHeroes(), 0)
+ 	Menu.flash:addParam("enemiesrange", "Distance target & other enemies", SCRIPT_PARAM_SLICE, 300, 0, 500, 0)
+ end 
+
+ -- Auto Ult
+ Menu:addSubMenu("Auto R", "autoR")
+ Menu.autoR:addParam("autoUlt", "Use Auto Ult", SCRIPT_PARAM_ONOFF, false)
+ Menu.autoR:addParam("hitX", "Auto R if hit x enemies", SCRIPT_PARAM_SLICE, 3, 0, 5, 0)
+ for i, enemy in ipairs(GetEnemyHeroes()) do
+	Menu.autoR:addParam(enemy.charName, "Auto R on " .. enemy.charName, SCRIPT_PARAM_ONOFF, true)
+ end 
+
 
  -- Harass
  Menu:addSubMenu("Harass", "harass")
@@ -983,7 +1220,9 @@ function DrawMenu()
  Menu.harass:addParam("harassQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
  Menu.harass:addParam("harassW", "Use W", SCRIPT_PARAM_ONOFF, true)
  Menu.harass:addParam("autoQ", "Auto Q when stuns enemy", SCRIPT_PARAM_ONOFF, false)
- Menu.harass:addParam("autoQW", "Auto Q/W when W will stun enemy", SCRIPT_PARAM_ONOFF, false)
+ if VUP_USER then
+ 	Menu.harass:addParam("autoQW", "Auto Q/W when W will stun enemy", SCRIPT_PARAM_ONOFF, false)
+ end 
  Menu.harass:addParam("harassMana", "Mana Manager %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
 
  -- Farming
@@ -993,26 +1232,43 @@ function DrawMenu()
  Menu.farm:addParam("farmW", "Farm using W", SCRIPT_PARAM_ONOFF, false)
  Menu.farm:addParam("farmStun", "Farm until Stun is up", SCRIPT_PARAM_ONOFF, false)
 
+ -- Jungle Steal
+ Menu:addSubMenu("Jungle Steal", "jungle")
+ Menu.jungle:addParam("useJungle", "Jungle Steal", SCRIPT_PARAM_ONOFF, false)
+ Menu.jungle:addParam("stealTeam", "Steal Which Jungle", SCRIPT_PARAM_LIST, 2, {"Both", "Enemy", "Ally"})
+ Menu.jungle:addParam("stealBlue", "Steal Blue Buff", SCRIPT_PARAM_ONOFF, false)
+ Menu.jungle:addParam("stealRed", "Steal Red Buff", SCRIPT_PARAM_ONOFF, false)
+ Menu.jungle:addParam("stealDragon", "Steal Dragon Buff", SCRIPT_PARAM_ONOFF, false)
+ Menu.jungle:addParam("stealBaron", "Steal Baron Buff", SCRIPT_PARAM_ONOFF, false)
+
+
  --Drawings
  Menu:addSubMenu("Drawings", "drawings")
  Menu.drawings:addParam("draw", "Drawings", SCRIPT_PARAM_ONOFF, true)
  Menu.drawings:addParam("drawQ", "Draw Q Range", SCRIPT_PARAM_ONOFF, true)
  Menu.drawings:addParam("drawW", "Draw W Range", SCRIPT_PARAM_ONOFF, true)
  Menu.drawings:addParam("drawR", "Draw R Range", SCRIPT_PARAM_ONOFF, true)
- Menu.drawings:addParam("drawKillable", "Draw Killable", SCRIPT_PARAM_ONOFF, true)
+ Menu.drawings:addParam("drawKillable", "Draw Killable Text", SCRIPT_PARAM_ONOFF, true)
+ --Menu.drawings:addParam("drawDamage", "Draw Damage", SCRIPT_PARAM_ONOFF, true)
 
  Menu:addSubMenu("Auto Kill when killable", "autokill")
  Menu.autokill:addParam("autokill", "Auto Kill - KillSteal", SCRIPT_PARAM_ONOFF, false)
  Menu.autokill:addParam("autokillDFG", "Use DFG", SCRIPT_PARAM_ONOFF, true)
+ if ignite ~= nil then
+ 	Menu.autokill:addParam("autokillIgnite", "Use Ignite", SCRIPT_PARAM_ONOFF, true)
+ end
  Menu.autokill:addParam("autokillQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
  Menu.autokill:addParam("autokillW", "Use W", SCRIPT_PARAM_ONOFF, true)
  Menu.autokill:addParam("autokillR", "Use R", SCRIPT_PARAM_ONOFF, true)
+
  for i, enemy in ipairs(GetEnemyHeroes()) do
 	Menu.autokill:addParam(enemy.charName, "Kill " .. enemy.charName, SCRIPT_PARAM_ONOFF, false)
  end 
 
+
  -- Misc
  Menu:addSubMenu("Misc", "misc")
+ Menu.misc:addParam("procEW", "Use E and W in fountain", SCRIPT_PARAM_ONOFF, false)
  Menu.misc:addParam("procE", "Use E to get stacks", SCRIPT_PARAM_ONOFF, false)
  Menu.misc:addParam("useEonAttack", "Auto E when attacked", SCRIPT_PARAM_ONOFF, false)
  Menu.misc:addParam("info", "CAN NOT BE BOTH ON", SCRIPT_PARAM_INFO, "CAREFUL")
@@ -1053,17 +1309,25 @@ if barrier ~= nil then
 	Menu.misc.autobarrier:addParam("useBarrier", "Use Summoner Barrier", SCRIPT_PARAM_ONOFF, false)
 	Menu.misc.autobarrier:addParam("amountOfHealth", "Under % of health", SCRIPT_PARAM_SLICE, 0, 0, 1, 2)
 end 
-  -- Default Information
- Menu:addParam("Version", "Version", SCRIPT_PARAM_INFO, version)
- Menu:addParam("Author", "Author",  SCRIPT_PARAM_INFO, author)
+
 
   -- Target Selector
   Menu:addTS(ts)
   ts.name = "TargetSelector"
 
+ Menu.misc:addSubMenu("Gapcloser", "gc")
+ AntiGapcloser(Menu.misc.gc, castStunGapClosing)
+ Menu.misc:addSubMenu("Interrupter", "ai")
+ Interrupter(Menu.misc.ai, castStunInterruptable)
+
  -- Orbwalker to menu
  Menu:addSubMenu("Orbwalker", "Orbwalker")
  OrbWalk:LoadToMenu(Menu.Orbwalker)
+
+
+  -- Default Information
+ Menu:addParam("Version", "Version", SCRIPT_PARAM_INFO, version)
+ Menu:addParam("Author", "Author",  SCRIPT_PARAM_INFO, author)
  
  -- Always show
  Menu.combo:permaShow("combo")
@@ -1072,7 +1336,7 @@ end
  --Menu.killsteal:permaShow("killsteal")
  Menu.autokill:permaShow("autokill")
  Menu.farm:permaShow("farm")
- Menu.misc.zhonyas:permaShow("zhonyas")
+ Menu.jungle:permaShow("useJungle")
  Menu.drawings:permaShow("draw")
 
 end
@@ -1086,3 +1350,383 @@ function MenuCheck()
  	end 
 end 
 
+-- Gapcloser (SourceLib TriggerCallbacks)
+function castStunGapClosing(unit, spell)
+	if GetDistance(unit) < 600 and canStun then
+		if Qready and Wready then
+			CastQ(unit)
+		elseif Qready then
+			CastQ(unit)
+		elseif Wready then
+			CastW(unit)
+		end
+	end 
+end 
+
+--Interuptable (SourceLib TriggerCallbacks)
+function castStunInterruptable(unit, spell) 
+	if GetDistance(unit) < 600 then
+		if Qready and Wready then
+			CastQ(unit)
+		elseif Qready then
+			CastQ(unit)
+		elseif Wready then
+			CastW(unit)
+		end
+	end 
+end 
+
+-- return number of enemy in range
+function CountAllyHeroInRange(range, object)
+    object = object or myHero
+    range = range and range * range or myHero.range * myHero.range
+    local enemyInRange = 0
+    for i = 1, heroManager.iCount, 1 do
+        local hero = heroManager:getHero(i)
+        if hero.team == object.team and GetDistanceSqr(object, hero) <= range then
+            enemyInRange = enemyInRange + 1
+        end
+    end
+    return enemyInRange
+end
+
+function CalcSpellDamage(enemy)
+
+	if not enemy then return end 
+
+
+	-- Credits to ExtraGoz for Spell Damage Library
+	-- I put this in this script myself, so I can modify it myself and so it's not dependant
+	-- of the state of the library.
+	local damageQ = 35 * myHero:GetSpellData(_Q).level + 45 + .8 * myHero.ap
+	local damageW = 45 * myHero:GetSpellData(_W).level + 25 + .85 * myHero.ap
+	local damageR = math.max(125 * myHero:GetSpellData(_R).level + 50 + .8 * myHero.ap)
+
+
+	local Qdmg = myHero:CalcMagicDamage(enemy, damageQ) or 0
+	local Wdmg = myHero:CalcMagicDamage(enemy, damageW) or 0
+	local Rdmg = myHero:CalcMagicDamage(enemy, damageR) or 0
+
+	return Qdmg, Wdmg, Rdmg
+end 
+
+--[[
+
+----- Functions transferred from SourceLib, thanks to Hellsing for his hard work. ----
+		I take absolute no credits for the code below
+		I do not want to require SourceLib for my script, since it isn't fully needed, as Annie doesn't require skillshots.
+		I simply ported useful information to my own script.
+
+		All credits goes to Hellsing and the other people who have worked on SourceLib
+
+--]]
+--[[
+-- Set enemy bar data
+for i, enemy in ipairs(GetEnemyHeroes()) do
+    enemy.barData = {PercentageOffset = {x = 0, y = 0} }--GetEnemyBarData()--spadge pls
+end
+
+function GetEnemyHPBarPos(enemy)
+
+    -- Prevent error spamming
+    if not enemy.barData then
+        return
+    end
+
+    local barPos = GetUnitHPBarPos(enemy)
+    local barPosOffset = GetUnitHPBarOffset(enemy)
+    local barOffset = Point(enemy.barData.PercentageOffset.x, enemy.barData.PercentageOffset.y)
+    local barPosPercentageOffset = Point(enemy.barData.PercentageOffset.x, enemy.barData.PercentageOffset.y)
+
+    local BarPosOffsetX = 169
+    local BarPosOffsetY = 47
+    local CorrectionX = 16
+    local CorrectionY = 4
+
+    barPos.x = barPos.x + (barPosOffset.x - 0.5 + barPosPercentageOffset.x) * BarPosOffsetX + CorrectionX
+    barPos.y = barPos.y + (barPosOffset.y - 0.5 + barPosPercentageOffset.y) * BarPosOffsetY + CorrectionY 
+
+    local StartPos = Point(barPos.x, barPos.y)
+    local EndPos = Point(barPos.x + 103, barPos.y)
+
+    return Point(StartPos.x, StartPos.y), Point(EndPos.x, EndPos.y)
+
+end
+
+function DrawIndicator(enemy)
+	Qdmg, Wdmg, Rdmg = CalcSpellDamage(enemy)
+
+    local damage = Qdmg + Wdmg + Rdmg
+
+    local SPos, EPos = GetEnemyHPBarPos(enemy)
+
+    -- Validate data
+    if not SPos then return end
+
+    local barwidth = EPos.x - SPos.x
+    local Position = SPos.x + math.max(0, (enemy.health - damage) / enemy.maxHealth) * barwidth
+
+    DrawText("|", 16, math.floor(Position), math.floor(SPos.y + 8), ARGB(255,0,255,0))
+    DrawText("HP: "..math.floor(enemy.health - damage), 13, math.floor(SPos.x), math.floor(SPos.y), (enemy.health - damage) > 0 and ARGB(255, 0, 255, 0) or  ARGB(255, 255, 0, 0))
+end 
+--]]
+
+--[[
+
+'||'            .                                               .                   
+ ||  .. ...   .||.    ....  ... ..  ... ..  ... ...  ... ...  .||.    ....  ... ..  
+ ||   ||  ||   ||   .|...||  ||' ''  ||' ''  ||  ||   ||'  ||  ||   .|...||  ||' '' 
+ ||   ||  ||   ||   ||       ||      ||      ||  ||   ||    |  ||   ||       ||     
+.||. .||. ||.  '|.'  '|...' .||.    .||.     '|..'|.  ||...'   '|.'  '|...' .||.    
+                                                      ||                            
+                                                     ''''                           
+
+    Interrupter - They will never cast!
+
+    Like alwasy undocumented by honda...
+]]
+class 'Interrupter'
+
+local _INTERRUPTIBLE_SPELLS = {
+    ["KatarinaR"]                          = { charName = "Katarina",     DangerLevel = 5, MaxDuration = 2.5, CanMove = false },
+    ["Meditate"]                           = { charName = "MasterYi",     DangerLevel = 1, MaxDuration = 2.5, CanMove = false },
+    ["Drain"]                              = { charName = "FiddleSticks", DangerLevel = 3, MaxDuration = 2.5, CanMove = false },
+    ["Crowstorm"]                          = { charName = "FiddleSticks", DangerLevel = 5, MaxDuration = 2.5, CanMove = false },
+    ["GalioIdolOfDurand"]                  = { charName = "Galio",        DangerLevel = 5, MaxDuration = 2.5, CanMove = false },
+    ["MissFortuneBulletTime"]              = { charName = "MissFortune",  DangerLevel = 5, MaxDuration = 2.5, CanMove = false },
+    ["VelkozR"]                            = { charName = "Velkoz",       DangerLevel = 5, MaxDuration = 2.5, CanMove = false },
+    ["InfiniteDuress"]                     = { charName = "Warwick",      DangerLevel = 5, MaxDuration = 2.5, CanMove = false },
+    ["AbsoluteZero"]                       = { charName = "Nunu",         DangerLevel = 4, MaxDuration = 2.5, CanMove = false },
+    ["ShenStandUnited"]                    = { charName = "Shen",         DangerLevel = 3, MaxDuration = 2.5, CanMove = false },
+    ["FallenOne"]                          = { charName = "Karthus",      DangerLevel = 5, MaxDuration = 2.5, CanMove = false },
+    ["AlZaharNetherGrasp"]                 = { charName = "Malzahar",     DangerLevel = 5, MaxDuration = 2.5, CanMove = false },
+    ["Pantheon_GrandSkyfall_Jump"]         = { charName = "Pantheon",     DangerLevel = 5, MaxDuration = 2.5, CanMove = false },
+
+}
+
+function Interrupter:__init(menu, cb)
+
+    self.callbacks = {}
+    self.activespells = {}
+    AddTickCallback(function() self:OnTick() end)
+    AddProcessSpellCallback(function(unit, spell) self:OnProcessSpell(unit, spell) end)
+    if menu then
+        self:AddToMenu(menu)
+    end
+    if cb then
+        self:AddCallback(cb)
+    end
+
+end
+
+function Interrupter:AddToMenu(menu)
+
+    assert(menu, "Interrupter: menu can't be nil!")
+    local SpellAdded = false
+    local EnemyChampioncharNames = {}
+    for i, enemy in ipairs(GetEnemyHeroes()) do
+        table.insert(EnemyChampioncharNames, enemy.charName)
+    end
+    menu:addParam("Enabled", "Enabled", SCRIPT_PARAM_ONOFF, true)
+    for spellName, data in pairs(_INTERRUPTIBLE_SPELLS) do
+        if table.contains(EnemyChampioncharNames, data.charName) then
+            menu:addParam(string.gsub(spellName, "_", ""), data.charName.." - "..spellName, SCRIPT_PARAM_ONOFF, true)
+            SpellAdded = true
+        end
+    end
+    if not SpellAdded then
+        menu:addParam("Info", "Info", SCRIPT_PARAM_INFO, "No spell available to interrupt")
+    end
+    self.Menu = menu
+
+end
+
+function Interrupter:AddCallback(cb)
+
+    assert(cb and type(cb) == "function", "Interrupter: callback is invalid!")
+    table.insert(self.callbacks, cb)
+
+end
+
+function Interrupter:TriggerCallbacks(unit, spell)
+
+    for i, callback in ipairs(self.callbacks) do
+        callback(unit, spell)
+    end
+
+end
+
+function Interrupter:OnProcessSpell(unit, spell)
+
+    if not self.Menu.Enabled then return end
+    if unit.team ~= myHero.team then
+        if _INTERRUPTIBLE_SPELLS[spell.name] then
+            local SpellToInterrupt = _INTERRUPTIBLE_SPELLS[spell.name]
+            if (self.Menu and self.Menu[string.gsub(spell.name, "_", "")]) or not self.Menu then
+                local data = {unit = unit, DangerLevel = SpellToInterrupt.DangerLevel, endT = os.clock() + SpellToInterrupt.MaxDuration, CanMove = SpellToInterrupt.CanMove}
+                table.insert(self.activespells, data)
+                self:TriggerCallbacks(data.unit, data)
+            end
+        end
+    end
+
+end
+
+function Interrupter:OnTick()
+
+    for i = #self.activespells, 1, -1 do
+        if self.activespells[i].endT - os.clock() > 0 then
+            self:TriggerCallbacks(self.activespells[i].unit, self.activespells[i])
+        else
+            table.remove(self.activespells, i)
+        end
+    end
+
+end
+
+
+--[[
+
+    |                .    ||   ..|'''.|                           '||                                 
+   |||    .. ...   .||.  ...  .|'     '   ....   ... ...    ....   ||    ...    ....    ....  ... ..  
+  |  ||    ||  ||   ||    ||  ||    .... '' .||   ||'  || .|   ''  ||  .|  '|. ||. '  .|...||  ||' '' 
+ .''''|.   ||  ||   ||    ||  '|.    ||  .|' ||   ||    | ||       ||  ||   || . '|.. ||       ||     
+.|.  .||. .||. ||.  '|.' .||.  ''|...'|  '|..'|'  ||...'   '|...' .||.  '|..|' |'..|'  '|...' .||.    
+                                                  ||                                                  
+                                                 ''''                                                 
+
+    AntiGapcloser - Stay away please, thanks.
+
+    And again undocumented by honda -.-
+]]
+class 'AntiGapcloser'
+
+local _GAPCLOSER_TARGETED, _GAPCLOSER_SKILLSHOT = 1, 2
+--Add only very fast skillshots/targeted spells since vPrediction will handle the slow dashes that will trigger OnDash
+local _GAPCLOSER_SPELLS = {
+    ["AatroxQ"]              = "Aatrox",
+    ["AkaliShadowDance"]     = "Akali",
+    ["Headbutt"]             = "Alistar",
+    ["FioraQ"]               = "Fiora",
+    ["DianaTeleport"]        = "Diana",
+    ["EliseSpiderQCast"]     = "Elise",
+    ["FizzPiercingStrike"]   = "Fizz",
+    ["GragasE"]              = "Gragas",
+    ["HecarimUlt"]           = "Hecarim",
+    ["JarvanIVDragonStrike"] = "JarvanIV",
+    ["IreliaGatotsu"]        = "Irelia",
+    ["JaxLeapStrike"]        = "Jax",
+    ["KhazixE"]              = "Khazix",
+    ["khazixelong"]          = "Khazix",
+    ["LeblancSlide"]         = "LeBlanc",
+    ["LeblancSlideM"]        = "LeBlanc",
+    ["BlindMonkQTwo"]        = "LeeSin",
+    ["LeonaZenithBlade"]     = "Leona",
+    ["UFSlash"]              = "Malphite",
+    ["Pantheon_LeapBash"]    = "Pantheon",
+    ["PoppyHeroicCharge"]    = "Poppy",
+    ["RenektonSliceAndDice"] = "Renekton",
+    ["RivenTriCleave"]       = "Riven",
+    ["SejuaniArcticAssault"] = "Sejuani",
+    ["slashCast"]            = "Tryndamere",
+    ["ViQ"]                  = "Vi",
+    ["MonkeyKingNimbus"]     = "MonkeyKing",
+    ["XenZhaoSweep"]         = "XinZhao",
+    ["YasuoDashWrapper"]     = "Yasuo"
+}
+
+function AntiGapcloser:__init(menu, cb)
+
+    self.callbacks = {}
+    self.activespells = {}
+    AddTickCallback(function() self:OnTick() end)
+    AddProcessSpellCallback(function(unit, spell) self:OnProcessSpell(unit, spell) end)
+    if menu then
+        self:AddToMenu(menu)
+    end
+    if cb then
+        self:AddCallback(cb)
+    end
+
+end
+
+function AntiGapcloser:AddToMenu(menu)
+
+    assert(menu, "AntiGapcloser: menu can't be nil!")
+    local SpellAdded = false
+    local EnemyChampioncharNames = {}
+    for i, enemy in ipairs(GetEnemyHeroes()) do
+        table.insert(EnemyChampioncharNames, enemy.charName)
+    end
+    menu:addParam("Enabled", "Enabled", SCRIPT_PARAM_ONOFF, true)
+    for spellName, charName in pairs(_GAPCLOSER_SPELLS) do
+        if table.contains(EnemyChampioncharNames, charName) then
+            menu:addParam(string.gsub(spellName, "_", ""), charName.." - "..spellName, SCRIPT_PARAM_ONOFF, true)
+            SpellAdded = true
+        end
+    end
+    if not SpellAdded then
+        menu:addParam("Info", "Info", SCRIPT_PARAM_INFO, "No spell available to interrupt")
+    end
+    self.Menu = menu
+
+end
+
+function AntiGapcloser:AddCallback(cb)
+
+    assert(cb and type(cb) == "function", "AntiGapcloser: callback is invalid!")
+    table.insert(self.callbacks, cb)
+
+end
+
+function AntiGapcloser:TriggerCallbacks(unit, spell)
+
+    for i, callback in ipairs(self.callbacks) do
+        callback(unit, spell)
+    end
+
+end
+
+function AntiGapcloser:OnProcessSpell(unit, spell)
+
+    if not self.Menu.Enabled then return end
+    if unit.team ~= myHero.team then
+        if _GAPCLOSER_SPELLS[spell.name] then
+            local Gapcloser = _GAPCLOSER_SPELLS[spell.name]
+            if (self.Menu and self.Menu[string.gsub(spell.name, "_", "")]) or not self.Menu then
+                local add = false
+                if spell.target and spell.target.isMe then
+                    add = true
+                    startPos = Vector(unit.visionPos)
+                    endPos = myHero
+                elseif not spell.target then
+                    local endPos1 = Vector(unit.visionPos) + 300 * (Vector(spell.endPos) - Vector(unit.visionPos)):normalized()
+                    local endPos2 = Vector(unit.visionPos) + 100 * (Vector(spell.endPos) - Vector(unit.visionPos)):normalized()
+                    --TODO check angles etc
+                    if (GetDistanceSqr(myHero.visionPos, unit.visionPos) > GetDistanceSqr(myHero.visionPos, endPos1) or GetDistanceSqr(myHero.visionPos, unit.visionPos) > GetDistanceSqr(myHero.visionPos, endPos2))  then
+                        add = true
+                    end
+                end
+
+                if add then
+                    local data = {unit = unit, spell = spell.name, startT = os.clock(), endT = os.clock() + 1, startPos = startPos, endPos = endPos}
+                    table.insert(self.activespells, data)
+                    self:TriggerCallbacks(data.unit, data)
+                end
+            end
+        end
+    end
+
+end
+
+function AntiGapcloser:OnTick()
+
+    for i = #self.activespells, 1, -1 do
+        if self.activespells[i].endT - os.clock() > 0 then
+            self:TriggerCallbacks(self.activespells[i].unit, self.activespells[i])
+        else
+            table.remove(self.activespells, i)
+        end
+    end
+
+end
