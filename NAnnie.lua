@@ -89,6 +89,28 @@
 			2.06 
 				Temp fix for SxOrbwalk
 
+			2.10
+				Fixed spam bug with "Qmg"
+				Fixed Jungle Names (Jungle steal should now work 'perfectly')
+					Perfectly as in it'll cast abilities.
+					It'll steal even if no enemies are near, so be careful with this.
+
+					I'll adjust this later, so you can adjust this to your own settings.
+				Added more options to Draw Killable
+				Re-enabled normal SxOrbWalk 
+				Changed Ignite settings
+					Normal killsteal Ignite is now included in AutoKill
+					Ignite kill with Combo is now included in Misc > Ignite
+
+
+		To-do:
+			Rewrite AutoKill to make it smoother and faster
+			More accurate Jungle Steal with more adjustable settings
+				So it doesn't try to steal jungle minion if your jungle is near for example
+				So it doesn't steal if there aren't more than x enemies
+				etc
+			More ways of flash
+
 
 
 		Script Coded by Nickieboy.
@@ -103,7 +125,7 @@ if myHero.charName ~= "Annie" then return end
 
 --- BoL Script Status Connector --- 
 local ScriptKey = "XKNKQKPMJPN" -- NAnnie auth key
-local ScriptVersion = "2.06" -- Your .version file content
+local ScriptVersion = "2.10" -- Your .version file content
 
 -- Thanks to Bilbao for his socket help & encryption
 assert(load(Base64Decode("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"), nil, "bt", _ENV))() BolBoost( ScriptKey, ScriptVersion )
@@ -111,7 +133,7 @@ assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIKAAAABgBAAEFAAA
 
 
 --[[		Auto Update		]]
-local version = "2.06"
+local version = "2.10"
 local author = "Nickieboy"
 local SCRIPT_NAME = "NAnnie"
 local AUTOUPDATE = true
@@ -141,8 +163,7 @@ end
 
 -- Lib Updater
 local REQUIRED_LIBS = {
-	--["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua",
-	["SxOrbWalk"] = "https://raw.githubusercontent.com/Nickieboy/BoL/master/lib/SxOrbWalk.lua",
+	["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua",
 	["Spell Damage Library"] = "https://raw.githubusercontent.com/Nickieboy/BoL/master/lib/Spell_Damage_Library.lua",
 }
 
@@ -172,15 +193,13 @@ local Qdmg, Wdmg, Rdmg, DFGdmg, iDmg, totalDamage, health, mana, maxHealth, maxM
 local canStun = false
 local EnemyMinions = minionManager(MINION_ENEMY, 600, myHero, MINION_SORT_HEALTH_ASC)
 local JungleMinions = minionManager(MINION_JUNGLE, 600, myHero, MINION_SORT_HEALTH_ASC)
-local minionsSteal = {"Blue Sentinel", "Red Brambleback", "Dragon", "Baron Nashor"}
+local minionsSteal = {"SRU_Blue", "SRU_Red", "SRU_Dragon", "SRU_Baron"}
 local ignite, heal, barrier, flash = nil, nil, nil, nil
 local passiveStacks = 0
 local hasTibbers = false
 local isRecalling = false
 local Rtarget = nil
-local Qready, Wready, Eready, Rready = false, false, false, false
-local Hready, Bready, Iready, Fready = false, false, false
-local flashTarget = nil
+local Qready, Wready, Eready, Rready, Hready, Bready, Iready, Fready = false, false, false, false, false, false, false, false, false
 local useFlash = false
 
 
@@ -226,6 +245,7 @@ function OnTick()
 	if Menu.autokill.autokill and not Menu.combo.combo then
 		KillStealPrecise() 
 	end 
+
 	--[[ Temporary disabled
 	if Menu.misc.autolevel.levelAuto then
 		AutoLevel()
@@ -247,13 +267,15 @@ function OnTick()
 		Zhonyas()
 	end 
 
-	if Menu.misc.procE and canStun ~= true and isRecalling ~= true then
+	if Menu.misc.Esettings.procE and canStun ~= true and isRecalling ~= true then
 		CastE()
 	end 
 
-	if Menu.misc.procEW and InFountain() and Eready and Wready and canStun ~= true then
-		CastSpell(_W, mousePos.x, mousePos.z)
+	if Menu.misc.Esettings.procEW and InFountain() and Eready and Wready and canStun ~= true then
 		CastE()
+		if canStun ~= true then
+			CastSpell(_W, mousePos.x, mousePos.z)
+		end
 	end 
 
 	if heal ~= nil then
@@ -262,7 +284,7 @@ function OnTick()
 		end 
 	end 
 	if ignite ~= nil then
-		if Menu.misc.autoignite.useIgnite then
+		if Menu.misc.autoignite.useIgnite and Menu.combo.combo then
 			UseIgnite()
 		end 
 	end 
@@ -352,6 +374,11 @@ end
 
 function Combo()
 	if ts.target ~= nil and ValidTarget(ts.target, 625) then
+
+		if Menu.combo.disableAA then
+			OrbWalk:DisableAttacks()
+		end 
+
 		if Menu.combo.comboRStun and Rready then	
 			ComboRStun()
 		else
@@ -364,7 +391,11 @@ function Combo()
 			elseif Menu.combo.comboWay == 4 then
 				ComboRW()
 			end  
-		end  
+		end
+
+		if Menu.combo.disableAA then
+			OrbWalk:EnableAttacks()
+		end 
 	end  
 end 
 
@@ -375,6 +406,7 @@ function ComboQ()
 			CastItem(3128, ts.target)
 		end 
 	end 
+
 	if Menu.combo.comboQ then
 		CastQ(ts.target)
 	end 
@@ -513,8 +545,9 @@ function ComboRStun()
 end 
 
 function AutoUlt()
-
-	useFlash = FlashSettings()
+	if flash ~= nil then
+		useFlash = FlashSettings()
+	end
 
 	Rtarget = ReturnBestUltTarget(Menu.autoR.hitX, useFlash)
 	if Rtarget ~= nil then
@@ -528,6 +561,7 @@ function AutoUlt()
 end
 
 function FlashSettings()
+
 	local menuFlash = Menu.flash.useFlash
 	local allies = Menu.flash.allies
 	local alliesrange = Menu.flash.alliesrange
@@ -773,7 +807,7 @@ function KillStealPrecise()
 		
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		if Menu.autokill[enemy.charName] then
-			if ValidTarget(enemy, 600) then
+			if ValidTarget(enemy, 575) then
 
 				local Qdmg, Wdmg, Rdmg = CalcSpellDamage(enemy)
 
@@ -787,7 +821,7 @@ function KillStealPrecise()
 
 				if useDFG and DFGready then
 					if useQ and Qready then
-						Qdmg = Qdmg + ((Qmg / 100) * 20)
+						Qdmg = Qdmg + ((Qdmg / 100) * 20)
 					end 
 					if useW and Wready then
 						Wdmg = Wdmg + ((Wdmg / 100) * 20)
@@ -799,26 +833,28 @@ function KillStealPrecise()
 
 				if ignite ~= nil and useIgnite and Iready then
 					if useDFG and DFGready then
-						if Qdmg > Wdmg and Wready and useW and Wdmg + DFGdmg + iDmg > enemy.health and myHero.mana > Wmana then
-							CastItem(3128, enemy)
+						if iDmg > enemy.health then
+							CastSpell(ignite, enemy)
+						elseif Qdmg > Wdmg and Wready and useW and Wdmg + DFGdmg + iDmg > enemy.health and myHero.mana > Wmana then
+							CastSpell(DFGSlot, enemy)
 							CastW(enemy)
 							CastSpell(ignite, enemy)
 						elseif Wdmg > Qdmg and Qready and useQ and Qdmg + DFGdmg + iDmg > enemy.health and myHero.mana > Qmana then
-							CastItem(3128, enemy)
+							CastSpell(DFGSlot, enemy)
 							CastQ(enemy)
 							CastSpell(ignite, enemy)
 						elseif Qready and Wready and useQ and useW and Qdmg + Wdmg + DFGdmg + iDmg > enemy.health and myHero.mana > (Qmana + Wmana) then
-							CastItem(3128, enemy)
+							CastSpell(DFGSlot, enemy)
 							CastQ(enemy)
 							CastW(enemy)
 							CastSpell(ignite, enemy)
 						elseif Qready and Rready and useQ and useR and Qdmg + Rdmg + DFGdmg + iDmg > enemy.health and myHero.mana > (Rmana + Qmana) then
-							CastItem(3128, enemy)
+							CastSpell(DFGSlot, enemy)
 							CastQ(enemy)	
 							CastR(enemy)
 							CastSpell(ignite, enemy)
 						elseif Qready and Wready and Rready and useQ and useW and useR and Qdmg + Wdmg + Rdmg + DFGdmg + iDmg > enemy.health and myHero.mana > (Qmana + Wmana + Rmana) then
-							CastItem(3128, enemy)
+							CastSpell(DFGSlot, enemy)
 							CastQ(enemy)
 							CastW(enemy)
 							CastR(enemy)
@@ -849,21 +885,21 @@ function KillStealPrecise()
 				else
 					if useDFG and DFGready then
 						if Qdmg > Wdmg and Wready and useW and Wdmg + DFGdmg > enemy.health and myHero.mana > Wmana then
-							CastItem(3128, enemy)
+							CastSpell(DFGSlot, enemy)
 							CastW(enemy)
 						elseif Wdmg > Qdmg and Qready and useQ and Qdmg + DFGdmg > enemy.health and myHero.mana > Qmana then
-							CastItem(3128, enemy)
+							CastSpell(DFGSlot, enemy)
 							CastQ(enemy)
 						elseif Qready and Wready and useQ and useW and Qdmg + Wdmg + DFGdmg > enemy.health and myHero.mana > (Qmana + Wmana) then
-							CastItem(3128, enemy)
+							CastSpell(DFGSlot, enemy)
 							CastQ(enemy)
 							CastW(enemy)
 						elseif Qready and Rready and useQ and useR and Qdmg + Rdmg + DFGdmg > enemy.health and myHero.mana > (Qmana + Rmana) then
-							CastItem(3128, enemy)
+							CastSpell(DFGSlot, enemy)
 							CastQ(enemy)	
 							CastR(enemy)
 						elseif Qready and Wready and Rready and useQ and useW and useR and Qdmg + Wdmg + Rdmg + DFGdmg > enemy.health and myHero.mana > (Qmana + Wmana + Rmana) then
-							CastItem(3128, enemy)
+							CastSpell(DFGSlot, enemy)
 							CastQ(enemy)
 							CastW(enemy)
 							CastR(enemy)
@@ -923,6 +959,13 @@ function DrawKillable()
 		local enemy = heroManager:getHero(i)
 		if ValidTarget(enemy) then
 			if enemy.team ~= myHero.team then 
+				local DFGSlot = GetInventorySlotItem(3128)
+				local DFGready = (DFGSlot ~= nil and myHero:CanUseSpell(DFGSlot) == READY)
+				
+				if useDFG and DFGready then
+					DFGdmg = getDmg("DFG", enemy, myHero)
+				end
+
 				if ignite ~= nil and Iready then
 					iDmg = getDmg("IGNITE", enemy, myHero)
 				end
@@ -932,20 +975,37 @@ function DrawKillable()
 				local barPos = WorldToScreen(D3DXVECTOR3(enemy.x, enemy.y, enemy.z))
                 local PosX = barPos.x - 35
                 local PosY = barPos.y - 50
-                if ignite ~= nil and iDmg > enemy.health then
+
+                if DFGready and DFGdmg > enemy.health then
+                	DrawText("DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+                elseif ignite ~= nil and iDmg > enemy.health then
                 	DrawText("Ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif Qdmg > enemy.health then
 					DrawText("Q = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+				elseif DFGready and Qdmg + DFGdmg > enemy.health then
+					DrawText("Q + DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif ignite ~= nil and  Qdmg + iDmg > enemy.health then
 					DrawText("Q + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+				elseif ignite ~= nil and DFGready and Qdmg + iDmg + DFGdmg > enemy.health then
+					DrawText("Q + ignite + DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif Qdmg + Wdmg > enemy.health then
 					DrawText("QW = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+				elseif DFGready and Qdmg + Wdmg + DFGdmg > enemy.health then
+					DrawText("QW + DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif ignite ~= nil and Qdmg + Wdmg + iDmg > enemy.health then
+					DrawText("QW + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+				elseif ignite ~= nil and DFGready and Qdmg + Wdmg + iDmg + DFGdmg > enemy.health then
 					DrawText("QW + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif Qdmg + Wdmg + Rdmg > enemy.health then
 					DrawText("QWR = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+				elseif DFGready and DFGdmg + Qdmg + Wdmg + Rdmg > enemy.health then
+					DrawText("QWR + DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif ignite ~= nil and Qdmg + Wdmg + Rdmg + iDmg > enemy.health then
 					DrawText("QWR + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+				elseif ignite ~= nil and DFGready and Qdmg + Wdmg + Rdmg + iDmg + DFGdmg > enemy.health then
+					DrawText("QWR + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+				else
+					DrawText("Not killable", 15, PosX, PosY, ARGB(255,255,204,0))
 				end 
 			end 
 		end 
@@ -1017,7 +1077,7 @@ end
 
 
 function OnProcessSpell(object, spell)
-  	if (spell.target == myHero and string.find(spell.name, "BasicAttack")) and Menu.misc.useEonAttack then
+  	if (spell.target == myHero and string.find(spell.name, "BasicAttack")) and Menu.misc.Esettings.useEonAttack then
    	 	CastSpell(_E)
   	end
 
@@ -1191,10 +1251,11 @@ function DrawMenu()
  Menu:addSubMenu("Combo", "combo")
  Menu.combo:addParam("comboWay", "Cast Combo", SCRIPT_PARAM_LIST, 1, {"QWR", "WQR", "RQW", "RWQ"})
  Menu.combo:addParam("combo", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+ Menu.combo:addParam("disableAA", "Disable AA in Combo", SCRIPT_PARAM_ONOFF, false)
+ Menu.combo:addParam("comboDFG", "Use DFG", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboW", "Use W", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboR", "Use R", SCRIPT_PARAM_ONOFF, true)
- Menu.combo:addParam("comboDFG", "Use DFG", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboRStun", "Only R if R stuns", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addSubMenu("R Usage", "RUsage")
  for i, enemy in ipairs(GetEnemyHeroes()) do
@@ -1275,10 +1336,11 @@ function DrawMenu()
 
  -- Misc
  Menu:addSubMenu("Misc", "misc")
- Menu.misc:addParam("procEW", "Use E and W in fountain", SCRIPT_PARAM_ONOFF, false)
- Menu.misc:addParam("procE", "Use E to get stacks", SCRIPT_PARAM_ONOFF, false)
- Menu.misc:addParam("useEonAttack", "Auto E when attacked", SCRIPT_PARAM_ONOFF, false)
- Menu.misc:addParam("info", "CAN NOT BE BOTH ON", SCRIPT_PARAM_INFO, "CAREFUL")
+ Menu.misc:addSubMenu("E Settings", "Esettings")
+ Menu.misc.Esettings:addParam("procEW", "Use E and W in fountain", SCRIPT_PARAM_ONOFF, false)
+ Menu.misc.Esettings:addParam("procE", "Use E to get stacks", SCRIPT_PARAM_ONOFF, false)
+ Menu.misc.Esettings:addParam("useEonAttack", "Auto E when attacked", SCRIPT_PARAM_ONOFF, false)
+ Menu.misc.Esettings:addParam("info", "CAN NOT BE BOTH ON", SCRIPT_PARAM_INFO, "CAREFUL")
 
 --[[ Temporary disabled
   -- Auto Level
@@ -1349,11 +1411,11 @@ end
 end
 
 function MenuCheck()
-	if Menu.misc.procE then
- 		Menu.misc.useEonAttack = false
+	if Menu.misc.Esettings.procE then
+ 		Menu.misc.Esettings.useEonAttack = false
  	end
- 	if Menu.misc.useEonAttack then
- 		Menu.misc.procE = false
+ 	if Menu.misc.Esettings.useEonAttack then
+ 		Menu.misc.Esettings.procE = false
  	end 
 end 
 
