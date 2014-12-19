@@ -4,6 +4,10 @@
 						 > 1.0
 						 		Release
 
+						 > 1.1
+						 		Few tweaks
+						 		Fixed R
+
 				Donate: Look link in thread
 				Bugs: Post in thread
 				Appreciation: Post comment on bol.b00st and in thread
@@ -13,18 +17,18 @@
 if myHero.charName ~= "Swain" then return end
 
 -- Download script
-local version = 1.0
+local version = 1.1
 local author = "Nickieboy"
-local SCRIPT_NAME = "NSwain"
+local SCRIPT_NAME = "Totally Swain"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
-local UPDATE_PATH = "/Nickieboy/BoL/master/NSwain.lua".."?rand="..math.random(1,10000)
+local UPDATE_PATH = "/Nickieboy/BoL/master/Totally Swain.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
-function AutoupdaterMsg(msg) print("<font color=\"#6699ff\"><b>NSwain:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
+function AutoupdaterMsg(msg) print("<font color=\"#6699ff\"><b>Totally Swain:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
 if AUTOUPDATE then
-	local ServerData = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/version/NSwain.version")
+	local ServerData = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/version/TotallySwain.version")
 	if ServerData then
 		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
 		if ServerVersion then
@@ -44,9 +48,7 @@ end
 -- Download Libraries
 local REQUIRED_LIBS = {
 	["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua",
-	["VPrediction"] = "https://raw.githubusercontent.com/Hellsing/BoL/master/common/VPrediction.lua",
-	["SourceLib"] = "https://raw.githubusercontent.com/Dienofail/BoL/master/common/SourceLib.lua",
-	["SOW"] = "https://raw.github.com/Hellsing/BoL/master/common/SOW.lua",
+	["VPrediction"] = "https://raw.githubusercontent.com/Ralphlol/BoLGit/master/VPrediction.lua",
 	["Spell Damage Library"] = "https://raw.githubusercontent.com/Nickieboy/BoL/master/lib/Spell_Damage_Library.lua"
 }
 
@@ -71,8 +73,8 @@ for DOWNLOAD_LIB_NAME, DOWNLOAD_LIB_URL in pairs(REQUIRED_LIBS) do
 end
 
 --- BoL Script Status Connector --- 
-local ScriptKey = "SFIFLJJEMIF" -- NSwain auth key
-local ScriptVersion = "1.0" -- Your .version file content
+local ScriptKey = "SFIFLJJEMIF" -- Totally Swain auth key
+local ScriptVersion = "1.1" -- Your .version file content
 
 -- Thanks to Bilbao for his socket help & encryption
 assert(load(Base64Decode("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"), nil, "bt", _ENV))() BolBoost( ScriptKey, ScriptVersion )
@@ -90,7 +92,6 @@ local Hready, Iready, Bready = false, false, false
 local Qtarget, Wtarget, Etarget = nil, nil, nil
 local ultActive = false
 local heal, ignite, barrier = nil
-local SOWloaded = false
 local SxOrbloaded = false
 local MMAloaded = false
 local SACloaded = false
@@ -104,7 +105,8 @@ function GetOrbTarget()
 
 	if SACloaded then
     	if _G.AutoCarry and _G.AutoCarry.Crosshair and _G.AutoCarry.Attack_Crosshair and _G.AutoCarry.Attack_Crosshair.target and _G.AutoCarry.Attack_Crosshair.target.type == myHero.type then 
-    		return _G.AutoCarry.Attack_Crosshair.target end
+    		return _G.AutoCarry.Attack_Crosshair.target 
+    	end
   	end
 
 	if MMAloaded then
@@ -115,48 +117,26 @@ function GetOrbTarget()
 		return SxOrb:GetTarget()
 		
 	end
-
-	if SOWloaded then
-		return SOWOrb:GetTarget()
-		
-	end 
-
-	if ValidTarget(ts.target) then
-		return ts.target
-	end 
-
-
+	return ts.target
 end 
 
 function OnLoad()
 
 	FindSummoners() 
 
-	DelayAction(CheckSACMMA, 1)
+	DelayAction(CheckOrbWalker, 1)
 
 	VP = VPrediction()
-
-	Q = Spell(_Q, Qspell.range, false)
-	
-	W = Spell(_W, Wspell.range, false)
-	W:SetSkillshot(VP, SKILLSHOT_CIRCULAR, Wspell.width, Wspell.delay, Wspell.speed, false)
-	W:SetAOE(true, Wspell.radius, 1)
-	
-	E = Spell(_E, Espell.range, false)
-	
-	R = Spell(_R, Rspell.range, false)
-
+	SxOrb = SxOrbWalk()
 
 	Menu()
 
+	if SACloaded or MMAloaded then
+		Menu.Orbwalker.General.Enabled = false
+	end 
 end
 
-
-
 function OnTick()
-	if not loaded then
-		CheckSxOrbOrSOW()
-	end 
 
 	ts:update()
 
@@ -173,21 +153,18 @@ function OnTick()
 	if Menu.farm.farm then
 		Farm() 
 	end
-
+	--[[
 	if VIP_USER then
 		if Menu.misc.skinChanger.skinChanger and skinChanged()  then
 			GenModelPacket("Swain", Menu.misc.skinChanger.skinChangerSlice)
 	        lastSkin = Menu.misc.skinChanger.skinChangerSlice
 		end 
  	end 
+	--]]
 
- 	if not Menu.combo.combo and not Menu.farm.farm and ultActive and CountEnemyHeroInRange(Rspell.range) < 3 then
+ 	if not Menu.combo.combo and not Menu.farm.farm and ultActive and CountEnemyHeroInRange(Rspell.range) < 1 then
  		CastSpell(_R)
  	end
-
- 	if CountEnemyHeroInRange(Rspell.range) >= 3 and Rready and not ultActive then
- 		CastSpell(_R)
- 	end 
 
  	Zhonyas()
  	DrinkPotions()
@@ -228,10 +205,6 @@ function OnDraw()
 		end
 	end 
 
-	if not loaded then
-		DrawText3D("Choose an orbwalker", myHero.x, myHero.y + 50, myHero.z, 50, 4294967295, true)
-	end
-
 end
 
 function Combo()
@@ -240,29 +213,21 @@ function Combo()
 
 	if Menu.combo.comboE then
 		if target ~= nil and Eready then
-			if VIP_USER and Menu.misc.pc.usePackets then
-				Packet("S_CAST", {spellId = _E, fromX = target.x, fromY = target.z, toX = target.x, toY = target.z}):send()
-			else 
-				E:Cast(target)
-			end 
+			CastSpell(_E, target)
 		end
 	end 
 
 	if Menu.combo.comboQ then
 		if target ~= nil and Qready then
-			if VIP_USER and Menu.misc.pc.usePackets then
-				Packet("S_CAST", {spellId = _Q, fromX = target.x, fromY = target.z, toX = target.x, toY = target.z}):send()
-			else 
-				Q:Cast(target)
-			end 
+			CastSpell(_Q, target)
 		end 
 	end 
 
 	if Menu.combo.comboW then
 		if target ~= nil and Wready then
-			local castPosition, hitChance, nTargets = W:GetPrediction(target)
-			if castPosition and hitChance >= 2 then
-				W:Cast(castPosition.x, castPosition.z)
+			local castPosition, hitchance, nTargets = VP:GetCircularAOECastPosition(target, Wspell.delay, Wspell.radius, Wspell.range, Wspell.speed, myHero)
+			if castPosition then
+				CastSpell(_W, castPosition.x, castPosition.z)
 			end
 		end  
 	end 
@@ -285,19 +250,22 @@ function Harass()
 
 	if Menu.harass.harassE then
 		if target ~= nil and Eready then
-			E:Cast(target)
+			CastSpell(_E, target)
 		end 
 	end 
 
 	if Menu.harass.harassQ then
 		if target ~= nil and Qready then
-			Q:Cast(target)
+			CastSpell(_Q, target)
 		end 
 	end 
 
 	if Menu.harass.harassW then
 		if target ~= nil and Wready then
-			W:Cast(target.x, target.z)
+			local castPosition, hitchance, nTargets = VP:GetCircularAOECastPosition(target, Wspell.delay, Wspell.radius, Wspell.range, Wspell.speed, myHero)
+			if castPosition then
+				CastSpell(_W, castPosition.x, castPosition.z)
+			end
 		end 
 	end 
 
@@ -306,27 +274,19 @@ end
 
 function Farm() 
 	EnemyMinions:update()
-	if #EnemyMinions.objects >= 2 then
 
-		if Menu.farm.farmW and Wready then
-			farmMinions = SelectUnits(EnemyMinions.objects, function(t) return ValidTarget(t) end)
-			local castPosition, bestHit = GetBestCircularFarmPosition(Wspell.range, Wspell.radius, farmMinions)
-
+	if Menu.farm.farmW and Wready then
+		for i, minion in pairs(EnemyMinions.objects) do
+			local castPosition, hitchance, nTargets = VP:GetCircularAOECastPosition(minion, Wspell.delay, Wspell.radius, Wspell.range, Wspell.speed, myHero)
 			if castPosition then
-				W:Cast(castPosition.x, castPosition.z)
+				CastSpell(_W, castPosition.x, castPosition.z)
 			end 
 		end 
-
-		if Menu.farm.farmR then
-			if GetEnemyMinions() >= 3 then
-				if Rready and not ultActive then
-					CastSpell(_R)
-				end 
-			end 
-		end 
-
-
 	end 
+
+	if Menu.farm.farmR and Rready and not ultActive and GetEnemyMinions() >= 1 then
+		CastSpell(_R)
+	end   
 end
 
 function GetEnemyMinions()
@@ -363,32 +323,34 @@ function CalculateDamageWithoutBuff(t)
 	return Qdmg, Wdmg, Edmg
 end 
 
-function CalculateDamageWithBuff(t)
-	local Qdmg, Wdmg, Edmg = CalculateDamageWithoutBuff(t)
+function CalculateDamageWithBuff(targ)
+	local Qdmg, Wdmg, Edmg = CalculateDamageWithoutBuff(targ)
 
 	if GetSpellData(_Q).level == 1 then
-		Qdmg = ((Qdmg / 100) * 8) + Qdmg
+		Qdmg = Qdmg * 1.08
 	elseif  GetSpellData(_Q).level == 2 then
-		Qdmg = ((Qdmg / 100) * 11) + Qdmg
+		Qdmg = Qdmg * 1.11
 	elseif GetSpellData(_Q).level == 3 then
-		Qdmg = ((Qdmg / 100) * 14) + Qdmg
+		Qdmg = Qdmg * 1.14
 	elseif GetSpellData(_Q).level == 4 then
-		Qdmg = ((Qdmg / 100) * 17) + Qdmg
+		Qdmg = Qdmg * 1.17
 	elseif GetSpellData(_Q).level == 5 then
-		Qdmg = ((Qdmg / 100) * 20) + Qdmg
+		Qdmg = Qdmg *  1.20
 	end 
 
 	if GetSpellData(_W).level == 1 then
-		Wdmg = ((Wdmg / 100) * 8) + Wdmg
+		Wdmg = Wdmg * 1.08
 	elseif  GetSpellData(_Q).level == 2 then
-		Wdmg = ((Qdmg / 100) * 11) + Wdmg
+		Wdmg = Wdmg * 1.11
 	elseif GetSpellData(_Q).level == 3 then
-		Wdmg = ((Qdmg / 100) * 14) + Wdmg
+		Wdmg = Wdmg * 1.14
 	elseif GetSpellData(_Q).level == 4 then
-		Wdmg = ((Qdmg / 100) * 17) + Wdmg
+		Wdmg = Wdmg * 1.17
 	elseif GetSpellData(_Q).level == 5 then
-		Wdmg = ((Qdmg / 100) * 20) + Wdmg
+		Wdmg = Wdmg * 1.20
 	end 
+
+	return Qdmg, Wdmg, Edmg
 end 
 
 function SpellChecks()
@@ -430,6 +392,7 @@ function FindSummoners()
     end
 end 
 
+--[[
 function skinChanged()
         return Menu.misc.skinChanger.skinChangerSlice ~= lastSkin
 end
@@ -458,7 +421,7 @@ function GenModelPacket(champ, skinId)
         p:Hide()
         RecvPacket(p)
 end
-
+--]]
 
 function OnProcessSpell(unit, spell)
     if unit.isMe then
@@ -501,11 +464,11 @@ function UseHeal()
 end 
 
 function UseIgnite()
-	local igniteDMG = (50 + (20 * myHero.level))
+	local iDmg = (50 + (20 * myHero.level))
 	for i, enemy in ipairs(GetEnemyHeroes()) do
-		if GetDistance(enemy, myHero) < 600 and ValidTarget(enemy, 600) then
+		if GetDistance(enemy, myHero) < 600 and ValidTarget(enemy, 600) and Menu.misc.autoignite[enemy.charName] then
 			if Iready then
-				if enemy.health < igniteDMG then
+				if enemy.health < iDmg then
 					CastSpell(ignite, enemy)
 				end 
 			end 
@@ -539,7 +502,7 @@ end
 
 function Menu()
 
-	Menu = scriptConfig("NSwain by Nickieboy", "NSwain")
+	Menu = scriptConfig("Totally Swain by Nickieboy", "TotallySwain.cfg")
 
 	-- Combo
 	Menu:addSubMenu("Combo", "combo")
@@ -595,8 +558,11 @@ function Menu()
 
 	if ignite ~= nil then
 	Menu.misc:addSubMenu("Auto Ignite", "autoignite")
-	Menu.misc.autoignite:addParam("useIgnite", "Use Summoner Ignite", SCRIPT_PARAM_ONOFF, false)
-	end 
+	Menu.misc.autoignite:addParam("useIgnite", "Use Summoner Ignite", SCRIPT_PARAM_ONOFF, true)
+ 	for i, enemy in ipairs(GetEnemyHeroes()) do
+		Menu.misc.autoignite:addParam(enemy.charName, "Use Ignite On " .. enemy.charName, SCRIPT_PARAM_ONOFF, true)
+ 	end 
+end 
 
 	if barrier ~= nil then
 	Menu.misc:addSubMenu("Auto Barrier", "autobarrier")
@@ -608,39 +574,17 @@ function Menu()
  	Menu.misc.zhonyas:addParam("zhonyas", "Auto Zhonyas", SCRIPT_PARAM_ONOFF, true)
  	Menu.misc.zhonyas:addParam("zhonyasunder", "Use Zhonyas under % health", SCRIPT_PARAM_SLICE, 0.20, 0, 1 ,2)
 
-	if VIP_USER then
-		Menu.misc:addSubMenu("Skin Changer", "skinChanger")
-		Menu.misc.skinChanger:addParam("skinChanger", "Change Skin (VIP)", SCRIPT_PARAM_ONOFF, false)
-		Menu.misc.skinChanger:addParam("skinChangerSlice", "Change Skin", SCRIPT_PARAM_SLICE, 1, 1, 4, 0)
-	end
-
-	Menu.misc:addSubMenu("Gapcloser", "gc")
-	AntiGapcloser(Menu.misc.gc, castStunGapClosing)
-	Menu.misc:addSubMenu("Interrupter", "ai")
-	Interrupter(Menu.misc.ai, castStunInterruptable)
-
-	Menu.misc:addSubMenu("Packet Casting", "pc")
-	Menu.misc.pc:addParam("usePackets", "Use Packets", SCRIPT_PARAM_ONOFF, false)
-
 	--Orbwalker
 	Menu:addSubMenu("OrbWalker", "orbwalker")
-	Menu.orbwalker:addParam("sxorbwalk", "Use SxOrbWalk", SCRIPT_PARAM_ONOFF, false)
-	Menu.orbwalker:addParam("sow", "Use SOW", SCRIPT_PARAM_ONOFF, false)
+	SxOrb:LoadToMenu(Menu.orbwalker)
 
-end 
+	 -- Always show
+	 Menu.combo:permaShow("combo")
+	 Menu.harass:permaShow("harass")
+	 --Menu.killsteal:permaShow("killsteal")
+	 Menu.farm:permaShow("farm")
+	 Menu.drawings:permaShow("draw")
 
--- Gapcloser (SourceLib TriggerCallbacks)
-function castStunGapClosing(unit, spell)
-	if Wready and GetDistance(unit) <= Wspell.range then
-		W:Cast(unit.x, unit.z)
-	end
-end 
-
---Interuptable (SourceLib TriggerCallbacks)
-function castStunInterruptable(unit, spell) 
-	if Wready and GetDistance(unit) <= Wspell.range then
-		W:Cast(unit.x, unit.z)
-	end
 end 
 
 function DrinkPotions()
@@ -654,7 +598,7 @@ function DrinkPotions()
 end 
 
 function DrinkHealth(h, mH) 
-	if not HasBuff(myHero, "RegenerationPotion") then
+	if not HaveBuff(myHero, "RegenerationPotion") then
 		if GetInventoryHaveItem(2003) then
 			if (h / mH <= Menu.misc.autopotions.health) then
 				CastItem(2003)
@@ -664,7 +608,7 @@ function DrinkHealth(h, mH)
 end 
 
 function DrinkMana(m, mM) 
-	if not HasBuff(myHero, "FlaskOfCrystalWater") then
+	if not HaveBuff(myHero, "FlaskOfCrystalWater") then
 		if GetInventoryHaveItem(2004) then
 			if (m / mM <= Menu.misc.autopotions.mana) then
 				CastItem(2004)
@@ -673,42 +617,31 @@ function DrinkMana(m, mM)
 	end 
 end 
 
-function CheckSACMMA()
+function HaveBuff(unit,buffname)
+	local result = false
+	for i = 1, unit.buffCount, 1 do 
+		if unit:getBuff(i) ~= nil and unit:getBuff(i).name == buffname and unit:getBuff(i).valid and BuffIsValid(unit:getBuff(i)) then 
+			result = true 
+			break 
+		end 
+	end 
+	return result
+end 
+
+function CheckOrbWalker()
 	if _G.AutoCarry then
-  
 	    if _G.AutoCarry.Helper then
 	    	SACloaded = true
-	    	loaded = true
-	     	print("<font color=\"#20b2aa\">NSwain:</font> <font color=\"#FF0000\"> Loaded SAC: Reborn</font>")
+	     	print("<font color=\"#20b2aa\">Totally Swain:</font> <font color=\"#FF0000\"> Loaded SAC: Reborn</font>")
 	    end
-    
   	elseif _G.Reborn_Loaded then
     	DelayAction(CheckSACMMA, 1) 
 	elseif _G.MMA_Loaded then
 		MMAloaded = true
-		loaded = true
-		print("<font color=\"#20b2aa\">NSwain:</font> <font color=\"#FF0000\"> Loaded MMA</font>")
-	end 
-end 
-
-
-function CheckSxOrbOrSOW()
-	if Menu.orbwalker.sxorbwalk then
-		SxOrb = SxOrbWalk(VP)
-		SxOrb:LoadToMenu(Menu.orbwalker)
+		print("<font color=\"#20b2aa\">Totally Swain:</font> <font color=\"#FF0000\"> Loaded MMA</font>")
+	elseif FileExist(LIB_PATH .. "SxOrbWalk.lua") then
 		SxOrbloaded = true
-		loaded = true
-		print("<font color=\"#20b2aa\">NSwain:</font> <font color=\"#FF0000\"> Loaded SxOrbWalk</font>")
-		print("<font color=\"#20b2aa\">NSwain:</font> <font color=\"#FF0000\"> Press F9 twice to change Orbwalker</font>")
-
-	end 
-
-	if Menu.orbwalker.sow then
-		SOWOrb = SOW(VP)
-		SOWOrb:LoadToMenu(Menu.orbwalker)
-		SOWloaded = true
-		loaded = true
-		print("<font color=\"#20b2aa\">NSwain:</font> <font color=\"#FF0000\">  Loaded SOW</font>")
-		print("<font color=\"#20b2aa\">NSwain:</font> <font color=\"#FF0000\">  Press F9 twice to change Orbwalker</font>")
+		print("<font color=\"#20b2aa\">Totally Swain:</font> <font color=\"#FF0000\"> Loaded SxOrbWalk</font>")
 	end 
 end 
+
