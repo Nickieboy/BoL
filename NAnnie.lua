@@ -113,6 +113,12 @@
 				The Kill Text should now have DFG
 				Few performance tweaks (Script should max give a 20fps drop)
 
+			2.25
+				R in Combo mode now:
+					Normal
+					Stun
+					Killable
+
 
 
 		Script Coded by Nickieboy.
@@ -127,7 +133,7 @@ if myHero.charName ~= "Annie" then return end
 
 --- BoL Script Status Connector --- 
 local ScriptKey = "XKNKQKPMJPN" -- NAnnie auth key
-local ScriptVersion = "2.20" -- Your .version file content
+local ScriptVersion = "2.25" -- Your .version file content
 
 -- Thanks to Bilbao for his socket help & encryption
 assert(load(Base64Decode("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"), nil, "bt", _ENV))() BolBoost( ScriptKey, ScriptVersion )
@@ -135,7 +141,7 @@ assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIKAAAABgBAAEFAAA
 
 
 --[[		Auto Update		]]
-local version = "2.20"
+local version = "2.25"
 local author = "Nickieboy"
 local SCRIPT_NAME = "NAnnie"
 local AUTOUPDATE = true
@@ -390,7 +396,7 @@ function AutoHarass()
  			CastQ(target)
  		end 
 	end 
-
+	--[[
 	if VIP_USER then
 		if Menu.harass.autoQW and passiveStacks >= 3 and not Menu.combo.combo and ManaManager() then 
 	 		if target ~= nil and ValidTarget(target, 575) then
@@ -399,12 +405,13 @@ function AutoHarass()
 	 		end 
 	 	end 
 	end 
+	--]]
 end 
 
 function Combo()
-	if target ~= nil and ValidTarget(target, 600) then
+	if target ~= nil and ValidTarget(target, 590) then
 
-		if Menu.combo.comboRStun and Rready then	
+		if Menu.combo.RUsage.howR == 3 and Rready then	
 			ComboRStun()
 		else
 			if Menu.combo.comboWay == 1 then
@@ -437,9 +444,13 @@ function ComboQ()
 		CastW(target)
 	end 
 
-	if Menu.combo.comboR and Menu.combo.RUsage[target.charName] then
+	if Menu.combo.comboR and Menu.combo.RUsage[target.charName] and Menu.combo.RUsage.howR == 1 then
 		CastR(target)  
-	end  
+	elseif Menu.combo.comboR and Menu.combo.RUsage[target.charName] and Menu.combo.RUsage.howR == 2 then
+		if target.health < getDmg("R", target, myHero, 1) then
+			CastR(target)  
+		end 
+	end 
 end
 
 function ComboW()
@@ -460,9 +471,13 @@ function ComboW()
 
 	
 
-	if Menu.combo.comboR and Menu.combo.RUsage[target.charName] then
+	if Menu.combo.comboR and Menu.combo.RUsage[target.charName] and Menu.combo.RUsage.howR == 1 then
 		CastR(target)  
-	end
+	elseif Menu.combo.comboR and Menu.combo.RUsage[target.charName] and Menu.combo.RUsage.howR == 2 then
+		if target.health < getDmg("R", target, myHero, 1) then
+			CastR(target)  
+		end 
+	end 
 end 
 
 function ComboRQ()
@@ -473,9 +488,13 @@ function ComboRQ()
 		end 
 	end 
 
-	if Menu.combo.comboR and Menu.combo.RUsage[target.charName] then
+	if Menu.combo.comboR and Menu.combo.RUsage[target.charName] and Menu.combo.RUsage.howR == 1 then
 		CastR(target)  
-	end
+	elseif Menu.combo.comboR and Menu.combo.RUsage[target.charName] and Menu.combo.RUsage.howR == 2 then
+		if target.health < getDmg("R", target, myHero, 1) then
+			CastR(target)  
+		end 
+	end 
 	
 	if Menu.combo.comboQ then
 		CastQ(target)
@@ -494,9 +513,13 @@ function ComboRW()
 		end 
 	end 
 
-	if Menu.combo.comboR and Menu.combo.RUsage[target.charName] then
+	if Menu.combo.comboR and Menu.combo.RUsage[target.charName] and Menu.combo.RUsage.howR == 1 then
 		CastR(target)  
-	end
+	elseif Menu.combo.comboR and Menu.combo.RUsage[target.charName] and Menu.combo.RUsage.howR == 2 then
+		if target.health < getDmg("R", target, myHero, 1) then
+			CastR(target)  
+		end 
+	end 
 	
 	if Menu.combo.comboW then
 		CastW(target)
@@ -520,6 +543,7 @@ function ComboRStun()
 			CastSpell(DFGslot, target)
 		end 
 	end
+
 	if Menu.combo.comboWay == 1 then
 		if Menu.combo.comboQ then
 			CastQ(target)
@@ -576,14 +600,7 @@ function AutoUlt()
 end
 
 function FlashSettings()
-
-	local menuFlash = Menu.flash.useFlash
-	local allies = Menu.flash.allies
-	local alliesrange = Menu.flash.alliesrange
-	local enemies = Menu.flash.enemies
-	local enemiesrange = Menu.flash.enemiesrange
-
-	if menuFlash and CountEnemyHeroInRange(enemiesrange) >= enemies and CountAllyHeroInRange(alliesrange) >= allies and Fready then
+	if Menu.flash.useFlash and CountEnemyHeroInRange(Menu.flash.enemiesrange) >= Menu.flash.enemies and CountAllyHeroInRange(Menu.flash.alliesrange) >= Menu.flash.allies and Fready then
 		return true
 	end
 	return false
@@ -940,43 +957,46 @@ function DrawKillable()
 				local DFGSlot = GetInventorySlotItem(3128)
 				local DFGready = (DFGSlot ~= nil and myHero:CanUseSpell(DFGSlot) == READY)
 				
-				DFGdmg = ((Menu.combo.comboDFG or Menu.autokill.spells.autokillDFG) and DFGready and getDmg("DFG", enemy, myHero))
+				DFGdmg = ((Menu.combo.comboDFG or Menu.autokill.spells.autokillDFG) and DFGready and getDmg("DFG", enemy, myHero) or 0)
 
 				iDmg = ((ignite ~= nil and Iready and getDmg("IGNITE", enemy, myHero)) or 0)
 
 				local Qdmg, Wdmg, Rdmg = CalcSpellDamage(enemy)
+				Qdmg = ((Qready and Qdmg) or 0)
+				Wdmg = ((Wready and Wdmg) or 0)
+				Rdmg = ((Rready and Rdmg) or 0)
 
 				local barPos = WorldToScreen(D3DXVECTOR3(enemy.x, enemy.y, enemy.z))
                 local PosX = barPos.x - 35
                 local PosY = barPos.y - 50
 
-                if DFGready and DFGdmg > enemy.health then
+                if DFGdmg > enemy.health then
                 	DrawText("DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-                elseif ignite ~= nil and Iready and iDmg > enemy.health then
+                elseif iDmg > enemy.health then
                 	DrawText("Ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif Qdmg > enemy.health then
 					DrawText("Q = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif DFGready and Qdmg + DFGdmg > enemy.health then
+				elseif Qdmg + DFGdmg > enemy.health then
 					DrawText("Q + DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif ignite ~= nil and Iready and Qdmg + iDmg > enemy.health then
+				elseif Qdmg + iDmg > enemy.health then
 					DrawText("Q + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif ignite ~= nil and Iready and DFGready and Qdmg + iDmg + DFGdmg > enemy.health then
+				elseif Qdmg + iDmg + DFGdmg > enemy.health then
 					DrawText("Q + ignite + DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif Qdmg + Wdmg > enemy.health then
 					DrawText("QW = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif DFGready and Qdmg + Wdmg + DFGdmg > enemy.health then
+				elseif Qdmg + Wdmg + DFGdmg > enemy.health then
 					DrawText("QW + DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif ignite ~= nil and Iready and Qdmg + Wdmg + iDmg > enemy.health then
+				elseif Qdmg + Wdmg + iDmg > enemy.health then
 					DrawText("QW + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif ignite ~= nil and Iready and DFGready and Qdmg + Wdmg + iDmg + DFGdmg > enemy.health then
+				elseif Qdmg + Wdmg + iDmg + DFGdmg > enemy.health then
 					DrawText("QW + DFG + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				elseif Qdmg + Wdmg + Rdmg > enemy.health then
 					DrawText("QWR = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif DFGready and DFGdmg + Qdmg + Wdmg + Rdmg > enemy.health then
+				elseif DFGdmg + Qdmg + Wdmg + Rdmg > enemy.health then
 					DrawText("QWR + DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif ignite ~= nil and Iready and Qdmg + Wdmg + Rdmg + iDmg > enemy.health then
+				elseif Qdmg + Wdmg + Rdmg + iDmg > enemy.health then
 					DrawText("QWR + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif ignite ~= nil and Iready and DFGready and Qdmg + Wdmg + Rdmg + iDmg + DFGdmg > enemy.health then
+				elseif Qdmg + Wdmg + Rdmg + iDmg + DFGdmg > enemy.health then
 					DrawText("QWR + ignite + DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
 				else
 					DrawText("Not killable", 15, PosX, PosY, ARGB(255,255,204,0))
@@ -1210,11 +1230,12 @@ function DrawMenu()
  Menu.combo:addParam("comboQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboW", "Use W", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboR", "Use R", SCRIPT_PARAM_ONOFF, true)
- Menu.combo:addParam("comboRStun", "Only R if R stuns", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addSubMenu("R Usage", "RUsage")
+ Menu.combo.RUsage:addParam("howR", "Use R", SCRIPT_PARAM_LIST, 1, {"Normal", "Killable", "Stun"})
  for i, enemy in ipairs(GetEnemyHeroes()) do
 	Menu.combo.RUsage:addParam(enemy.charName, "Use R on " .. enemy.charName, SCRIPT_PARAM_ONOFF, true)
  end 
+
  
  -- Flash Settings --[[ IN PROGRESS ]]
  if flash ~= nil then
@@ -1263,9 +1284,9 @@ Menu.autokill.optional:addParam("enemiesnearby", "Max enemies in that range", SC
  Menu.harass:addParam("harassQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
  Menu.harass:addParam("harassW", "Use W", SCRIPT_PARAM_ONOFF, true)
  Menu.harass:addParam("autoQ", "Auto Q when stuns enemy", SCRIPT_PARAM_ONOFF, false)
- if VIP_USER then
- 	Menu.harass:addParam("autoQW", "Auto Q/W when W will stun enemy", SCRIPT_PARAM_ONOFF, false)
- end 
+ --if VIP_USER then
+ --	Menu.harass:addParam("autoQW", "Auto Q/W when W will stun enemy", SCRIPT_PARAM_ONOFF, false)
+ --end 
  Menu.harass:addParam("harassMana", "Mana Manager %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
 
  -- Farming
