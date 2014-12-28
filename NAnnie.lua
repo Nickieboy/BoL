@@ -119,6 +119,9 @@
 					Stun
 					Killable
 
+			2.27
+				Performance tweaks
+
 
 
 		Script Coded by Nickieboy.
@@ -133,7 +136,7 @@ if myHero.charName ~= "Annie" then return end
 
 --- BoL Script Status Connector --- 
 local ScriptKey = "XKNKQKPMJPN" -- NAnnie auth key
-local ScriptVersion = "2.25" -- Your .version file content
+local ScriptVersion = "2.27" -- Your .version file content
 
 -- Thanks to Bilbao for his socket help & encryption
 assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIKAAAABgBAAEFAAAAdQAABBkBAAGUAAAAKQACBBkBAAGVAAAAKQICBHwCAAAQAAAAEBgAAAGNsYXNzAAQJAAAAQm9sQm9vc3QABAcAAABfX2luaXQABAkAAABTZW5kU3luYwACAAAAAgAAAAoAAAADAAs/AAAAxgBAAAZBQABAAYAAHYEAAViAQAIXQAGABkFAAEABAAEdgQABWIBAAhcAAIADQQAAAwGAAEHBAADdQIABCoAAggpAgILGwEEAAYEBAN2AAAEKwACDxgBAAAeBQQAHAUICHQGAAN2AAAAKwACExoBCAAbBQgBGAUMAR0HDAoGBAwBdgQABhgFDAIdBQwPBwQMAnYEAAcYBQwDHQcMDAQIEAN2BAAEGAkMAB0JDBEFCBAAdggABRgJDAEdCwwSBggQAXYIAAVZBggIdAQAB3YAAAArAgITMwEQAQwGAAN1AgAHGAEUAJQEAAN1AAAHGQEUAJUEAAN1AAAEfAIAAFgAAAAQHAAAAYXNzZXJ0AAQFAAAAdHlwZQAEBwAAAHN0cmluZwAEHwAAAEJvTGIwMHN0OiBXcm9uZyBhcmd1bWVudCB0eXBlLgAECAAAAHZlcnNpb24ABAUAAABya2V5AAQHAAAAc29ja2V0AAQIAAAAcmVxdWlyZQAEBAAAAHRjcAAEBQAAAGh3aWQABA0AAABCYXNlNjRFbmNvZGUABAkAAAB0b3N0cmluZwAEAwAAAG9zAAQHAAAAZ2V0ZW52AAQVAAAAUFJPQ0VTU09SX0lERU5USUZJRVIABAkAAABVU0VSTkFNRQAEDQAAAENPTVBVVEVSTkFNRQAEEAAAAFBST0NFU1NPUl9MRVZFTAAEEwAAAFBST0NFU1NPUl9SRVZJU0lPTgAECQAAAFNlbmRTeW5jAAQUAAAAQWRkQnVnc3BsYXRDYWxsYmFjawAEEgAAAEFkZFVubG9hZENhbGxiYWNrAAIAAAAJAAAACQAAAAAAAwUAAAAFAAAADABAAIMAAAAdQIABHwCAAAEAAAAECQAAAFNlbmRTeW5jAAAAAAABAAAAAQAQAAAAQG9iZnVzY2F0ZWQubHVhAAUAAAAJAAAACQAAAAkAAAAJAAAACQAAAAAAAAABAAAABQAAAHNlbGYACgAAAAoAAAAAAAMFAAAABQAAAAwAQACDAAAAHUCAAR8AgAABAAAABAkAAABTZW5kU3luYwAAAAAAAQAAAAEAEAAAAEBvYmZ1c2NhdGVkLmx1YQAFAAAACgAAAAoAAAAKAAAACgAAAAoAAAAAAAAAAQAAAAUAAABzZWxmAAEAAAAAABAAAABAb2JmdXNjYXRlZC5sdWEAPwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAQAAAAEAAAABAAAAAQAAAAEAAAABAAAAAUAAAAFAAAABQAAAAUAAAAFAAAABQAAAAYAAAAGAAAABgAAAAYAAAAHAAAABwAAAAcAAAAHAAAACAAAAAgAAAAIAAAACAAAAAgAAAAIAAAACAAAAAgAAAAIAAAABQAAAAUAAAAIAAAACAAAAAgAAAAIAAAACQAAAAkAAAAJAAAACgAAAAoAAAAKAAAACgAAAAMAAAAFAAAAc2VsZgAAAAAAPwAAAAIAAABhAAAAAAA/AAAAAgAAAGIAAAAAAD8AAAABAAAABQAAAF9FTlYACwAAABIAAAACAA8iAAAAhwBAAIxAQAEBgQAAQcEAAJ1AAAJbAAAAF0AAgApAQYIXAACACoBBgocAQACMwEEBAQECAEdBQgCBgQIAxwFBAAGCAgBGwkIARwLDBIGCAgDHQkMAAYMCAEeDQwCBwwMAFoEDAp1AgAGHAEAAjABEAQFBBACdAIEBRwFAAEyBxAJdQQABHwCAABMAAAAEBAAAAHRjcAAECAAAAGNvbm5lY3QABA0AAABib2wuYjAwc3QuZXUAAwAAAAAAAFRABAcAAAByZXBvcnQABAIAAAAwAAQCAAAAMQAEBQAAAHNlbmQABA0AAABHRVQgL3VwZGF0ZS0ABAUAAABya2V5AAQCAAAALQAEBwAAAG15SGVybwAECQAAAGNoYXJOYW1lAAQIAAAAdmVyc2lvbgAEBQAAAGh3aWQABCIAAAAgSFRUUC8xLjANCkhvc3Q6IGJvbC5iMDBzdC5ldQ0KDQoABAgAAAByZWNlaXZlAAQDAAAAKmEABAYAAABjbG9zZQAAAAAAAQAAAAAAEAAAAEBvYmZ1c2NhdGVkLmx1YQAiAAAACwAAAAsAAAALAAAACwAAAAsAAAALAAAACwAAAAwAAAAMAAAADAAAAA0AAAANAAAADQAAAA0AAAAOAAAADwAAABAAAAAQAAAAEAAAABEAAAARAAAAEQAAABIAAAASAAAAEgAAAA0AAAASAAAAEgAAABIAAAASAAAAEgAAABIAAAASAAAAEgAAAAUAAAAFAAAAc2VsZgAAAAAAIgAAAAIAAABhAAAAAAAiAAAAAgAAAGIAHgAAACIAAAACAAAAYwAeAAAAIgAAAAIAAABkAB4AAAAiAAAAAQAAAAUAAABfRU5WAAEAAAABABAAAABAb2JmdXNjYXRlZC5sdWEACgAAAAEAAAABAAAAAQAAAAIAAAAKAAAAAgAAAAsAAAASAAAACwAAABIAAAAAAAAAAQAAAAUAAABfRU5WAA=="), nil, "bt", _ENV))() BolBoost( ScriptKey, ScriptVersion )
@@ -141,7 +144,7 @@ assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIKAAAABgBAAEFAAA
 
 
 --[[		Auto Update		]]
-local version = "2.25"
+local version = "2.27"
 local author = "Nickieboy"
 local SCRIPT_NAME = "NAnnie"
 local AUTOUPDATE = true
@@ -213,6 +216,8 @@ local SxOrbLoaded, SACLoaded, MMALoaded = false, false, false
 local enemyJunglers = {}
 local allyJunglers = {}
 local AAdisabled = false
+local TextList = {"DFG = kill", "Ignite = kill", "Q = kill", "Q + DFG = kill", "Q + ignite = kill", "Q + ignite + DFG = kill", "QW = kill", "QW + DFG = kill", "QW + ignite = kill", "QW + ignite + DFG = kill", "QWR = kill", "QWR + DFG = kill", "QWR + ignite = kill", "QWR + ignite + DFG = kill", "Not Killable"}
+local KillText = {}
 
 --Perform on load
 function OnLoad()
@@ -324,7 +329,7 @@ function OnTick()
 		end
 	end 
 
-	if heal ~= nil and Menu.misc.autoheal.useHeal then
+	if heal ~= nil and Menu.misc.autoheal.useHeal and not InFountain() then
 		UseHeal()
 	end 
 
@@ -336,6 +341,9 @@ function OnTick()
 	end 
 
 	MenuCheck()
+
+
+	DrawKillable()
  
 
 end
@@ -351,7 +359,15 @@ function OnDraw()
 	 	end 
 
 	 	if Menu.drawings.drawKillable then
-	 		DrawKillable()
+	 		for i = 1, heroManager.iCount do
+	 			local enemy = heroManager:getHero(i)
+	 			if ValidTarget(enemy) then
+	 				local barPos = WorldToScreen(D3DXVECTOR3(enemy.x, enemy.y, enemy.z))
+					local PosX = barPos.x - 35
+					local PosY = barPos.y - 50  
+					DrawText(TextList[KillText[i]], 15, PosX, PosY, ARGB(255,255,204,0))
+				end 
+			end 
 	 	end 
 	 	---[[
 	 	if Menu.drawings["drawDamage"] then 
@@ -371,7 +387,7 @@ function GetOrbTarget()
 	ts:update()
 	if _G.MMA_Target and _G.MMA_Target.type == myHero.type then return _G.MMA_Target end
 	if _G.AutoCarry and _G.AutoCarry.Crosshair and _G.AutoCarry.Attack_Crosshair and _G.AutoCarry.Attack_Crosshair.target and _G.AutoCarry.Attack_Crosshair.target.type == myHero.type then return _G.AutoCarry.Attack_Crosshair.target end
-	if FileExist(LIB_PATH .. "SxOrbWalk.lua") then return OrbWalk:GetTarget() end 
+	if SxOrbLoaded then return OrbWalk:GetTarget() end 
 	return ts.target
 end 
 
@@ -824,9 +840,6 @@ function KillStealPrecise()
 	local Qmana = myHero:GetSpellData(_Q).mana
 	local Wmana = myHero:GetSpellData(_W).mana
 	local Rmana = myHero:GetSpellData(_R).mana
-	local QDFGdmg = 0
-	local WDFGdmg = 0
-	local RDFGdmg = 0
 
 	optionalRange = ((Menu.autokill.optional.useOptional and CountEnemyHeroInRange(Menu.autokill.optional.range) <= Menu.autokill.optional.enemiesnearby and Menu.autokill.optional.range) or 575)
 
@@ -837,19 +850,20 @@ function KillStealPrecise()
 
 			Qdmg = ((useQ and Qready and Qdmg) or 0)
 			Wdmg = ((useW and Wready and Wdmg) or 0)
-			Rdmg = ((useR and Rready and Rdmg) or 0)
+			Rdmg = ((useR and Rready and not HaveBuff(myHero, "infernalguardiantimer") and Rdmg) or 0)
 			iDmg = ((useIgnite and Iready and getDmg("IGNITE", enemy, myHero)) or 0)
 			DFGdmg = ((useDFG and DFGready and getDmg("DFG", enemy, myHero)) or 0)
+
+			local QDFGdmg = 0
+			local WDFGdmg = 0
+			local RDFGdmg = 0
 
 			if DFGdmg > 0 then
 				QDFGdmg = Qdmg * 1.2
 				WDFGdmg = Wdmg * 1.2
 				RDFGdmg = Rdmg * 1.2
-			else
-				QDFGdmg = 0
-				WDFGdmg = 0
-				RDFGdmg = 0 
 			end 
+
 
 			if DFGdmg > enemy.health then
 				CastSpell(DFGSlot, enemy)
@@ -931,7 +945,7 @@ function ReturnBestUltTarget(amountOfTargets, flashTrue)
 
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		if GetDistance(enemy, myHero) <= range then
-			local count = 0
+			local count = 1
 			for i, Tenemy in ipairs(GetEnemyHeroes()) do
 				if enemy ~= Tenemy then
 					if GetDistance(Tenemy, enemy) < 150 then
@@ -957,49 +971,53 @@ function DrawKillable()
 				local DFGSlot = GetInventorySlotItem(3128)
 				local DFGready = (DFGSlot ~= nil and myHero:CanUseSpell(DFGSlot) == READY)
 				
-				DFGdmg = ((Menu.combo.comboDFG or Menu.autokill.spells.autokillDFG) and DFGready and getDmg("DFG", enemy, myHero) or 0)
+				DFGdmg = (((Menu.combo.comboDFG or Menu.autokill.spells.autokillDFG) and DFGready and getDmg("DFG", enemy, myHero)) or 0)
 
 				iDmg = ((ignite ~= nil and Iready and getDmg("IGNITE", enemy, myHero)) or 0)
 
 				local Qdmg, Wdmg, Rdmg = CalcSpellDamage(enemy)
 				Qdmg = ((Qready and Qdmg) or 0)
 				Wdmg = ((Wready and Wdmg) or 0)
-				Rdmg = ((Rready and Rdmg) or 0)
+				Rdmg = ((Rready and not HaveBuff(myHero, "infernalguardiantimer") and Rdmg) or 0)
 
-				local barPos = WorldToScreen(D3DXVECTOR3(enemy.x, enemy.y, enemy.z))
-                local PosX = barPos.x - 35
-                local PosY = barPos.y - 50
+				local QDFGdmg, WDFGdmg, RDFGdmg = 0, 0, 0
 
+				if DFGdmg > 0 then
+					QDFGdmg = Qdmg * 1.2
+					WDFGdmg = Wdmg * 1.2
+					RDFGdmg = Rdmg * 1.2
+				end
+      
                 if DFGdmg > enemy.health then
-                	DrawText("DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+                	KillText[i] = 1
                 elseif iDmg > enemy.health then
-                	DrawText("Ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+                	KillText[i] = 2
 				elseif Qdmg > enemy.health then
-					DrawText("Q = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif Qdmg + DFGdmg > enemy.health then
-					DrawText("Q + DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+					KillText[i] = 3
+				elseif QDFGdmg + DFGdmg > enemy.health then
+					KillText[i] = 4
 				elseif Qdmg + iDmg > enemy.health then
-					DrawText("Q + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+					KillText[i] = 5
 				elseif Qdmg + iDmg + DFGdmg > enemy.health then
-					DrawText("Q + ignite + DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+					KillText[i] = 6
 				elseif Qdmg + Wdmg > enemy.health then
-					DrawText("QW = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif Qdmg + Wdmg + DFGdmg > enemy.health then
-					DrawText("QW + DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+					KillText[i] = 7
+				elseif QDFGdmg + WDFGdmg + DFGdmg > enemy.health then
+					KillText[i] = 8
 				elseif Qdmg + Wdmg + iDmg > enemy.health then
-					DrawText("QW + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif Qdmg + Wdmg + iDmg + DFGdmg > enemy.health then
-					DrawText("QW + DFG + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+					KillText[i] = 9
+				elseif QDFGdmg + WDFGdmg + iDmg + DFGdmg > enemy.health then
+					KillText[i] = 10
 				elseif Qdmg + Wdmg + Rdmg > enemy.health then
-					DrawText("QWR = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif DFGdmg + Qdmg + Wdmg + Rdmg > enemy.health then
-					DrawText("QWR + DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+					KillText[i] = 11
+				elseif DFGdmg + QDFGdmg + WDFGdmg + RDFGdmg > enemy.health then
+					KillText[i] = 12
 				elseif Qdmg + Wdmg + Rdmg + iDmg > enemy.health then
-					DrawText("QWR + ignite = kill", 15, PosX, PosY, ARGB(255,255,204,0))
-				elseif Qdmg + Wdmg + Rdmg + iDmg + DFGdmg > enemy.health then
-					DrawText("QWR + ignite + DFG = kill", 15, PosX, PosY, ARGB(255,255,204,0))
+					KillText[i] = 13
+				elseif QDFGdmg + WDFGdmg + RDFGdmg + iDmg + DFGdmg > enemy.health then
+					KillText[i] = 14
 				else
-					DrawText("Not killable", 15, PosX, PosY, ARGB(255,255,204,0))
+					KillText[i] = 15
 				end 
 			end 
 		end 
@@ -1129,7 +1147,7 @@ function DrinkHealth(h, mH)
 		local hSlot = GetInventorySlotItem(2003)
 		if hSlot ~= nil then
 			if (h / mH <= Menu.misc.autopotions.health) then
-				CastItem(2003)
+				CastSpell(hSlot)
 			end 
 		end 
 	end
@@ -1140,7 +1158,7 @@ function DrinkMana(m, mM)
 		local mSlot = GetInventorySlotItem(2004)
 		if mSlot ~= nil then
 			if (m / mM <= Menu.misc.autopotions.mana) then
-				CastItem(2004)
+				CastSpell(mSlot)
 			end 
 		end 
 	end 
@@ -1269,7 +1287,7 @@ function DrawMenu()
  Menu.autokill.spells:addParam("autokillR", "Use R", SCRIPT_PARAM_ONOFF, true)
  Menu.autokill:addSubMenu("Enemies", "enemies")
  for i, enemy in ipairs(GetEnemyHeroes()) do
-	Menu.autokill.enemies:addParam(enemy.charName, "Kill " .. enemy.charName, SCRIPT_PARAM_ONOFF, false)
+	Menu.autokill.enemies:addParam(enemy.charName, "Kill " .. enemy.charName, SCRIPT_PARAM_ONOFF, true)
  end 
 
 Menu.autokill:addSubMenu("Optional Settings", "optional")
