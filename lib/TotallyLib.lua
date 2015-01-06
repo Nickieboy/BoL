@@ -7,6 +7,30 @@
 
 
 local version = 0.1
+local AUTO_UPDATE = true
+local UPDATE_HOST = "raw.github.com"
+local UPDATE_PATH = "/Nickieboy/BoL/master/lib/TotallyLib.lua".."?rand="..math.random(1,10000)
+local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
+local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
+
+function AutoupdaterMsg(msg) print("<font color=\"#6699ff\"><b>TotallyLib:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
+if AUTO_UPDATE then
+	local ServerData = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/version/TotallyLib.version")
+	if ServerData then
+		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
+		if ServerVersion then
+			if tonumber(version) < ServerVersion then
+				AutoupdaterMsg("New version available"..ServerVersion)
+				AutoupdaterMsg("Updating, please don't press F9")
+				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () AutoupdaterMsg("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
+			else
+				AutoupdaterMsg("You have got the latest version ("..ServerVersion..")")
+			end
+		end
+	else
+		AutoupdaterMsg("Error downloading version info")
+	end
+end
 
 _G.TotallyLib_Loaded = true
 
@@ -15,26 +39,25 @@ _G.TotallyLib_Loaded = true
 class 'MenuMisc'
 
 
-function MenuMisc:__init(menu, includeSummoners)
+function MenuMisc:__init(Menu, includeSummoners)
 
-	assert(menu, "Menu not found. Not able to load the Menu")
+	assert(Menu, "Menu not found. Not able to load the Menu")
 
-	self.menu = menu
+ 	Menu:addSubMenu("Auto Potions", "autopotions")
+ 	Menu.autopotions:addParam("usePotion", "Use Potions Automatically", SCRIPT_PARAM_ONOFF, true)
+ 	Menu.autopotions:addParam("health", "Health under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
+ 	Menu.autopotions:addParam("mana", "Mana under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
 
-	if includeSummoners == true then
-		self.summoners = Summoners(self.menu)
+
+	Menu:addSubMenu("Zhyonas", "zhonyas")
+ 	Menu.zhonyas:addParam("zhonyas", "Auto Zhonyas", SCRIPT_PARAM_ONOFF, true)
+ 	Menu.zhonyas:addParam("zhonyasunder", "Use Zhonyas under % health", SCRIPT_PARAM_SLICE, 0.20, 0, 1 , 2)
+ 	
+ 	if includeSummoners == true then
+		Summoners(Menu)
 	end
 
- 	self.menu:addSubMenu("Auto Potions", "autopotions")
- 	self.menu.autopotions:addParam("usePotion", "Use Potions Automatically", SCRIPT_PARAM_ONOFF, true)
- 	self.menu.autopotions:addParam("health", "Health under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
- 	self.menu.autopotions:addParam("mana", "Mana under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
-
-
-	self.menu:addSubMenu("Zhyonas", "zhonyas")
- 	self.menu.zhonyas:addParam("zhonyas", "Auto Zhonyas", SCRIPT_PARAM_ONOFF, true)
- 	self.menu.zhonyas:addParam("zhonyasunder", "Use Zhonyas under % health", SCRIPT_PARAM_SLICE, 0.20, 0, 1 , 2)
-
+	self.menu = Menu
 
  	AddTickCallBack(function() self:OnTick() end)
 	AddCreateObjCallback(function(obj) self:OnCreateObj(obj) end)
