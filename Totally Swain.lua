@@ -7,6 +7,10 @@
 						 > 1.1
 						 		Few tweaks
 						 		Fixed R
+						 > 1.2
+						 		R is smoother
+						 		Code is smoother
+						 		Added library
 
 				Donate: Look link in thread
 				Bugs: Post in thread
@@ -17,7 +21,7 @@
 if myHero.charName ~= "Swain" then return end
 
 -- Download script
-local version = 1.1
+local version = 1.2
 local author = "Nickieboy"
 local SCRIPT_NAME = "Totally Swain"
 local AUTOUPDATE = true
@@ -37,7 +41,7 @@ if AUTOUPDATE then
 				AutoupdaterMsg("Updating, please don't press F9")
 				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () AutoupdaterMsg("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
 			else
-				AutoupdaterMsg("You have got the latest version (v"..ServerVersion..") of NVarus by " .. author)
+				AutoupdaterMsg("You have got the latest version (v"..ServerVersion..") of Totally Swain by " .. author)
 			end
 		end
 	else
@@ -49,8 +53,9 @@ end
 local REQUIRED_LIBS = {
 	["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua",
 	["VPrediction"] = "https://raw.githubusercontent.com/Ralphlol/BoLGit/master/VPrediction.lua",
-	["Spell Damage Library"] = "https://raw.githubusercontent.com/Nickieboy/BoL/master/lib/Spell_Damage_Library.lua"
+	["TotallyLib"] = "https://raw.githubusercontent.com/Nickieboy/BoL/master/lib/TotallyLib.lua"
 }
+
 
 local DOWNLOADING_LIBS, DOWNLOAD_COUNT = false, 0
 
@@ -72,58 +77,49 @@ for DOWNLOAD_LIB_NAME, DOWNLOAD_LIB_URL in pairs(REQUIRED_LIBS) do
 	end
 end
 
---- BoL Script Status Connector --- 
-local ScriptKey = "SFIFLJJEMIF" -- Totally Swain auth key
-local ScriptVersion = "1.1" -- Your .version file content
+prodictionLoaded = false
+if VIP_USER and FileExist(LIB_PATH.."Prodiction.lua") then
+	require "Prodiction"
+	prodictionLoaded = true
+end
 
--- Thanks to Bilbao for his socket help & encryption
-assert(load(Base64Decode("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"), nil, "bt", _ENV))() BolBoost( ScriptKey, ScriptVersion )
------------------------------------
+function InitializeVariables()
+	Spells = {
+		["Q"] = {name = "Decrepify", range = 625, radius = 0, delay = 0, speed = 0},
+		["W"] = {name = "Nevermore", range = 900, radius = 125, delay = 0.85, speed = math.huge},
+		["E"] = {name = "Torment", range = 625, radius = 0, delay = 0, speed = 1400},
+		["R"] = {name = "Ravenous Flock", range = 800, delay = 0, speed = 0}
 
-
-local Qspell = {name = "Decrepify", range = 625, radius = 0, delay = 0, speed = 0}
-local Wspell = {name = "Nevermore", range = 900, radius = 125, delay = 0.85, speed = math.huge}
-local Espell = {name = "Torment", range = 625, radius = 0, delay = 0, speed = 1400}
-local Rspell = {name = "Ravenous Flock", range = 700, delay = 0, speed = 0}
-local AA = 500
-local rangeAVG = 625 * 625
-local Qready, Wready, Eready, Rready = false, false, false, false
-local Hready, Iready, Bready = false, false, false
-local Qtarget, Wtarget, Etarget = nil, nil, nil
-local ultActive = false
-local heal, ignite, barrier = nil
-local SxOrbloaded = false
-local MMAloaded = false
-local SACloaded = false
-local SOWOrb, SxOrb = nil, nil
-local EnemyMinions = minionManager(MINION_ENEMY, Rspell.range, myHero, MINION_SORT_HEALTH_ASC)
-local ts = TargetSelector(TARGET_LOW_HP, 625)
-
+	}
+	AA = 500
+	rangeAVG = 625 * 625
+	Qready, Wready, Eready, Rready = false, false, false, false
+	Hready, Iready, Bready = false, false, false
+	Qtarget, Wtarget, Etarget = nil, nil, nil
+	ultActive = false
+	heal, ignite, barrier = nil
+	SxOrbloaded = false
+	MMAloaded = false
+	SACloaded = false
+	SOWOrb, SxOrb = nil, nil
+	EnemyMinions = minionManager(MINION_ENEMY, Spells.R.range, myHero, MINION_SORT_HEALTH_ASC)
+	ts = TargetSelector(TARGET_LOW_HP, 625)
+end
 
 function GetOrbTarget()
 	ts:update()
-
 	if SACloaded then
     	if _G.AutoCarry and _G.AutoCarry.Crosshair and _G.AutoCarry.Attack_Crosshair and _G.AutoCarry.Attack_Crosshair.target and _G.AutoCarry.Attack_Crosshair.target.type == myHero.type then 
     		return _G.AutoCarry.Attack_Crosshair.target 
     	end
   	end
-
-	if MMAloaded then
-		return _G.MMA_Target
-	end 
-
-	if SxOrbloaded then
-		return SxOrb:GetTarget()
-		
-	end
+	if MMAloaded then return _G.MMA_Target end 
+	if SxOrbloaded then return SxOrb:GetTarget() end
 	return ts.target
 end 
 
 function OnLoad()
-
-	FindSummoners() 
-
+	InitializeVariables()
 	DelayAction(CheckOrbWalker, 1)
 
 	VP = VPrediction()
@@ -131,184 +127,119 @@ function OnLoad()
 
 	Menu()
 
-	if SACloaded or MMAloaded then
-		Menu.Orbwalker.General.Enabled = false
-	end 
+	DelayAction(function() 
+		if SACloaded or MMAloaded then
+			Menu.Orbwalker.General.Enabled = false
+		end 
+	end, 1.1)
+
+	Abilities = SpellHelper(VP, Menu)
+	Abilities:AddSpell(_Q, Spells.Q.range)
+	Abilities:AddSpell(_E, Spells.E.range)
+	Abilities:AddSkillShot(_W, Spells.W.range, Spells.W.delay, Spells.W.radius, Spells.W.speed, false, "circaoe")
+
 end
 
 function OnTick()
 
-	ts:update()
+	EnemyMinions:update()
+	target = GetOrbTarget()
 
-	SpellChecks()
+	if Menu.keys.combo then Combo() end 
 
-	if Menu.combo.combo then
-		Combo()
-	end 
+	if Menu.keys.harass then Harass() end 
 
-	if Menu.harass.harass then
-		Harass()
-	end 
+	if Menu.keys.laneclear then LaneClear() end
 
-	if Menu.farm.farm then
-		Farm() 
-	end
-	--[[
-	if VIP_USER then
-		if Menu.misc.skinChanger.skinChanger and skinChanged()  then
-			GenModelPacket("Swain", Menu.misc.skinChanger.skinChangerSlice)
-	        lastSkin = Menu.misc.skinChanger.skinChangerSlice
-		end 
- 	end 
-	--]]
-
- 	if not Menu.combo.combo and not Menu.farm.farm and ultActive and CountEnemyHeroInRange(Rspell.range) < 1 then
+ 	if not Menu.keyscombo and not Menu.keys.laneclear and ultActive and CountEnemyHeroInRange(Spells.R.range) < 1 then
  		CastSpell(_R)
  	end
 
- 	Zhonyas()
- 	DrinkPotions()
-
- 	if heal ~= nil then
-		if Menu.misc.autoheal.useHeal then
-			UseHeal()
-		end 
-	end 
-
-	if ignite ~= nil then
-		if Menu.misc.autoignite.useIgnite then
-			UseIgnite()
-		end 
-	end 
-
-	if barrier ~= nil then
-		if Menu.misc.autobarrier.useBarrier then
-			UseBarrier()
-		end 
-	end 
 end
 
 
 function OnDraw()
 	if Menu.drawings.draw then
-
 		if Menu.drawings.drawQ then
-			DrawCircle(myHero.x, myHero.y, myHero.z, Qspell.range, 0x111111)
+			DrawCircle(myHero.x, myHero.y, myHero.z, Spells.Q.range, 0x111111)
 		end
-
 		if Menu.drawings.drawE then
-			DrawCircle(myHero.x, myHero.y, myHero.z, Espell.range, 0x111111)
+			DrawCircle(myHero.x, myHero.y, myHero.z, Spells.E.range, 0x111111)
 		end
-
 		if Menu.drawings.drawR then
-			DrawCircle(myHero.x, myHero.y, myHero.z, Rspell.range, 0x111111)
+			DrawCircle(myHero.x, myHero.y, myHero.z, Spells.R.range, 0x111111)
 		end
 	end 
 
 end
 
 function Combo()
-	local target = GetOrbTarget()
+	if target ~= nil then
+		if Menu.combo.comboR then
+			if IsSpellReady(_R) and not ultActive and CountEnemyHeroInRange(Spells.R.range) >= Menu.combo.comboRx then
+				CastSpell(_R) 
+			end 
+			if IsSpellReady(_R) and ultActive and CountEnemyHeroInRange(Spells.R.range) < Menu.combo.comboRx then
+				CastSpell(_R)
+			end 
+		end 
 
 
-	if Menu.combo.comboE then
-		if target ~= nil and Eready then
-			CastSpell(_E, target)
+		if Menu.combo.comboE then
+			if target ~= nil then
+				Abilities:Cast(_E, target)
+			end
+		end 
+
+		if Menu.combo.comboQ then
+			if target ~= nil then
+				Abilities:Cast(_Q, target)
+			end 
+		end  
+
+		if Menu.combo.comboW then
+			--if Wready then
+				--local castPosition, hitchance, nTargets = VP:GetCircularAOECastPosition(target, Spells.W.delay, Spells.W.radius, Spells.W.range, Spells.W.speed, myHero)
+				--if castPosition then
+					--CastSpell(_W, castPosition.x, castPosition.z)
+				--end
+			--end  
+			Abilities:Cast(_W, target)
 		end
 	end 
-
-	if Menu.combo.comboQ then
-		if target ~= nil and Qready then
-			CastSpell(_Q, target)
-		end 
-	end 
-
-	if Menu.combo.comboW then
-		if target ~= nil and Wready then
-			local castPosition, hitchance, nTargets = VP:GetCircularAOECastPosition(target, Wspell.delay, Wspell.radius, Wspell.range, Wspell.speed, myHero)
-			if castPosition then
-				CastSpell(_W, castPosition.x, castPosition.z)
-			end
-		end  
-	end 
-
-
-	if Menu.combo.comboR then
-		if Rready and not ultActive and CountEnemyHeroInRange(Rspell.range) > Menu.combo.comboRx then
-			CastSpell(_R) 
-		end 
-		if Rready and ultActive and CountEnemyHeroInRange(Rspell.range) < Menu.combo.comboRx then
-			CastSpell(_R)
-		end 
-	end 
-
 end
 
 
 function Harass()
-	local target = GetOrbTarget()
-
-	if Menu.harass.harassE then
-		if target ~= nil and Eready then
-			CastSpell(_E, target)
+	if target ~= nil then
+		if Menu.harass.harassE then
+			Abilities:Cast(_E, target)
 		end 
-	end 
 
-	if Menu.harass.harassQ then
-		if target ~= nil and Qready then
-			CastSpell(_Q, target)
+		if Menu.harass.harassQ then
+			Abilities:Cast(_Q, target) 
 		end 
-	end 
 
-	if Menu.harass.harassW then
-		if target ~= nil and Wready then
-			local castPosition, hitchance, nTargets = VP:GetCircularAOECastPosition(target, Wspell.delay, Wspell.radius, Wspell.range, Wspell.speed, myHero)
-			if castPosition then
-				CastSpell(_W, castPosition.x, castPosition.z)
-			end
+		if Menu.harass.harassW then
+			Abilities:Cast(_W, target)
 		end 
-	end 
-
-
+	end
 end 
 
-function Farm() 
-	EnemyMinions:update()
+function LaneClear() 
 
-	if Menu.farm.farmW and Wready then
-		for i, minion in pairs(EnemyMinions.objects) do
-			local castPosition, hitchance, nTargets = VP:GetCircularAOECastPosition(minion, Wspell.delay, Wspell.radius, Wspell.range, Wspell.speed, myHero)
-			if castPosition then
-				CastSpell(_W, castPosition.x, castPosition.z)
-			end 
+	if Menu.laneclear.laneclearW and IsSpellReady(_W) then
+		local castPosition, hitchance, nTargets = GetBestAOEPosition(EnemyMinions.objects, Spells.W.range, Spells.W.radius, myHero)
+		if castPosition then
+			CastSpell(_W, castPosition.x, castPosition.z)
 		end 
 	end 
 
-	if Menu.farm.farmR and Rready and not ultActive and GetEnemyMinions() >= 1 then
+	if Menu.laneclear.laneclearR and IsSpellReady(_R) and not ultActive and GetEnemyMinions(Spells.R.range) >= 1 then
 		CastSpell(_R)
 	end   
 end
 
-function GetEnemyMinions()
-	local range = myHero.range * myHero.range
-    local minionsInRange = 0
-    for i, minion in ipairs(EnemyMinions.objects) do
-        if ValidTarget(minion) and GetDistanceSqr(myHero, minion) <= range then
-            minionsInRange = minionsInRange + 1
-        end
-    end
-    return minionsInRange
-end  
-
---[[
-function KillSteal()
-	for i, enemy in ipairs(GetEnemyHeroes()) do
-		if ValidTarget(enemy, 625) then
-			local Qdmg, Wdmg, Edmg = CalculateDamageWithBuff(enemy)
-		end 
-	end 
-end 
---]]
 
 function CalculateDamageWithoutBuff(t)
 	local Qdmg = 0
@@ -353,75 +284,6 @@ function CalculateDamageWithBuff(targ)
 	return Qdmg, Wdmg, Edmg
 end 
 
-function SpellChecks()
-	Qready = (myHero:CanUseSpell(_Q) == READY)
-	Wready = (myHero:CanUseSpell(_Q) == READY)
-	Eready = (myHero:CanUseSpell(_E) == READY)
-	Rready = (myHero:CanUseSpell(_R) == READY)
-
-	if ignite ~= nil then
-		Iready = (myHero:CanUseSpell(ignite) == READY)
-	end 
-
-	if heal ~= nil then
-		Hready = (myHero:CanUseSpell(heal) == READY)
-	end 
-
-	if barrier ~= nil then
-		Bready = (myHero:CanUseSpell(barrier) == READY)
-	end 
-end 
-
-function FindSummoners() 
-	if myHero:GetSpellData(SUMMONER_1).name:find("summonerheal") then 
-		heal = SUMMONER_1
-    elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerheal") then 
-    	heal = SUMMONER_2
-    end 
-
-    if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then 
-		ignite = SUMMONER_1
-    elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then 
-    	ignite = SUMMONER_2
-    end 
-
-    if myHero:GetSpellData(SUMMONER_1).name:find("summonerbarrier") then 
-		barrier = SUMMONER_1
-    elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerbarrier") then 
-    	barrier = SUMMONER_2
-    end
-end 
-
---[[
-function skinChanged()
-        return Menu.misc.skinChanger.skinChangerSlice ~= lastSkin
-end
-
-
-function GenModelPacket(champ, skinId)
-        p = CLoLPacket(0x97)
-        p:EncodeF(myHero.networkID)
-        p.pos = 1
-        t1 = p:Decode1()
-        t2 = p:Decode1()
-        t3 = p:Decode1()
-        t4 = p:Decode1()
-        p:Encode1(t1)
-        p:Encode1(t2)
-        p:Encode1(t3)
-        p:Encode1(bit32.band(t4,0xB))
-        p:Encode1(1)--hardcode 1 bitfield
-        p:Encode4(skinId)
-        for i = 1, #champ do
-                p:Encode1(string.byte(champ:sub(i,i)))
-        end
-        for i = #champ + 1, 64 do
-                p:Encode1(0)
-        end
-        p:Hide()
-        RecvPacket(p)
-end
---]]
 
 function OnProcessSpell(unit, spell)
     if unit.isMe then
@@ -437,94 +299,47 @@ function OnProcessSpell(unit, spell)
     end 
 end
 
-function UseHeal()
-	health = myHero.health
-	maxHealth = myHero.maxHealth
-
-	if Hready then
-		if ((health / maxHealth) <= Menu.misc.autoheal.amountOfHealth) then
-			CastSpell(heal)
-		end 
-	end 
-
-	if Menu.misc.autoheal.amountOfHealth then
-		for i, teammate in ipairs(GetAllyHeroes()) do
-			if GetDistance(teammate, myHero) <= 700 then
-				health = teammate.health
-				maxHealth = teammate.maxHealth
-
-				if ((health / maxHealth) <= Menu.misc.autoheal.amountOfHealth) then
-					if Hready then
-						CastSpell(heal)
-					end 
-				end 
-			end 
-		end 
-	end 
+function OnGainBuff(unit, buff)
+	if unit.isMe and GetDistance(buff) < 50 then
+		print("Gained:" .. buff.name)
+	end
 end 
 
-function UseIgnite()
-	local iDmg = (50 + (20 * myHero.level))
-	for i, enemy in ipairs(GetEnemyHeroes()) do
-		if GetDistance(enemy, myHero) < 600 and ValidTarget(enemy, 600) and Menu.misc.autoignite[enemy.charName] then
-			if Iready then
-				if enemy.health < iDmg then
-					CastSpell(ignite, enemy)
-				end 
-			end 
-		end  
-	end 
-end 
-
-function UseBarrier()
-	health = myHero.health
-	maxHealth = myHero.maxHealth
-
-	if Bready then
-		if ((health / maxHealth) <= Menu.misc.autobarrier.amountOfHealth) then
-			CastSpell(barrier)
-		end 
-	end 
-end 
-
-function Zhonyas()
-	if Menu.misc.zhonyas.zhonyas then
-		if GetInventoryHaveItem(3157) and GetInventoryItemIsCastable(3157) then
-			health = myHero.health
-			mana = myHero.mana
-			maxHealth = myHero.maxHealth
-			if (health / maxHealth) <= Menu.misc.zhonyas.zhonyasunder then
-				CastItem(3157)
-			end 
-		end 
-	end 
-end
 
 function Menu()
 
 	Menu = scriptConfig("Totally Swain by Nickieboy", "TotallySwain.cfg")
 
+	Menu:addSubMenu("Key Settings", "keys")
+	Menu.keys:addParam("combo", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+	Menu.keys:addParam("harass", "Harass", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
+	Menu.keys:addParam("laneclear", "LaneClear", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("K"))
+	Menu.keys:addParam("lasthit", "LastHit", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("X"))
+	SxOrb:RegisterHotKey("fight", Menu.keys, "combo") 
+	SxOrb:RegisterHotKey("harass", Menu.keys, "harass") 
+	SxOrb:RegisterHotKey("laneclear", Menu.keys, "laneclear") 
+	SxOrb:RegisterHotKey("lasthit", Menu.keys, "lasthit") 
+
 	-- Combo
 	Menu:addSubMenu("Combo", "combo")
-	Menu.combo:addParam("combo", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, 32)
-	Menu.combo:addParam("comboQ", "Use " .. Qspell.name .. " (Q)", SCRIPT_PARAM_ONOFF, true)
-	Menu.combo:addParam("comboW", "Use " .. Wspell.name .. " (W)", SCRIPT_PARAM_ONOFF, true)
-	Menu.combo:addParam("comboE", "Use " .. Espell.name .. " (E)", SCRIPT_PARAM_ONOFF, true)
-	Menu.combo:addParam("comboR", "Use " .. Rspell.name .. " (R)", SCRIPT_PARAM_ONOFF, true)
+
+	Menu.combo:addParam("comboItems", "Use Items", SCRIPT_PARAM_ONOFF, true)
+	Menu.combo:addParam("comboQ", "Use " .. Spells.Q.name .. " (Q)", SCRIPT_PARAM_ONOFF, true)
+	Menu.combo:addParam("comboW", "Use " .. Spells.W.name .. " (W)", SCRIPT_PARAM_ONOFF, true)
+	Menu.combo:addParam("comboE", "Use " .. Spells.E.name .. " (E)", SCRIPT_PARAM_ONOFF, true)
+	Menu.combo:addParam("comboR", "Use " .. Spells.R.name .. " (R)", SCRIPT_PARAM_ONOFF, true)
 	Menu.combo:addParam("comboRx", "Use R if x amount of people nearby", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
 
 	 -- Harass
 	Menu:addSubMenu("Harass", "harass")
- 	Menu.harass:addParam("harass", "Harass", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
- 	Menu.harass:addParam("harassQ", "Use " .. Qspell.name .. " (Q)", SCRIPT_PARAM_ONOFF, true)
- 	Menu.harass:addParam("harassW", "Use " .. Wspell.name .. " (W)", SCRIPT_PARAM_ONOFF, false)
- 	Menu.harass:addParam("harassE", "Use " .. Espell.name .. " (E)", SCRIPT_PARAM_ONOFF, false)
+ 	Menu.harass:addParam("harassQ", "Use " .. Spells.Q.name .. " (Q)", SCRIPT_PARAM_ONOFF, true)
+ 	Menu.harass:addParam("harassW", "Use " .. Spells.W.name .. " (W)", SCRIPT_PARAM_ONOFF, false)
+ 	Menu.harass:addParam("harassE", "Use " .. Spells.E.name .. " (E)", SCRIPT_PARAM_ONOFF, false)
 
 	-- Farming
-	Menu:addSubMenu("Farming", "farm")
-	Menu.farm:addParam("farm", "Farming (K)", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("K"))
-	Menu.farm:addParam("farmW", "Farm using W", SCRIPT_PARAM_ONOFF, false)
-	Menu.farm:addParam("farmR", "Farm using R", SCRIPT_PARAM_ONOFF, false)
+	Menu:addSubMenu("Laneclear", "laneclear")
+	Menu.laneclear:addParam("laneclearR", "LaneClear using W", SCRIPT_PARAM_ONOFF, false)
+	Menu.laneclear:addParam("laneclearW", "Laneclear using R", SCRIPT_PARAM_ONOFF, false)
 
 --[[
  	 -- Killsteal
@@ -537,96 +352,32 @@ function Menu()
  	--Drawings
  	Menu:addSubMenu("Drawings", "drawings")
  	Menu.drawings:addParam("draw", "Use Drawings", SCRIPT_PARAM_ONOFF, true)
- 	Menu.drawings:addParam("drawQ", "Draw " .. Qspell.name .. " (Q)", SCRIPT_PARAM_ONOFF, true)
- 	Menu.drawings:addParam("drawE", "Draw " .. Espell.name .. " (E)", SCRIPT_PARAM_ONOFF, true)
- 	Menu.drawings:addParam("drawR", "Draw " .. Rspell.name .. " (R)", SCRIPT_PARAM_ONOFF, true)
+ 	Menu.drawings:addParam("drawQ", "Draw " .. Spells.Q.name .. " (Q)", SCRIPT_PARAM_ONOFF, true)
+ 	Menu.drawings:addParam("drawE", "Draw " .. Spells.W.name .. " (E)", SCRIPT_PARAM_ONOFF, true)
+ 	Menu.drawings:addParam("drawR", "Draw " .. Spells.R.name .. " (R)", SCRIPT_PARAM_ONOFF, true)
 
  	--Misc
  	Menu:addSubMenu("Misc", "misc")
+ 	DelayAction(function() 
+ 		if _G.TotallyLib_Loaded then
+			MenuMisc(Menu.misc, true)
+		end
+ 	end, 0.5)
  	
- 	Menu.misc:addSubMenu("Auto Potions", "autopotions")
- 	Menu.misc.autopotions:addParam("usePotion", "Use Potions Automatically", SCRIPT_PARAM_ONOFF, false)
- 	Menu.misc.autopotions:addParam("health", "Health under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
- 	Menu.misc.autopotions:addParam("mana", "Mana under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
-
- 	if heal ~= nil then
-	Menu.misc:addSubMenu("Auto Heal", "autoheal")
-	Menu.misc.autoheal:addParam("useHeal", "Use Summoner Heal", SCRIPT_PARAM_ONOFF, false)
-	Menu.misc.autoheal:addParam("amountOfHealth", "Under % of health", SCRIPT_PARAM_SLICE, 0, 0, 1, 2)
-	Menu.misc.autoheal:addParam("helpHeal", "Use Heal to save teammates", SCRIPT_PARAM_ONOFF, false)
-	end 
-
-	if ignite ~= nil then
-	Menu.misc:addSubMenu("Auto Ignite", "autoignite")
-	Menu.misc.autoignite:addParam("useIgnite", "Use Summoner Ignite", SCRIPT_PARAM_ONOFF, true)
- 	for i, enemy in ipairs(GetEnemyHeroes()) do
-		Menu.misc.autoignite:addParam(enemy.charName, "Use Ignite On " .. enemy.charName, SCRIPT_PARAM_ONOFF, true)
- 	end 
-end 
-
-	if barrier ~= nil then
-	Menu.misc:addSubMenu("Auto Barrier", "autobarrier")
-	Menu.misc.autobarrier:addParam("useBarrier", "Use Summoner Barrier", SCRIPT_PARAM_ONOFF, false)
-	Menu.misc.autobarrier:addParam("amountOfHealth", "Under % of health", SCRIPT_PARAM_SLICE, 0, 0, 1, 2)
-	end 
-
-	Menu.misc:addSubMenu("Zhyonas", "zhonyas")
- 	Menu.misc.zhonyas:addParam("zhonyas", "Auto Zhonyas", SCRIPT_PARAM_ONOFF, true)
- 	Menu.misc.zhonyas:addParam("zhonyasunder", "Use Zhonyas under % health", SCRIPT_PARAM_SLICE, 0.20, 0, 1 ,2)
 
 	--Orbwalker
 	Menu:addSubMenu("OrbWalker", "orbwalker")
-	SxOrb:LoadToMenu(Menu.orbwalker)
+	SxOrb:LoadToMenu(Menu.orbwalker, true)
 
 	 -- Always show
-	 Menu.combo:permaShow("combo")
-	 Menu.harass:permaShow("harass")
+	 Menu.keys:permaShow("combo")
+	 Menu.keys:permaShow("harass")
 	 --Menu.killsteal:permaShow("killsteal")
-	 Menu.farm:permaShow("farm")
+	 Menu.keys:permaShow("laneclear")
 	 Menu.drawings:permaShow("draw")
 
 end 
 
-function DrinkPotions()
-	health = myHero.health
-	mana = myHero.mana
-	maxHealth = myHero.maxHealth
-	maxMana = myHero.maxMana
-	
-		DrinkHealth(health, maxHealth)
-		DrinkMana(mana, maxMana)
-end 
-
-function DrinkHealth(h, mH) 
-	if not HaveBuff(myHero, "RegenerationPotion") then
-		if GetInventoryHaveItem(2003) then
-			if (h / mH <= Menu.misc.autopotions.health) then
-				CastItem(2003)
-			end 
-		end 
-	end
-end 
-
-function DrinkMana(m, mM) 
-	if not HaveBuff(myHero, "FlaskOfCrystalWater") then
-		if GetInventoryHaveItem(2004) then
-			if (m / mM <= Menu.misc.autopotions.mana) then
-				CastItem(2004)
-			end 
-		end 
-	end 
-end 
-
-function HaveBuff(unit,buffname)
-	local result = false
-	for i = 1, unit.buffCount, 1 do 
-		if unit:getBuff(i) ~= nil and unit:getBuff(i).name == buffname and unit:getBuff(i).valid and BuffIsValid(unit:getBuff(i)) then 
-			result = true 
-			break 
-		end 
-	end 
-	return result
-end 
 
 function CheckOrbWalker()
 	if _G.AutoCarry then

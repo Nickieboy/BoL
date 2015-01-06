@@ -5,7 +5,6 @@
 
 --]]
 
-
 local version = 0.1
 local AUTO_UPDATE = true
 local UPDATE_HOST = "raw.github.com"
@@ -32,21 +31,22 @@ if AUTO_UPDATE then
 	end
 end
 
+
+
+
 _G.TotallyLib_Loaded = true
 
 
 
 class 'MenuMisc'
-
-
 function MenuMisc:__init(Menu, includeSummoners)
 
 	assert(Menu, "Menu not found. Not able to load the Menu")
 
  	Menu:addSubMenu("Auto Potions", "autopotions")
  	Menu.autopotions:addParam("usePotion", "Use Potions Automatically", SCRIPT_PARAM_ONOFF, true)
- 	Menu.autopotions:addParam("health", "Health under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
- 	Menu.autopotions:addParam("mana", "Mana under %", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
+ 	Menu.autopotions:addParam("health", "Health under %", SCRIPT_PARAM_SLICE, 0.25, 0, 0.9, 2)
+ 	Menu.autopotions:addParam("mana", "Mana under %", SCRIPT_PARAM_SLICE, 0.25, 0, 0.9, 2)
 
 
 	Menu:addSubMenu("Zhyonas", "zhonyas")
@@ -59,44 +59,40 @@ function MenuMisc:__init(Menu, includeSummoners)
 
 	self.menu = Menu
 
- 	AddTickCallBack(function() self:OnTick() end)
+ 	AddTickCallback(function() self:OnTick() end)
 	AddCreateObjCallback(function(obj) self:OnCreateObj(obj) end)
 	AddDeleteObjCallback(function(obj) self:OnDeleteObj(obj) end)
+
+	self.drinkingHealth = false
+	self.drinkingMana = false
+	self.isRecalling = false
 end 
 
 
-function MenuMisc:UpdateSlots()
-	self.healthSlot = GetInventorySlotItem(2003)
-	self.manaSlot = GetInventorySlotItem(2004)
-	self.zhonyasSlot = GetInventorySlotItem(3157)
-end
-
 function MenuMisc:DrinkPotions()
-
 	if not self.drinkingHealth and not self.isRecalling and not InFountain() then
-		if self.healthSlot ~= nil then
+		local healthSlot = GetInventorySlotItem(2003)
+		if healthSlot ~= nil then
 			if (myHero.health / myHero.maxHealth <= self.menu.autopotions.health) then
-				CastSpell(self.healthSlot)
+				CastSpell(healthSlot)
 			end 
 		end 
 	end
-
 	if not self.drinkingHealth and not self.isRecalling and not InFountain() then
-		if self.manaSlot ~= nil then
+		local manaSlot = GetInventorySlotItem(2004)
+		if manaSlot ~= nil then
 			if (myHero.mana / myHero.maxMana <= self.menu.autopotions.mana) then
-				CastSpell(self.manaSlot)
+				CastSpell(manaSlot)
 			end 
 		end 
 	end 
 end 
   
  function MenuMisc:CheckZhonyas()
-
- 	if self.zhonyasSlot then
- 		if self.zhonyasSlot ~= nil and myHero:CanUseSpell(self.zhonyasSlot) == READY then
-			if (myHero.health / myHero.maxHealth) <= self.zhonyas.zhonyasunder then
-				CastSpell(self.zhonyasSlot)
-			end 
+ 	local zhonyasSlot = GetInventorySlotItem(3157)
+ 	if zhonyasSlot ~= nil and IsSpellReady(self.zhonyasSlot) then
+		if (myHero.health / myHero.maxHealth) <= self.zhonyas.zhonyasunder then
+			CastSpell(zhonyasSlot)
 		end 
 	end 	
  end 
@@ -137,14 +133,12 @@ function MenuMisc:OnDeleteObj(obj)
 	end
 end
 
-
-
-
 function MenuMisc:OnTick()
-	self:UpdateSlots()
-	if self.menu.usePotion then self:DrinkPotions() end
-	if self.menu.zhonyas then self:CheckZhonyas() end 
+	if self.menu.autopotions.usePotion then self:DrinkPotions() end
+	if self.menu.zhonyas.zhonyas then self:CheckZhonyas() end 
 end
+
+
 
 
 bufflist = {
@@ -152,12 +146,12 @@ bufflist = {
 		["surpression"] = {spellname  = "Infinite Duress", spell = "R", charName = "Warwick"},   -- Only QSS
 		["paranoiamisschance"] = {spellname = "Terrify", spell = "Q", charName = "Fiddlestick"}, --correct
 		["puncturingtauntarmordebuff"] = {spellname = "Puncturing Taunt", spell = "E", charName = "Rammus"}, --
- 		["Teemo"] = {spellname = "Blinding Dart", spell = "R", charName = "Teemo"}, --
-		["Ahri"] = {spellname = "Charm", spell = "E", charName = "Ahri"}, --
+ 		--["Teemo"] = {spellname = "Blinding Dart", spell = "R", charName = "Teemo"}, --
+		--["Ahri"] = {spellname = "Charm", spell = "E", charName = "Ahri"}, --
 		["curseofthesadmummy"] = {spellname = "Curse of the Sad Mummy", spell = "R", charName = "Amumu"}, --correct
 		["enchantedcrystalarrow"] = {spellname = "Enchanted Crystal Arrow", spell = "R", charName = "Ashe"}, --correct
 		["Malzahar"] = {spellname = "Nether Grasp", spell = "R", charName = "Malzahar"}, --
-		["Skarner"] = {spellname = "Impale", spell = "R", charName = "Skarner"}, --
+		--["Skarner"] = {spellname = "Impale", spell = "R", charName = "Skarner"}, --
 		["veigarstun"] = {spellname = "Primordial Burst", spell = "E", charName = "Veigar"}, --correct
 		["nasusw"] = {spellname = "Wither", spell = "W", charName = "Nasus"}
 	}
@@ -175,11 +169,26 @@ class 'Summoners'
 
 function Summoners:__init(menu)
 
-	self.menu = menu
+	self.enemyNames = {}
 
 	self:UpdateSummoners()
 
-	 if self.heal ~= nil then 
+	if menu then
+		self:LoadToMenu(menu)
+	end
+
+	AddTickCallback(function() self:OnTick() end)
+	AddCreateObjCallback(function(obj) self:OnCreateObj(obj) end)
+	if VIP_USER then
+		AdvancedCallback:bind("GainBuff", function(unit, buff) self:OnGainBuff(unit, buff) end)
+	end 
+
+
+end 
+
+function Summoners:LoadToMenu(menu)
+	self.menu = menu
+	if self.heal ~= nil then 
 		self.menu:addSubMenu("Auto Heal", "autoheal")
 		self.menu.autoheal:addParam("useHeal", "Use Summoner Heal", SCRIPT_PARAM_ONOFF, true)
 		self.menu.autoheal:addParam("amountOfHealth", "Under % of health", SCRIPT_PARAM_SLICE, 0.25, 0, 1, 2)
@@ -213,20 +222,17 @@ function Summoners:__init(menu)
 					oneAdded = true
 					self.menu.autocleanse:addParam(buff, data.spellname .. " - " .. data.charName .. " (" .. data.spell .. ")", SCRIPT_PARAM_ONOFF, true)
 				end
-				if not oneAdded then
-					self.menu.autocleanse:addParam("info", "No buffs found", SCRIPT_PARAM_INFO, "Error")
-				end 
 			end 
+			if not oneAdded then
+				self.menu.autocleanse:addParam("info", "ERROR", SCRIPT_PARAM_INFO, "No buffs found to be added")
+			end 
+		else
+			for object, stuff in pairs(ccobjectlist) do
+				self.menu.autocleanse:addParam(object, object .. " - " .. stuff, SCRIPT_PARAM_ONOFF, true)
+			end
 		end 
 	end 
-
-	AddTickCallBack(function() self:OnTick() end)
-	AddCreateObjCallback(function(obj) self:OnCreateObj(obj) end)
-	if VIP_USER then
-		AdvancedCallback:bind("GainBuff", function(unit, buff) self:OnGainBuff(unit, buff) end)
-	end 
-
-end 
+end
 
 function Summoners:OnGainBuff(unit, buff)
 	if VIP_USER and self.cleanse ~= nil and self.menu.autocleanse.useCleanse and self.menu.autocleanse[buff.name] and unit.isMe then
@@ -237,8 +243,8 @@ function Summoners:OnGainBuff(unit, buff)
 end
 
 function Summoners:OnCreateObj(obj)
-	if not VIP_USER and self.cleanse ~= nil and cobjectlist[obj.name] and GetDistanceSqr(obj) < 2500 then
-		if self.menu.autocleanse.useCleanse and IsSpellReady(self.cleanse) then
+	if not VIP_USER and self.cleanse ~= nil and self.menu.autocleanse.useCleanse and self.menu.autocleanse[obj.name] and GetDistanceSqr(obj) < 2500 then
+		if IsSpellReady(self.cleanse) then
 			CastSpell(self.cleanse)
 		end 
 	end 
@@ -272,14 +278,13 @@ function Summoners:UseHeal()
 	end
 end
 
-
 function Summoners:Ignite()
 	self:IgniteDamage()
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		if GetDistance(enemy, myHero) < 600 and ValidTarget(enemy, 600) and self.menu.autoignite[enemy.charName] then
 			if myHero:CanUseSpell(self.ignite) == READY  then
 				if enemy.health < self:IgniteDamage() then
-					CastSpell(ignite, enemy)
+					CastSpell(self.ignite, enemy)
 				end 
 			end 
 		end  
@@ -309,34 +314,35 @@ end
 
 
 
-class 'Spells'
+class 'SpellHelper'
 
-function Spells:__init(VP, Prod, menu)
+function SpellHelper:__init(VP, menu)
 	self.Spells = {}
-	if VP and Prod and menu then
-		self.Predict = PredictionHelper(VP, Prod, menu)
+	if VP and menu then
+		self.Predict = PredictionHelper(VP, menu)
 	end
 end
 
-function Spells:AddSpell(slot, range)
+function SpellHelper:AddSpell(slot, range)
 	self.Spells[slot] = {slot = slot, range = range, skillShot = false}
 end
 
-function Spells:AddSkillShot(slot, range, delay, width, speed, collision, type)
-	self.Spells[slot] = {slot = slot, range = range, delay = delay, width = width, speed = speed, collision = collision, type = type, skillShot = true}
+function SpellHelper:AddSkillShot(slot, range, delay, width, speed, collision, typeSkill)
+	self.Spells[slot] = {slot = slot, range = range, delay = delay, width = width, speed = speed, collision = collision, typeSkill = typeSkill, skillShot = true}
 end
 
-function Spells:Ready(slot)
+function SpellHelper:Ready(slot)
 	return IsSpellReady(self.Spells[slot].slot)
 end 
 
-function Spells:InRange(slot, target)
-	return GetDistanceSqr(target) > self.Spells[slot].range * self.Spells[slot].range
+function SpellHelper:InRange(slot, target)
+	return GetDistanceSqr(target) < self.Spells[slot].range * self.Spells[slot].range
 end
 
-function Spells:Cast(slot, target, value)
+function SpellHelper:Cast(slot, target, value)
+
 	if self.Spells[slot].skillShot then
-		local castPosition = self.Predict:PredictSpell(target, self.Spells[slot].delay, self.Spells[slot].radius, self.Spells[slot].range, self.Spells[slot].speed, self.Spells[slot].collision, self.Spells[slot].collision)
+		local castPosition = self.Predict:PredictSpell(target, self.Spells[slot].delay, self.Spells[slot].width, self.Spells[slot].range, self.Spells[slot].speed, self.Spells[slot].collision, self.Spells[slot].typeSkill)
 		if castPosition ~= nil and self:Ready(self.Spells[slot].slot) and self:InRange(self.Spells[slot].slot, target) then
 			CastSpell(self.Spells[slot].slot, castPosition.x, castPosition.z)
 		end
@@ -353,90 +359,86 @@ function Spells:Cast(slot, target, value)
 	end
 end
 
-function Spells:CastAll(target, value)
+function SpellHelper:CastAll(target, value)
 	for i, info in ipairs(self.Spells) do
 		self:Cast(info.slot, target, value)
 	end
 end
 
 class 'PredictionHelper'
-function PredictionHelper:__init(VP, Prod, menu)
+function PredictionHelper:__init(VP, menu)
 	self.VP = VP
-	self.Prod = Prod and Prod or nil
-
 	if menu then
 		self:LoadToMenu(menu)
 	end
 end
 
 function PredictionHelper:LoadToMenu(Menu)
-	Menu:addSubMenu("Prediction Helper", "prediction")
-	if self.VP then
-		Menu.prediction:addParam("type", "Prediction:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction"})
-	elseif VIP_USER and self.Prod then
+	Menu:addSubMenu("Prediction Type", "prediction")
+	if VIP_USER and FileExist(LIB_PATH.."Prodiction.lua") then
 		Menu.prediction:addParam("type", "Prediction:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction", "Prodiction"})
+	elseif self.VP then
+		Menu.prediction:addParam("type", "Prediction:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction"})
 	end
 	Menu.prediction:addParam("hitchance", "Hitchance", SCRIPT_PARAM_LIST, 2, {"Low hitchance", "High HitChance", "Slowed", "Immobile"})
+	
 	self.menu = Menu
 end
 
-function PredictionHelper:PredictSpell(target, delay, radius, range, speed, collision, type)
-	local castPosition
-	local menuHitchance = self.menu.prediction.hitchance
+function PredictionHelper:PredictSpell(target, delay, radius, range, speed, collision, typeSkill)
 	if self.menu.prediction.type == 1 then
-		castPosition, coll = TargetPrediction(range, speed, delay, radius):GetPrediction(target)
-		if collision and coll then
+		local castPosition, coll = TargetPrediction(range, speed, delay, radius):GetPrediction(target)
+		if collision == true and not coll then
 			return castPosition
-		end
-		if not collision then
+		elseif not collision then
 			return castPosition
 		end 
 	elseif self.menu.prediction.type == 2 then
-		if type:lower():find() == "circ" and type:lower():find() == "AOE"then
+		if typeSkill == "circaoe" then
 			local castPosition, hitChance = self.VP:GetCircularAOECastPosition(target, delay, radius, range, speed, myHero, collision)
-			if hitChance >= menuHitchance then
+			if hitChance >= self.menu.prediction.hitchance then
 				return castPosition
 			end
-		elseif type:lower():find() == "line" and type:lower():find() == "AOE" then
+		elseif typeSkill == "lineaoe" then
 			local castPosition, hitChance = self.VP:GetLineAOECastPosition(unit, delay, radius, range, speed, myHero)
-		elseif type:lower():find() == "line" then
+		elseif typeSkill == "line" then
 			local castPosition, hitChance = self.VP:GetCircularCastPosition(target, delay, radius, range, speed, myHero, collision)
-			if hitChance >= menuHitchance then
+			if hitChance >= self.menu.prediction.hitchance then
 				return castPosition
 			end
-		elseif type:lower():find() == "circ" then
+		elseif typeSkill == "circ" then
 			local castPosition, hitChance = self.VP:GetCircularCastPosition(target, delay, radius, range, speed, myHero, collision)
-			if hitChance >= menuHitchance then
+			if hitChance >= self.menu.prediction.hitchance then
 				return castPosition
 			end
 		end
-	elseif self.menu.prediction.type == 3 and VIP_USER then
-		if type:lower():find() == "circ" and type:lower():find() == "AOE"then
-			local castPosition, info = self.Prod.GetCircularAOEPrediction(target, range, speed, delay, radius, myHero)
+	elseif self.menu.prediction.type == 3 then
+		if typeSkill == "circaoe" then
+			local castPosition, info = Prodiction.GetCircularAOEPrediction(target, range, speed, delay, radius, myHero)
 			if collision and not info.mCollision() then
 				return castPosition
 			end
 			if not collision then
 				return castPosition
 			end 
-		elseif type:lower():find() == "line" and type:lower():find() == "AOE" then
-			local castPosition, info = self.Prod:GetLineAOEPrediction(unit, range, speed, delay, width, myHero)
+		elseif typeSkill == "lineaoe" then
+			local castPosition, info = Prodiction.GetLineAOEPrediction(unit, range, speed, delay, width, myHero)
 			if collision and not info.mCollision() then
 				return castPosition
 			end
 			if not collision then
 				return castPosition
 			end
-		elseif type:lower():find() == "line" then
-			local castPosition, info = self.Prod:GetPrediction(unit, range, speed, delay, width, source)
+		elseif typeSkill == "line" then
+			local castPosition, info = Prodiction.GetPrediction(unit, range, speed, delay, width, source)
 			if collision and not info.mCollision() then
 				return castPosition
 			end
 			if not collision then
 				return castPosition
 			end
-		elseif type:lower():find() == "circ" then
-			local castPosition, info = self.VP:GetCircularCastPosition(target, delay, radius, range, speed, myHero, collision)
+		elseif typeSkill == "circ" then
+			local castPosition, info = Prodiction.GetCircularCastPosition(target, delay, radius, range, speed, myHero, collision)
 			if collision and not info.mCollision() then
 				return castPosition
 			end
@@ -479,6 +481,7 @@ itemlist = {
 	["Ruby Sightstone"] = 2045,
 	["Total Biscuit of Rejuvenation"] = 2009
 }
+
 
 class 'ItemHelper'
 function ItemHelper:__init(name)
