@@ -11,6 +11,13 @@
 						 		R is smoother
 						 		Code is smoother
 						 		Added library
+						 > 1.3
+						 		Forgot to actually add item support
+						 > 1.35
+						 		Fixed laneclear (Mistyped)
+						 		You can normally now do manual R
+						 			Haven't test it
+
 
 				Donate: Look link in thread
 				Bugs: Post in thread
@@ -21,7 +28,7 @@
 if myHero.charName ~= "Swain" then return end
 
 -- Download script
-local version = 1.3
+local version = 1.35
 local author = "Nickieboy"
 local SCRIPT_NAME = "Totally Swain"
 local AUTOUPDATE = true
@@ -103,6 +110,7 @@ function InitializeVariables()
 	SACloaded = false
 	SOWOrb, SxOrb = nil, nil
 	EnemyMinions = minionManager(MINION_ENEMY, Spells.R.range, myHero, MINION_SORT_HEALTH_ASC)
+
 	ts = TargetSelector(TARGET_LOW_HP, 625)
 	Items = {
 		BRK = { id = 3153, range = 450, reqTarget = true, slot = nil },
@@ -116,6 +124,8 @@ function InitializeVariables()
 		BFT = { id = 3188, range = 750, reqTarget = true, slot = nil },
 		RND = { id = 3143, range = 275, reqTarget = false, slot = nil }
 	}
+
+	RcastedThroughBot = false
 end
 
 function GetOrbTarget()
@@ -163,8 +173,9 @@ function OnTick()
 
 	if Menu.keys.laneclear then LaneClear() end
 
- 	if not Menu.keyscombo and not Menu.keys.laneclear and ultActive and CountEnemyHeroInRange(Spells.R.range) < 1 then
+ 	if RcastedThroughBot and not Menu.keys.combo and not Menu.keys.laneclear and ultActive and CountEnemyHeroInRange(Spells.R.range) < 1 then
  		CastSpell(_R)
+ 		RcastedThroughBot = false
  	end
 
 end
@@ -189,10 +200,12 @@ function Combo()
 	if target ~= nil then
 		if Menu.combo.comboR then
 			if IsSpellReady(_R) and not ultActive and CountEnemyHeroInRange(Spells.R.range) >= Menu.combo.comboRx then
+				RcastedThroughBot = true
 				CastSpell(_R) 
 			end 
 			if IsSpellReady(_R) and ultActive and CountEnemyHeroInRange(Spells.R.range) < Menu.combo.comboRx then
 				CastSpell(_R)
+				RcastedThroughBot = false
 			end 
 		end 
 
@@ -250,8 +263,9 @@ function LaneClear()
 		end 
 	end 
 
-	if Menu.laneclear.laneclearR and IsSpellReady(_R) and not ultActive and GetEnemyMinions(Spells.R.range) >= 1 then
+	if Menu.laneclear.laneclearR and IsSpellReady(_R) and not ultActive and CountMinions(EnemyMinions.objects, Spells.R.range) >= 1 then
 		CastSpell(_R)
+		RcastedThroughBot = true
 	end   
 end
 
@@ -335,13 +349,6 @@ function OnProcessSpell(unit, spell)
     end 
 end
 
-function OnGainBuff(unit, buff)
-	if unit.isMe and GetDistance(buff) < 50 then
-		print("Gained:" .. buff.name)
-	end
-end 
-
-
 function Menu()
 
 	Menu = scriptConfig("Totally Swain by Nickieboy", "TotallySwain.cfg")
@@ -364,7 +371,8 @@ function Menu()
 	Menu.combo:addParam("comboW", "Use " .. Spells.W.name .. " (W)", SCRIPT_PARAM_ONOFF, true)
 	Menu.combo:addParam("comboE", "Use " .. Spells.E.name .. " (E)", SCRIPT_PARAM_ONOFF, true)
 	Menu.combo:addParam("comboR", "Use " .. Spells.R.name .. " (R)", SCRIPT_PARAM_ONOFF, true)
-	Menu.combo:addParam("comboRx", "Use R if x amount of people nearby", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
+	Menu.combo:addParam("comboRx", "Min amount of people nearby", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
+	Menu.combo:addParam("info", "Info:", SCRIPT_PARAM_INFO, "Above option is to only R if x people in range in combo")
 
 	 -- Harass
 	Menu:addSubMenu("Harass", "harass")
@@ -374,8 +382,8 @@ function Menu()
 
 	-- Farming
 	Menu:addSubMenu("Laneclear", "laneclear")
-	Menu.laneclear:addParam("laneclearR", "LaneClear using W", SCRIPT_PARAM_ONOFF, false)
-	Menu.laneclear:addParam("laneclearW", "Laneclear using R", SCRIPT_PARAM_ONOFF, false)
+	Menu.laneclear:addParam("laneclearW", "LaneClear using W", SCRIPT_PARAM_ONOFF, false)
+	Menu.laneclear:addParam("laneclearR", "Laneclear using R", SCRIPT_PARAM_ONOFF, false)
 
 --[[
  	 -- Killsteal
