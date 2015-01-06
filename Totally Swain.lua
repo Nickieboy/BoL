@@ -17,7 +17,8 @@
 						 		Fixed laneclear (Mistyped)
 						 		You can normally now do manual R
 						 			Haven't test it
-
+						> 1.36
+								Dead Check
 
 				Donate: Look link in thread
 				Bugs: Post in thread
@@ -28,7 +29,7 @@
 if myHero.charName ~= "Swain" then return end
 
 -- Download script
-local version = 1.35
+local version = 1.36
 local author = "Nickieboy"
 local SCRIPT_NAME = "Totally Swain"
 local AUTOUPDATE = true
@@ -177,6 +178,7 @@ function OnTick()
  		CastSpell(_R)
  		RcastedThroughBot = false
  	end
+ 	if myHero.dead then ultActive = false end 
 
 end
 
@@ -197,6 +199,7 @@ function OnDraw()
 end
 
 function Combo()
+	if myHero.dead then return end
 	if target ~= nil then
 		if Menu.combo.comboR then
 			if IsSpellReady(_R) and not ultActive and CountEnemyHeroInRange(Spells.R.range) >= Menu.combo.comboRx then
@@ -239,6 +242,7 @@ end
 
 
 function Harass()
+	if myHero.dead then return end
 	if target ~= nil then
 		if Menu.harass.harassE then
 			Abilities:Cast(_E, target)
@@ -255,7 +259,7 @@ function Harass()
 end 
 
 function LaneClear() 
-
+	if myHero.dead then return end
 	if Menu.laneclear.laneclearW and IsSpellReady(_W) then
 		local castPosition, hitchance, nTargets = GetBestAOEPosition(EnemyMinions.objects, Spells.W.range, Spells.W.radius, myHero)
 		if castPosition then
