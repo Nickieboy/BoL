@@ -21,7 +21,7 @@
 if myHero.charName ~= "Swain" then return end
 
 -- Download script
-local version = 1.2
+local version = 1.3
 local author = "Nickieboy"
 local SCRIPT_NAME = "Totally Swain"
 local AUTOUPDATE = true
@@ -104,6 +104,18 @@ function InitializeVariables()
 	SOWOrb, SxOrb = nil, nil
 	EnemyMinions = minionManager(MINION_ENEMY, Spells.R.range, myHero, MINION_SORT_HEALTH_ASC)
 	ts = TargetSelector(TARGET_LOW_HP, 625)
+	Items = {
+		BRK = { id = 3153, range = 450, reqTarget = true, slot = nil },
+		BWC = { id = 3144, range = 400, reqTarget = true, slot = nil },
+		DFG = { id = 3128, range = 750, reqTarget = true, slot = nil },
+		HGB = { id = 3146, range = 400, reqTarget = true, slot = nil },
+		RSH = { id = 3074, range = 350, reqTarget = false, slot = nil },
+		STD = { id = 3131, range = 350, reqTarget = false, slot = nil },
+		TMT = { id = 3077, range = 350, reqTarget = false, slot = nil },
+		YGB = { id = 3142, range = 350, reqTarget = false, slot = nil },
+		BFT = { id = 3188, range = 750, reqTarget = true, slot = nil },
+		RND = { id = 3143, range = 275, reqTarget = false, slot = nil }
+	}
 end
 
 function GetOrbTarget()
@@ -184,6 +196,9 @@ function Combo()
 			end 
 		end 
 
+		if Menu.combo.comboItems then
+			UseItems(target)
+		end 
 
 		if Menu.combo.comboE then
 			if target ~= nil then
@@ -282,7 +297,28 @@ function CalculateDamageWithBuff(targ)
 	end 
 
 	return Qdmg, Wdmg, Edmg
+end
+
+function UseItems(unit)
+	if unit ~= nil then
+		for _, item in pairs(Items) do
+			item.slot = GetInventorySlotItem(item.id)
+			if item.slot ~= nil and myHero:CanUseSpell(item.slot) == READY then
+				if item.reqTarget and GetDistance(unit) < item.range then
+					CastSpell(item.slot, unit)
+				elseif not item.reqTarget then
+					if (GetDistance(unit) - getHitBoxRadius(myHero) - getHitBoxRadius(unit)) < 50 then
+						CastSpell(item.slot)
+					end
+				end
+			end
+		end
+	end
 end 
+
+function getHitBoxRadius(target)
+    return GetDistance(target.minBBox, target.maxBBox)/2
+end
 
 
 function OnProcessSpell(unit, spell)
