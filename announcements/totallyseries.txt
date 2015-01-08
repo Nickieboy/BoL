@@ -1,1 +1,2 @@
 Last updated: Totally Tryndamere - Release
+"<font color=\"#000000\"><b>Totally Series:</b></font> <font color=\"#ffaa00\">" .. Last updated: Totally Tryndamere - Release .. "</font>"
