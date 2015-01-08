@@ -3,9 +3,17 @@
 		Simply automatically integrates things I have in all my scripts to make life easier.
 		It reduces code in my own scripts and makes it more readable.
 
+
+		Changelog:
+			* 0.1:
+				Release
+
+			* 0.2:
+				Fixed a typo (unit > target)
+
 --]]
 
-local version = 0.1
+local version = 0.2
 local AUTO_UPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Nickieboy/BoL/master/lib/TotallyLib.lua".."?rand="..math.random(1,10000)
@@ -400,7 +408,7 @@ function PredictionHelper:PredictSpell(target, delay, radius, range, speed, coll
 				return castPosition
 			end
 		elseif typeSkill == "lineaoe" then
-			local castPosition, hitChance = self.VP:GetLineAOECastPosition(unit, delay, radius, range, speed, myHero)
+			local castPosition, hitChance = self.VP:GetLineAOECastPosition(target, delay, radius, range, speed, myHero)
 		elseif typeSkill == "line" then
 			local castPosition, hitChance = self.VP:GetCircularCastPosition(target, delay, radius, range, speed, myHero, collision)
 			if hitChance >= self.menu.prediction.hitchance then
@@ -422,7 +430,7 @@ function PredictionHelper:PredictSpell(target, delay, radius, range, speed, coll
 				return castPosition
 			end 
 		elseif typeSkill == "lineaoe" then
-			local castPosition, info = Prodiction.GetLineAOEPrediction(unit, range, speed, delay, width, myHero)
+			local castPosition, info = Prodiction.GetLineAOEPrediction(target, range, speed, delay, width, myHero)
 			if collision and not info.mCollision() then
 				return castPosition
 			end
@@ -430,7 +438,7 @@ function PredictionHelper:PredictSpell(target, delay, radius, range, speed, coll
 				return castPosition
 			end
 		elseif typeSkill == "line" then
-			local castPosition, info = Prodiction.GetPrediction(unit, range, speed, delay, width, source)
+			local castPosition, info = Prodiction.GetPrediction(target, range, speed, delay, width, source)
 			if collision and not info.mCollision() then
 				return castPosition
 			end
