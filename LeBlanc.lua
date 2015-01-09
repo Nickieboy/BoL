@@ -60,7 +60,6 @@
 			* 0.1 (1 January)
 				Happy New Year!
 				Testing last stuff with a headache 
-
 			* 0.2 (5 January)
 				Deleted Mixed Mode
 				Deleted Potions
@@ -70,6 +69,8 @@
 				Tweaked Smart W
 				Tweaked Smart Combo
 				Integration with SxOrbWalk tweaked
+			* 0.3 (9 Jan)
+				Few more tweaks and optimalizations
 
 
 
@@ -85,9 +86,11 @@ if myHero.charName:lower() ~= "leblanc" then return end
 
 _G.Leblanc_loaded = true
 
-
+function Say(text)
+	print("<font color=\"#FF0000\"><b>Totally LeBlanc:</b></font> <font color=\"#FFFFFF\">" .. text .. "</font>")
+end
 --[[		Auto Update		]]
-local version = "0.2"
+local version = "0.3"
 local author = "Totally Legit"
 local SCRIPT_NAME = "LeBlanc"
 local AUTOUPDATE = true
@@ -96,22 +99,21 @@ local UPDATE_PATH = "/Nickieboy/BoL/master/LeBlanc.lua".."?rand="..math.random(1
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
-function AutoupdaterMsg(msg) print("<font color=\"#FF0000\"><b>Totally LeBlanc:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
 if AUTOUPDATE then
 	local ServerData = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/version/LeBlanc.version")
 	if ServerData then
 		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
 		if ServerVersion then
 			if tonumber(version) < ServerVersion then
-				AutoupdaterMsg("New version available "..ServerVersion)
-				AutoupdaterMsg("Updating, please don't press F9")
-				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () AutoupdaterMsg("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
+				Say("New version available "..ServerVersion)
+				Say("Updating, please don't press F9")
+				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () Say("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
 			else
-				AutoupdaterMsg("You have got the latest version ("..ServerVersion..")")
+				Say("You have got the latest version ("..ServerVersion..")")
 			end
 		end
 	else
-		AutoupdaterMsg("Error downloading version info")
+		Say("Error downloading version info")
 	end
 end
 
@@ -281,8 +283,7 @@ function OnLoad()
 		ProdE = Prod:AddProdictionObject(_E, Spells.E.range, Spells.E.speed, Spells.E.delay, Spells.W.radius)   
 	end 
 
-	Say("Succesfully Loaded - Please report any bugs on the thread.")
-	Say("I am fully aware of the fps drops, however, I can't reduce them any harder as I actually have.")
+	Say("Succesfully Loaded - Please report any bugs on the thread. Give me all information: Keys used, Settings used, Region you're playing on, ...")
 
 	DrawMenu()
 
@@ -292,23 +293,26 @@ function OnLoad()
 	elseif heroManager.iCount == 6 then
 		arrangePrioritysTT()
 		--Say("Arranged Priorities")
-    else
-		Say("ERROR: Couldn't arrange priorities. Too few champions")
-	end
+    end
+
+	-- TotallySeries Message
+	serverMessage = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/announcements/totallyseries.txt")
+	print("<font color=\"#000000\"><b>Totally Series (Latest News):</b></font> <font color=\"#ffaa00\">" .. tostring(serverMessage) .. "</font>")
 end
 
 function OnDraw()
-	if Menu.drawings.draw then
+	if myHero.dead then return end
 
-		if Menu.drawings.drawQ then
+	if Menu.drawings.draw then
+		if Menu.drawings.drawQ and CanDrawSpell(_Q) then
 			DrawCircle(myHero.x, myHero.y, myHero.z, Spells.Q.range, RGB(255, 102, 102))
 		end
 
-		if Menu.drawings.drawW then
+		if Menu.drawings.drawW and CanDrawSpell(_W) then
 			DrawCircle(myHero.x, myHero.y, myHero.z, Spells.W.range, RGB(255, 51, 153))
 		end
 
-		if Menu.drawings.drawE then
+		if Menu.drawings.drawE and CanDrawSpell(_E) then
 			DrawCircle(myHero.x, myHero.y, myHero.z, Spells.E.range, RGB(255, 153, 153))
 		end
 
@@ -323,25 +327,39 @@ function OnDraw()
 				end 
 			end 
 		end 
-
 	end 
 end 
 
+function CanDrawSpell(spell)
+	if Menu.drawings.drawSpellReady then
+		if spell == _Q then
+			if not Qready then
+				return false
+			end
+		elseif spell == _W then
+			if not Wready then
+				return false
+			end
+		elseif spell == _E then
+			if not Eready then
+				return false
+			end
+		end
+	end
+	return true
+end
+
 
 function OnTick()
-
-
 	SpellReadyChecks()
-
 	enemyMinions:update()
-
 	target = GetOrbTarget()
 
 	if Menu.settingsW.useOptional then
 		WChecks()
 		LeBlancSpecificSpellChecks()
 	end 
-	
+
 	CalcDamage()
 
 	if SxOrb:GetMode() == 1 then
@@ -417,33 +435,29 @@ function OnProcessSpell(obj, spell)
 end
 
 function LeBlancSpecificSpellChecks()
-
 	-- W Activated Settings
 		-- W and W by R activated
 	if Menu.settingsW.useOptionalW == 1 then
 		if wUsed() and wrUsed() then
-			local HeroInRange = CountEnemyHeroInRange(600)
-			if #EnemiesNearWR < #EnemiesNearW and #EnemiesNearWR < HeroInRange then
+			if #EnemiesNearWR < #EnemiesNearW and #EnemiesNearWR < CountEnemyHeroInRange(600) then
 				if not Qready and not Eready then
 					CastSpell(_R)
 				end 
-			elseif #EnemiesNearW > #EnemiesNearWR and #EnemiesNearW < HeroInRange then
+			elseif #EnemiesNearW > #EnemiesNearWR and #EnemiesNearW < CountEnemyHeroInRange(600) then
 				if not Qready and not Eready then
 					CastSpell(_W)
 				end 
 			end 
 			-- Normal W
 		elseif wUsed() then
-			local HeroInRange = CountEnemyHeroInRange(600)
-			if (#EnemiesNearW < HeroInRange) then
+			if (#EnemiesNearW < CountEnemyHeroInRange(600)) then
 				if not Qready and not Eready then
 					CastSpell(_W)
 				end 
 			end  
 			-- W activated by using R
 		elseif wrUsed() then
-			local HeroInRange = CountEnemyHeroInRange(600)
-			if #EnemiesNearWR < HeroInRange then
+			if #EnemiesNearWR < CountEnemyHeroInRange(600) then
 				if not Qready and not Eready then
 					CastSpell(_W)
 				end 
@@ -491,27 +505,21 @@ function WChecks()
 			end 
 		end 
 	end
-
 	if not wUsed() and #EnemiesNearW >= 1 then
-		for i, enemy in ipairs(GetEnemyHeroes()) do
-			if table.contains(EnemiesNearW, enemy) then
-				table.remove(EnemiesNearW, i)
-			end 
+		for i, _ in ipairs(EnemiesNearW) do
+			table.remove(EnemiesNearW, i)
 		end 
 	end 
-
 	if not wrUsed() and #EnemiesNearWR then
-		for i, enemy in ipairs(GetEnemyHeroes()) do
-			if table.contains(EnemiesNearWR, enemy) then
-				table.remove(EnemiesNearWR, i)
-			end 
+		for i, _ in ipairs(EnemiesNearWR) do
+			table.remove(EnemiesNearWR, i)
 		end 
 	end 
 end
 
 
 function Combo()
-
+	if myHero.dead then return end
 	if target ~= nil and ValidTarget(target, 600) then
 
 		exampleTarget = target
@@ -533,19 +541,22 @@ function Combo()
 			DelayAction(function(target) combo = {_R, _W, _E} PerformCombo(combo, target) end, 0.5, {target})
 		---------------- QWRE -----------------------
 		elseif Menu.combo.comboWay == 3 then
-			combo = {_Q, _W, _R, _E}
+			combo = {_Q, _W}
+			DelayAction(function(target) combo = {_R, _E} PerformCombo(combo, target) end, 0.5, {target})
 		------------------ WQRE ----------------------
 		elseif Menu.combo.comboWay == 4 then
-			combo = {_W, _Q, _R, _E}
+			combo = {_W, _Q}
+			DelayAction(function(target) combo = {_R, _E} PerformCombo(combo, target) end, 0.5, {target})
 		------------------- WRQE --------------------
 		elseif Menu.combo.comboWay == 5 then
-			combo = {_W, _R, _Q, _E}	
+			combo = {_W}	
+			DelayAction(function(target) combo = {_R, _Q, _E} PerformCombo(combo, target) end, 0.5, {target})
 		end 
 
 		PerformCombo(combo, target)
 
 		-- Return to basic W if target is dead during combo
-		if exampleTarget and exampleTarget.dead and wUsed() and Menu.settingsW.useOptionalW == 2 or Menu.settingsW.useOptionalW == 4 then
+		if exampleTarget and exampleTarget.dead and wUsed() and Menu.settingsW.useOptional and (Menu.settingsW.useOptionalW == 2 or Menu.settingsW.useOptionalW == 4) then
 			CastSpell(_W)
 		end 
 
@@ -563,28 +574,22 @@ function Harass()
 			if Menu.debug.useDebug then
 		    	Say("Performing harass on: " .. target.charName)
 		  	end
-
 		if Menu.harass.harassQ then
 			CastQ(target) 
 		end 
-
 		if Menu.harass.harassW then
 			if CastW(target) then castedW = true end
-			if castedW == true then CastSpell(_W) end
-
 		end 
-
 		if Menu.harass.harassE then
 			CastE(target)
 		end 
-
+		if castedW == true and wUsed() then CastSpell(_W) end
 	end 
 end 
 
 
 -- In Progress
 function Farm()
-
 	local hasCasted = false
 
 	if Menu.farm.farmAA and SxOrb:CanAttack() == true then return end
@@ -594,7 +599,6 @@ function Farm()
 			if Menu.farm.farmRange and GetDistanceSqr(minion) < Spells.AA.range * Spells.AA.range and GetDistanceSqe(minion) < Spells.Q.range * Spells.Q.range then
 				if getDmg("Q", minion, myHero) > minion.health then
 					if CastQ(minion, false) then hasCasted = true end 
-					
 				end 
 				if hasCasted == true then break end 
 			end 
@@ -607,9 +611,7 @@ function Farm()
 			end 
 		end 
 	end 
-
 	if hasCasted then return end 
-
 	if Menu.farm.farmW then
 		for i, minion in ipairs(enemyMinions.objects) do
 			if Menu.farm.farmRange and GetDistanceSqr(minion) < Spells.AA.range * Spells.AA.range and GetDistanceSqr(minion) < Spells.W.range * Spells.W.range then
@@ -678,19 +680,15 @@ function LaneClear()
 	end 
 end
 
-
 function KillSteal()
 	for i, enemy in ipairs(GetEnemyHeroes()) do 
 		if ValidTarget(enemy, 600) and not enemy.dead and enemy.visible and Menu.killsteal.enemies[enemy.charName] then
-
 			local Qdmg = ((Qready and Menu.killsteal.killstealQ and SpellDmgCalculations("Q", enemy)) or 0)
 			local RQdmg = ((Rready and lastActivated == Spells.Q.spellname and SpellDmgCalculations("RQ", enemy)) or 0)
 			local QdmgMark = (((Qready or Rready) and (Menu.killsteal.killstealQ or Menu.killsteal.killstealR) and SpellDmgCalculations("QProc", enemy)) or 0)
 			local Wdmg = ((Wready and Menu.killsteal.killstealW and SpellDmgCalculations("W", enemy)) or 0)
 			local RWdmg = ((Rready and Menu.killsteal.killstealR and not wrUsed() and lastActivated == Spells.W.spellname and SpellDmgCalculations("RW", enemy)) or 0)
 			local Edmg = ((Eready and Menu.killsteal.killstealE and SpellDmgCalculations("E", enemy)) or 0)
-
-
 			if Qdmg > Wdmg and Wdmg > enemy.health then
 				CastW(enemy)
 						if Menu.debug.useDebug then
@@ -715,18 +713,12 @@ function KillSteal()
 	end 
 end 
 
-
-
 -- Obtain a target
 function GetOrbTarget()
 	ts:update()
-	if _G.MMA_Target and _G.MMA_Target.type == myHero.type then return _G.MMA_Target end
-	if _G.AutoCarry and _G.AutoCarry.Crosshair and _G.AutoCarry.Attack_Crosshair and _G.AutoCarry.Attack_Crosshair.target and _G.AutoCarry.Attack_Crosshair.target.type == myHero.type then return _G.AutoCarry.Attack_Crosshair.target end
-	if SxOrbloaded then return SxOrb:GetTarget(1000) end 
+	if SxOrbloaded then return SxOrb:GetTarget(1300) end 
 	return ts.target
 end 
-
-
 
 -- Zhonyas settings: Will be updated and improved
 function Zhonyas()
@@ -885,6 +877,7 @@ function DrawMenu()
 	Menu.combo:addParam("comboWay", "Perform Combo:", SCRIPT_PARAM_LIST, 1, {"Smart", "QRWE", "QWRE", "WQRE", "WRQE"})
 	Menu.combo:addParam("comboItems", "Use Items", SCRIPT_PARAM_ONOFF, true)
 	Menu.combo:addParam("comboAA", "Use AAs", SCRIPT_PARAM_ONOFF, true)
+	Menu.combo:addParam("comboGap", "Use W to GapClose", SCRIPT_PARAM_ONOFF, true)
 
 	-- W Settings
 	Menu:addSubMenu(name .. "Settings: W", "settingsW")
@@ -908,7 +901,7 @@ function DrawMenu()
 	-- LaneClear
 	Menu:addSubMenu(name .. "Laneclear", "laneclear")
 	Menu.laneclear:addParam("laneclearQ", "Use " .. Spells.Q.name .. " (Q)", SCRIPT_PARAM_ONOFF, true)
-	Menu.laneclear:addParam("laneclearW", "Use " .. Spells.W.name .. " (Q)", SCRIPT_PARAM_ONOFF, true)
+	Menu.laneclear:addParam("laneclearW", "Use " .. Spells.W.name .. " (W)", SCRIPT_PARAM_ONOFF, true)
 	Menu.laneclear:addParam("laneclearR", "Use " .. Spells.R.name .. " (R)", SCRIPT_PARAM_ONOFF, false)
 
  	 -- Killsteal
@@ -917,7 +910,7 @@ function DrawMenu()
  	Menu.killsteal:addParam("killstealQ", "Use " .. Spells.Q.name .. " (Q)", SCRIPT_PARAM_ONOFF, true)
  	Menu.killsteal:addParam("killstealW", "Use " .. Spells.W.name .. " (W)", SCRIPT_PARAM_ONOFF, true)
  	Menu.killsteal:addParam("killstealE", "Use " .. Spells.E.name .. " (E)", SCRIPT_PARAM_ONOFF, false)
- 	Menu.killsteal:addParam("killstealR", "Use " .. Spells.R.name .. " (E)", SCRIPT_PARAM_ONOFF, false)
+ 	Menu.killsteal:addParam("killstealR", "Use " .. Spells.R.name .. " (R)", SCRIPT_PARAM_ONOFF, false)
  	Menu.killsteal:addSubMenu("KillSteal Enemy", "enemies")
  	for i, enemy in ipairs(GetEnemyHeroes()) do
  		if table.contains(priorityTable.Support, enemy.charName) or table.contains(priorityTable.AD_Carry, enemy.charName) or table.contains(priorityTable.AP, enemy.charName) then
@@ -940,6 +933,7 @@ function DrawMenu()
  	Menu.drawings:addParam("drawE", "Draw " .. Spells.E.name .. " (E)", SCRIPT_PARAM_ONOFF, true)
  	Menu.drawings:addParam("drawKillable", "Draw Killable Text", SCRIPT_PARAM_ONOFF, true)
  	Menu.drawings:addParam("drawKillableWidth", "Draw Killable Width", SCRIPT_PARAM_SLICE, 10, 5, 20, 0)
+ 	Menu.drawings:addParam("drawSpellReady", "Don't draw if spell is CD", SCRIPT_PARAM_ONOFF, false)
 
  	Menu:addSubMenu(name .. "Prediction", "prediction")
  	if prodLoaded then
@@ -1143,6 +1137,8 @@ function GetEPrediction(target)
 end
 
 function PerformCombo(comboTable, target)
+	if not comboTable and not type(comboTable) == "table" then return end
+
 	for i, spell in ipairs(comboTable) do
 		if spell == _Q then
 			CastQ(target, false)
@@ -1172,8 +1168,10 @@ function CastQ(target, castedByR)
 end 
 
 function CastW(target, castedByR)
+	local WRangeRadius = Spells.W.range + 100
+	local WRangeRadiusSqr = WRangeRadius * WRangeRadius
 	local castedByR = (castedByR and castedByR == true and Rready and not wrUsed()) or nil
-	if not target.dead and GetDistanceSqr(target) <= Spells.W.range * Spells.W.range then
+	if not target.dead and GetDistanceSqr(target) <= WRangeRadiusSqr then
 		if target.type == myHero.type then
 			if castedByR then
 				local castPosition, hitChance = GetWPrediction(target)
@@ -1205,13 +1203,12 @@ end
 
 function GapClose(spell, range, target)
 	local range = range and range  or myHero.range
-	local rangeSqr = range and range * range or myHero.range * myHero.range
-	
+
 	if spell == _W then
 		local newPos = Vector(myHero.visionPos) + (Vector(target) - myHero.visionPos):normalized() * range
 
 		if not isWall(D3DXVECTOR3(newPos.x, newPos.y, newPos.z)) and not UnderTurret(newPos, true) then
-			CastSpell(_W, newPos.x, newPos.y)
+			CastSpell(_W, newPos.x, newPos.z)
 			return true
 		end
 	end
@@ -1252,7 +1249,7 @@ function CastR(target, castOnly)
 			end 
 		elseif castOnly == _W and not target.dead then
 			if lastActivated == Spells.Q.spellname then
-				if CastQ(target, true) then return true end 
+				if CastW(target, true) then return true end 
 			end 
 		end 
 		return false
@@ -1363,7 +1360,7 @@ function SmartCombo(targ)
 
 		return combo
 
-	elseif distanceTo > Spells.E.range * Spells.E.range and GetDistance(targ) < Spells.Q.range + Spells.W.range then
+	elseif Menu.combo.comboGap and distanceTo > Spells.E.range * Spells.E.range and GetDistance(targ) < (Spells.Q.range + Spells.W.range) then
 
 		if not wUsed() then
 			if GapClose(_W, Spells.W.range, targ) then
@@ -1387,8 +1384,6 @@ end
 
 
 function SpellDmgCalculations(parameter, target)
-
-
 	local dmg = 0
 
 	if parameter == "Q" then
@@ -1409,11 +1404,6 @@ function SpellDmgCalculations(parameter, target)
 
 	return myHero:CalcMagicDamage(target, dmg)
 end
-
-function Say(text)
-	print("<font color=\"#FF0000\"><b>Totally LeBlanc:</b></font> <font color=\"#FFFFFF\">" .. text .. "</font>")
-end
-
 
 function DrawCircleNextLvl(x, y, z, radius, width, color, chordlength)
 	radius = radius or 300
