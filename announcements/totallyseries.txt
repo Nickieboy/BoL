@@ -1,1 +1,1 @@
-Message: My exams are starting this week and I am working on 2.0 scripts at the moment, so I won't have a lot of time to improve my 1.0 scripts.
+Updated Totally Swain, adjusted TotallyLib and a possible fix for Tryndamere
