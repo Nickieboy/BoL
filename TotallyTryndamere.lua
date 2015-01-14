@@ -1,7 +1,7 @@
 if myHero.charName ~= "Tryndamere" then return end
 
 -- Download script
-local version = 1.00
+local version = 1.01
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Tryndamere"
 local AUTOUPDATE = true
@@ -155,7 +155,7 @@ function CastW(target)
 	if target ~= nil then
 		if isBothFacing(myHero, target) and GetDistance(target) < Spells.AA.range then
 			CastSpell(_W)
-		elseif not isFacing(myHero, target) and GetDistance(target) < Spells.W.range then
+		elseif not isFacing(myHero, target) and not isFacing(target, myHero) and GetDistance(target) < Spells.W.range and GetDistance(target) > Spells.AA.range then
 			CastSpell(_W)
 		end
 	end 

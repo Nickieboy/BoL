@@ -19,6 +19,8 @@
 						 			Haven't test it
 						> 1.36
 								Dead Check
+						> 1.37
+								Temp fixes
 
 				Donate: Look link in thread
 				Bugs: Post in thread
@@ -29,7 +31,7 @@
 if myHero.charName ~= "Swain" then return end
 
 -- Download script
-local version = 1.36
+local version = 1.37
 local author = "Nickieboy"
 local SCRIPT_NAME = "Totally Swain"
 local AUTOUPDATE = true
@@ -38,22 +40,25 @@ local UPDATE_PATH = "/Nickieboy/BoL/master/Totally Swain.lua".."?rand="..math.ra
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
-function AutoupdaterMsg(msg) print("<font color=\"#6699ff\"><b>Totally Swain:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
+function Say(text)
+	print("<font color=\"#FF0000\"><b>Totally Swain:</b></font> <font color=\"#FFFFFF\">" .. text .. "</font>")
+end
+
 if AUTOUPDATE then
 	local ServerData = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/version/TotallySwain.version")
 	if ServerData then
 		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
 		if ServerVersion then
 			if tonumber(version) < ServerVersion then
-				AutoupdaterMsg("New version available "..ServerVersion)
-				AutoupdaterMsg("Updating, please don't press F9")
-				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () AutoupdaterMsg("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
+				Say("New version available "..ServerVersion)
+				Say("Updating, please don't press F9")
+				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () Say("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
 			else
-				AutoupdaterMsg("You have got the latest version (v"..ServerVersion..") of Totally Swain by " .. author)
+				Say("You have got the latest version (v"..ServerVersion..") of Totally Swain by " .. author)
 			end
 		end
 	else
-		AutoupdaterMsg("Error downloading version info")
+		Say("Error downloading version info")
 	end
 end
 
@@ -85,13 +90,17 @@ for DOWNLOAD_LIB_NAME, DOWNLOAD_LIB_URL in pairs(REQUIRED_LIBS) do
 	end
 end
 
-prodictionLoaded = false
 if VIP_USER and FileExist(LIB_PATH.."Prodiction.lua") then
 	require "Prodiction"
-	prodictionLoaded = true
 end
 
+if not FileExist(LIB_PATH .. "SxOrbWalk.lua") then return Say("You need SxOrbWalk for this script. Please download this library.") end
+if not FileExist(LIB_PATH .. "TotallyLib.lua") then return Say("You need TotallyLib for this script. Please download this library.") end
+
 function InitializeVariables()
+	serverMessage = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/announcements/totallyseries.txt")
+	print("<font color=\"#000000\"><b>Totally Series (Latest News):</b></font> <font color=\"#ffaa00\">" .. tostring(serverMessage) .. "</font>")
+
 	Spells = {
 		["Q"] = {name = "Decrepify", range = 625, radius = 0, delay = 0, speed = 0},
 		["W"] = {name = "Nevermore", range = 900, radius = 125, delay = 0.85, speed = math.huge},
@@ -99,17 +108,12 @@ function InitializeVariables()
 		["R"] = {name = "Ravenous Flock", range = 800, delay = 0, speed = 0}
 
 	}
-	AA = 500
-	rangeAVG = 625 * 625
-	Qready, Wready, Eready, Rready = false, false, false, false
-	Hready, Iready, Bready = false, false, false
-	Qtarget, Wtarget, Etarget = nil, nil, nil
-	ultActive = false
-	heal, ignite, barrier = nil
+
+	target = nil
+	RcastedThroughBot = false
+
 	SxOrbloaded = false
-	MMAloaded = false
-	SACloaded = false
-	SOWOrb, SxOrb = nil, nil
+	SxOrb = nil
 	EnemyMinions = minionManager(MINION_ENEMY, Spells.R.range, myHero, MINION_SORT_HEALTH_ASC)
 
 	ts = TargetSelector(TARGET_LOW_HP, 625)
@@ -125,41 +129,33 @@ function InitializeVariables()
 		BFT = { id = 3188, range = 750, reqTarget = true, slot = nil },
 		RND = { id = 3143, range = 275, reqTarget = false, slot = nil }
 	}
-
-	RcastedThroughBot = false
 end
 
 function GetOrbTarget()
-	ts:update()
-	if SACloaded then
-    	if _G.AutoCarry and _G.AutoCarry.Crosshair and _G.AutoCarry.Attack_Crosshair and _G.AutoCarry.Attack_Crosshair.target and _G.AutoCarry.Attack_Crosshair.target.type == myHero.type then 
-    		return _G.AutoCarry.Attack_Crosshair.target 
-    	end
-  	end
-	if MMAloaded then return _G.MMA_Target end 
 	if SxOrbloaded then return SxOrb:GetTarget() end
 	return ts.target
 end 
 
 function OnLoad()
-	InitializeVariables()
-	DelayAction(CheckOrbWalker, 1)
 
+	InitializeVariables()
+	CheckOrbWalker()
+
+	-- Basic libraries
 	VP = VPrediction()
 	SxOrb = SxOrbWalk()
 
+	-- Drawing Menu
 	Menu()
 
-	DelayAction(function() 
-		if SACloaded or MMAloaded then
-			Menu.Orbwalker.General.Enabled = false
-		end 
-	end, 1.1)
-
+	-- TotallyLib Spell initializing
 	Abilities = SpellHelper(VP, Menu)
 	Abilities:AddSpell(_Q, Spells.Q.range)
 	Abilities:AddSpell(_E, Spells.E.range)
 	Abilities:AddSkillShot(_W, Spells.W.range, Spells.W.delay, Spells.W.radius, Spells.W.speed, false, "circaoe")
+
+
+	Say("Succesfully loaded. Enjoy the script. Please give feedback on the thread.")
 
 end
 
@@ -174,19 +170,26 @@ function OnTick()
 
 	if Menu.keys.laneclear then LaneClear() end
 
- 	if RcastedThroughBot and not Menu.keys.combo and not Menu.keys.laneclear and ultActive and CountEnemyHeroInRange(Spells.R.range) < 1 then
+ 	if RcastedThroughBot and not Menu.keys.combo and not Menu.keys.laneclear and ultActive() and CountEnemyHeroInRange(Spells.R.range) < 1 then
  		CastSpell(_R)
  		RcastedThroughBot = false
  	end
- 	if myHero.dead then ultActive = false end 
+
+ 	if myHero.dead and RcastedThroughBot then 
+ 		RcastedThroughBot = false
+ 	end 
 
 end
 
 
 function OnDraw()
+	if myHero.dead then return end
 	if Menu.drawings.draw then
 		if Menu.drawings.drawQ then
 			DrawCircle(myHero.x, myHero.y, myHero.z, Spells.Q.range, 0x111111)
+		end
+		if Menu.drawings.drawW then
+			DrawCircle(myHero.x, myHero.y, myHero.z, Spells.W.range, 0x111111)
 		end
 		if Menu.drawings.drawE then
 			DrawCircle(myHero.x, myHero.y, myHero.z, Spells.E.range, 0x111111)
@@ -200,16 +203,19 @@ end
 
 function Combo()
 	if myHero.dead then return end
+
 	if target ~= nil then
 		if Menu.combo.comboR then
-			if IsSpellReady(_R) and not ultActive and CountEnemyHeroInRange(Spells.R.range) >= Menu.combo.comboRx then
+			if IsSpellReady(_R) and not ultActive() and CountEnemyHeroInRange(Spells.R.range) >= Menu.combo.comboRx then
 				RcastedThroughBot = true
 				CastSpell(_R) 
-			end 
-			if IsSpellReady(_R) and ultActive and CountEnemyHeroInRange(Spells.R.range) < Menu.combo.comboRx then
+			elseif IsSpellReady(_R) and ultActive() and CountEnemyHeroInRange(Spells.R.range) < Menu.combo.comboRx then
 				CastSpell(_R)
 				RcastedThroughBot = false
 			end 
+			if ultActive() and not RcastedThroughBot then
+				RcastedThroughBot = true
+			end
 		end 
 
 		if Menu.combo.comboItems then
@@ -217,27 +223,21 @@ function Combo()
 		end 
 
 		if Menu.combo.comboE then
-			if target ~= nil then
-				Abilities:Cast(_E, target)
-			end
+			Abilities:Cast(_E, target)
 		end 
 
 		if Menu.combo.comboQ then
-			if target ~= nil then
-				Abilities:Cast(_Q, target)
-			end 
+			Abilities:Cast(_Q, target) 
 		end  
 
 		if Menu.combo.comboW then
-			--if Wready then
-				--local castPosition, hitchance, nTargets = VP:GetCircularAOECastPosition(target, Spells.W.delay, Spells.W.radius, Spells.W.range, Spells.W.speed, myHero)
-				--if castPosition then
-					--CastSpell(_W, castPosition.x, castPosition.z)
-				--end
-			--end  
 			Abilities:Cast(_W, target)
 		end
-	end 
+	else
+		if ultActive() and RcastedThroughBot and not (CountEnemyHeroInRange(Spells.R.range) >= Menu.combo.comboRx) then
+ 			CastSpell(_R) 
+ 		end
+ 	end
 end
 
 
@@ -267,10 +267,13 @@ function LaneClear()
 		end 
 	end 
 
-	if Menu.laneclear.laneclearR and IsSpellReady(_R) and not ultActive and CountMinions(EnemyMinions.objects, Spells.R.range) >= 1 then
+	if Menu.laneclear.laneclearR and IsSpellReady(_R) and not ultActive() and CountMinions(EnemyMinions.objects, Spells.R.range) >= 1 then
 		CastSpell(_R)
 		RcastedThroughBot = true
-	end   
+	elseif Menu.laneclear.laneclearR and IsSpellReady(_R) and ultActive() and CountMinions(EnemyMinions.objects, Spells.R.range) < 1 then
+		CastSpell(_R)
+		RcastedThroughBot = false
+	end
 end
 
 
@@ -339,18 +342,9 @@ function getHitBoxRadius(target)
 end
 
 
-function OnProcessSpell(unit, spell)
-    if unit.isMe then
-    	if spell.name == "SwainMetamorphism" and ultActive then
-    		 ultActive = false
-    		 return
-    	end 
 
-    	if spell.name == "SwainMetamorphism" and not ultActive then
-    		ultActive = true
-    		return
-    	end 
-    end 
+function ultActive()
+	return (myHero:GetSpellData(_Q).range + GetDistance(myHero.minBBox)/2) > 60
 end
 
 function Menu()
@@ -401,16 +395,13 @@ function Menu()
  	Menu:addSubMenu("Drawings", "drawings")
  	Menu.drawings:addParam("draw", "Use Drawings", SCRIPT_PARAM_ONOFF, true)
  	Menu.drawings:addParam("drawQ", "Draw " .. Spells.Q.name .. " (Q)", SCRIPT_PARAM_ONOFF, true)
- 	Menu.drawings:addParam("drawE", "Draw " .. Spells.W.name .. " (E)", SCRIPT_PARAM_ONOFF, true)
+ 	Menu.drawings:addParam("drawW", "Draw " .. Spells.W.name .. " (W)", SCRIPT_PARAM_ONOFF, true)
+ 	Menu.drawings:addParam("drawE", "Draw " .. Spells.E.name .. " (E)", SCRIPT_PARAM_ONOFF, true)
  	Menu.drawings:addParam("drawR", "Draw " .. Spells.R.name .. " (R)", SCRIPT_PARAM_ONOFF, true)
 
  	--Misc
  	Menu:addSubMenu("Misc", "misc")
- 	DelayAction(function() 
- 		if _G.TotallyLib_Loaded then
-			MenuMisc(Menu.misc, true)
-		end
- 	end, 0.5)
+	MenuMisc(Menu.misc, true)
  	
 
 	--Orbwalker
@@ -428,19 +419,7 @@ end
 
 
 function CheckOrbWalker()
-	if _G.AutoCarry then
-	    if _G.AutoCarry.Helper then
-	    	SACloaded = true
-	     	print("<font color=\"#20b2aa\">Totally Swain:</font> <font color=\"#FF0000\"> Loaded SAC: Reborn</font>")
-	    end
-  	elseif _G.Reborn_Loaded then
-    	DelayAction(CheckSACMMA, 1) 
-	elseif _G.MMA_Loaded then
-		MMAloaded = true
-		print("<font color=\"#20b2aa\">Totally Swain:</font> <font color=\"#FF0000\"> Loaded MMA</font>")
-	elseif FileExist(LIB_PATH .. "SxOrbWalk.lua") then
+	if FileExist(LIB_PATH .. "SxOrbWalk.lua") then
 		SxOrbloaded = true
-		print("<font color=\"#20b2aa\">Totally Swain:</font> <font color=\"#FF0000\"> Loaded SxOrbWalk</font>")
 	end 
 end 
-

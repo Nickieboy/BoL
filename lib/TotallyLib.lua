@@ -11,9 +11,12 @@
 			* 0.2:
 				Fixed a typo (unit > target)
 
+			* 0.22
+				Few more bug fixes
+
 --]]
 
-local version = 0.21
+local version = 0.22
 local AUTO_UPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Nickieboy/BoL/master/lib/TotallyLib.lua".."?rand="..math.random(1,10000)
@@ -64,18 +67,16 @@ function MenuMisc:__init(Menu, includeSummoners)
 
 	self.menu = Menu
 
- 	AddTickCallback(function() self:OnTick() end)
+	self.isRecalling = false
+
+	AddTickCallback(function() self:OnTick() end)
 	AddCreateObjCallback(function(obj) self:OnCreateObj(obj) end)
 	AddDeleteObjCallback(function(obj) self:OnDeleteObj(obj) end)
-
-	self.drinkingHealth = false
-	self.drinkingMana = false
-	self.isRecalling = false
 end 
 
 
 function MenuMisc:DrinkPotions()
-	if not self.drinkingHealth and not self.isRecalling and not InFountain() then
+	if not TargetHaveBuff("RegenerationPotion", myHero) and not self.isRecalling and not InFountain() then
 		local healthSlot = GetInventorySlotItem(2003)
 		if healthSlot ~= nil then
 			if (myHero.health / myHero.maxHealth <= self.menu.autopotions.health) then
@@ -83,7 +84,7 @@ function MenuMisc:DrinkPotions()
 			end 
 		end 
 	end
-	if not self.drinkingHealth and not self.isRecalling and not InFountain() then
+	if not TargetHaveBuff("FlaskOfCrystalWater", myHero) and not self.isRecalling and not InFountain() then
 		local manaSlot = GetInventorySlotItem(2004)
 		if manaSlot ~= nil then
 			if (myHero.mana / myHero.maxMana <= self.menu.autopotions.mana) then
@@ -95,44 +96,24 @@ end
   
  function MenuMisc:CheckZhonyas()
  	local zhonyasSlot = GetInventorySlotItem(3157)
- 	if zhonyasSlot ~= nil and IsSpellReady(self.zhonyasSlot) then
-		if (myHero.health / myHero.maxHealth) <= self.zhonyas.zhonyasunder then
+ 	if zhonyasSlot ~= nil and IsSpellReady(zhonyasSlot) then
+		if (myHero.health / myHero.maxHealth) <= self.menu.zhonyas.zhonyasunder then
 			CastSpell(zhonyasSlot)
 		end 
 	end 	
  end 
 
 function MenuMisc:OnCreateObj(obj)
-	if obj.name:find("Global_Item_HealthPotion.troy") then
-		if GetDistanceSqr(obj) <= 2500 then
-			self.drinkingHealth = true
-		end
-	end
-	if obj.name:find("Global_Item_ManaPotion.troy") then
-		if GetDistanceSqr(obj) <= 2500 then
-			self.drinkingMana = true
-		end
-	end
 	if obj.name:find("TeleportHome.troy") then
-		if GetDistanceSqr(obj) <= 2500 then
+		if GetDistance(obj) <= 70 then
 			self.isRecalling = true
 		end
 	end
 end
 
 function MenuMisc:OnDeleteObj(obj)
-	if obj.name:find("Global_Item_HealthPotion.troy") then
-		if GetDistanceSqr(obj) <= 2500 then
-			self.drinkingHealth = false
-		end
-	end
-	if obj.name:find("Global_Item_ManaPotion.troy") then		
-		if GetDistanceSqr(obj) <= 2500 then
-			self.drinkingMana = false
-		end
-	end
 	if obj.name:find("TeleportHome.troy") then
-		if GetDistanceSqr(obj) <= 2500 then
+		if GetDistance(obj) <= 70 then
 			self.isRecalling = false
 		end
 	end
@@ -141,6 +122,7 @@ end
 function MenuMisc:OnTick()
 	if self.menu.autopotions.usePotion then self:DrinkPotions() end
 	if self.menu.zhonyas.zhonyas then self:CheckZhonyas() end 
+
 end
 
 
@@ -265,15 +247,15 @@ end
 
 function Summoners:UseHeal()
 	if IsSpellReady(self.heal) then
-		if (myHero.health / myHero.maxHealth) <= self.autoheal.amountOfHealth then
+		if (myHero.health / myHero.maxHealth) <= self.menu.autoheal.amountOfHealth then
 			CastSpell(self.heal)
 		end 
 	end 
 
-	if self.autoheal.helpHeal then
+	if self.menu.autoheal.helpHeal then
 		for i, teammate in ipairs(GetAllyHeroes()) do
 			if GetDistanceSqr(teammate, myHero) <= 700 * 700 then
-				if (teammate.health / teammate.maxHealth) <= self.autoheal.amountOfHealth then
+				if (teammate.health / teammate.maxHealth) <= self.menu.autoheal.amountOfHealth then
 					if IsSpellReady(self.heal) then
 						CastSpell(self.heal)
 					end 
