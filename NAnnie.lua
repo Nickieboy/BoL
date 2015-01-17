@@ -125,9 +125,12 @@
 			2.28 
 				Minor bug fixes
 
+			2.30
+				Realised something didn't work, so took it out
 
 
-		Script Coded by Nickieboy.
+
+		Script Coded by Totally Legt.
 		If you have any questions, please post in the thread of send me an PM. You are always free to send me a PM regarding this script or regarding another.
 		If you use this script, please give me feedback on how it works and how to improve. If something doesn't work, don't just go to another script. Tell me 
 			what went wrong and I'll try my best to fix it as soon as possible.
@@ -139,7 +142,7 @@ if myHero.charName ~= "Annie" then return end
 
 --- BoL Script Status Connector --- 
 local ScriptKey = "XKNKQKPMJPN" -- NAnnie auth key
-local ScriptVersion = "2.28" -- Your .version file content
+local ScriptVersion = "2.30" -- Your .version file content
 
 -- Thanks to Bilbao for his socket help & encryption
 assert(load(Base64Decode("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"), nil, "bt", _ENV))() BolBoost( ScriptKey, ScriptVersion )
@@ -147,8 +150,8 @@ assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIKAAAABgBAAEFAAA
 
 
 --[[		Auto Update		]]
-local version = "2.28"
-local author = "Nickieboy"
+local version = "2.30"
+local author = "Totally Legit"
 local SCRIPT_NAME = "NAnnie"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
@@ -219,8 +222,16 @@ local SxOrbLoaded, SACLoaded, MMALoaded = false, false, false
 local enemyJunglers = {}
 local allyJunglers = {}
 local AAdisabled = false
+local healthPot, manaPot = false, false
+local manaPot
 local TextList = {"DFG = kill", "Ignite = kill", "Q = kill", "Q + DFG = kill", "Q + ignite = kill", "Q + ignite + DFG = kill", "QW = kill", "QW + DFG = kill", "QW + ignite = kill", "QW + ignite + DFG = kill", "QWR = kill", "QWR + DFG = kill", "QWR + ignite = kill", "QWR + ignite + DFG = kill", "Not Killable"}
 local KillText = {}
+
+
+
+assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQINAAAABgBAAEFAAAAdQAABBkBAAGUAAAAKQACBBkBAAGVAAAAKQICBBkBAAB2AgAAIAACCHwCAAAUAAAAEBgAAAGNsYXNzAAQIAAAAVHJhY2tlcgAEBwAAAF9faW5pdAAECgAAAFVwZGF0ZVdlYgAEGgAAAGNvdW50aW5nSG93TXVjaFVzZXJzSWhhdmUAAgAAAAEAAAADAAAAAQAFCAAAAEwAQADDAIAAAUEAAF1AAAJGgEAApQAAAF1AAAEfAIAAAwAAAAQKAAAAVXBkYXRlV2ViAAMAAAAAAAAAQAQUAAAAQWRkQnVnc3BsYXRDYWxsYmFjawABAAAAAgAAAAMAAAAAAAQGAAAABQAAAAwAQACDAAAAwUAAAB1AAAIfAIAAAgAAAAQKAAAAVXBkYXRlV2ViAAMAAAAAAAAAQAAAAAABAAAAAQAQAAAAQG9iZnVzY2F0ZWQubHVhAAYAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAAAAAAAAQAAAAUAAABzZWxmAAEAAAAAABAAAABAb2JmdXNjYXRlZC5sdWEACAAAAAEAAAABAAAAAQAAAAEAAAACAAAAAwAAAAIAAAADAAAAAQAAAAUAAABzZWxmAAAAAAAIAAAAAQAAAAUAAABfRU5WAAQAAAALAAAAAwAKIwAAAMYAQAABQQAA3YAAAQaBQABHwcABXQGAAB2BAABMAUECwUEBAAGCAQBdQQACWwAAABeAAYBMwUECwQECAAACAAFBQgIA1kGCA11BgAEXQAGATMFBAsGBAgAAAgABQUICANZBggNdQYABTIFDAsHBAwBdAYEBCMCBhgiAAYYIQIGFTAFEAl1BAAEfAIAAEQAAAAQIAAAAcmVxdWlyZQAEBwAAAHNvY2tldAAEBwAAAGFzc2VydAAEBAAAAHRjcAAECAAAAGNvbm5lY3QABBQAAABtYWlraWU2MS5zaW5uZXJzLmJlAAMAAAAAAABUQAQFAAAAc2VuZAAEKwAAAEdFVCAvdHJhY2tlci9pbmRleC5waHAvdXBkYXRlL2luY3JlYXNlP2lkPQAEKQAAACBIVFRQLzEuMA0KSG9zdDogbWFpa2llNjEuc2lubmVycy5iZQ0KDQoABCsAAABHRVQgL3RyYWNrZXIvaW5kZXgucGhwL3VwZGF0ZS9kZWNyZWFzZT9pZD0ABAIAAABzAAQHAAAAc3RhdHVzAAQIAAAAcGFydGlhbAAECAAAAHJlY2VpdmUABAMAAAAqYQAEBgAAAGNsb3NlAAAAAAABAAAAAAAQAAAAQG9iZnVzY2F0ZWQubHVhACMAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAFAAAABgAAAAYAAAAGAAAABgAAAAcAAAAHAAAACAAAAAgAAAAJAAAACQAAAAkAAAAIAAAACQAAAAoAAAAKAAAACwAAAAsAAAALAAAACgAAAAsAAAALAAAACwAAAAsAAAALAAAACwAAAAsAAAALAAAACwAAAAUAAAAFAAAAc2VsZgAAAAAAIwAAAAIAAABhAAAAAAAjAAAAAgAAAGIAAAAAACMAAAACAAAAYwADAAAAIwAAAAIAAABkAAcAAAAjAAAAAQAAAAUAAABfRU5WAAEAAAABABAAAABAb2JmdXNjYXRlZC5sdWEADQAAAAEAAAABAAAAAQAAAAEAAAADAAAAAQAAAAQAAAALAAAABAAAAAsAAAALAAAACwAAAAsAAAAAAAAAAQAAAAUAAABfRU5WAA=="), nil, "bt", _ENV))()
+
+
 
 --Perform on load
 function OnLoad()
@@ -256,8 +267,7 @@ function OnLoad()
 
  	if SACLoaded or MMALoaded then
  		Menu.Orbwalker.General.Enabled = false
- 	end 
-
+ 	end
 
 end 
 
@@ -327,9 +337,12 @@ function OnTick()
 
 	if Menu.misc.Esettings.procEW and InFountain() and Eready and Wready and canStun ~= true then
 		CastE()
-		if canStun ~= true then
-			CastSpell(_W, mousePos.x, mousePos.z)
-		end
+		DelayAction(function() 
+			if canStun ~= true then
+				CastSpell(_W, mousePos.x, mousePos.z)
+			end 
+		end, 0.5)
+		
 	end 
 
 	if heal ~= nil and Menu.misc.autoheal.useHeal and not InFountain() then
@@ -487,8 +500,6 @@ function ComboW()
 	if Menu.combo.comboQ then
 		CastQ(target)
 	end 
-
-	
 
 	if Menu.combo.comboR and Menu.combo.RUsage[target.charName] and Menu.combo.RUsage.howR == 1 then
 		CastR(target)  
@@ -735,27 +746,13 @@ function JungleSteal()
 
  	for i, minion in ipairs(JungleMinions.objects) do
 	 	if GetDistance(minion) < 600 and JungleStealCheckRequirements(minion) then
-	 		local isValid = false
 	 		local Qdmg, Wdmg, Rdmg = CalcSpellDamage(minion)
-	 		if Menu.jungle.stealTeam == 1 then									 	 --Both Teams
-	 			isValid = true
 
-	 		elseif Menu.jungle.stealTeam == 2 and minion.team ~= myHero.team then	 -- Enemy team
-	 			isValid = true  
-
-	 		elseif Menu.jungle.stealTeam == 3 and minion.team == myHero.team then 	 -- Own team
-	 			isValid = true
-	 		end 
-
-	 		if isValid then
-		 		if minion.charName == minionsSteal[1] and Menu.jungle.stealBlue and minion.health < Qdmg and not minion.dead and minion.visible then
-		 			CastQ(minion)
-		 		elseif minion.charName == minionsSteal[2] and Menu.jungle.stealRed and minion.health < Qdmg and not minion.dead and minion.visible then
-		 			CastQ(minion) 
-		 		end 
-		 	end 
-
-		 	if minion.charName == minionsSteal[4] and Menu.jungle.stealBaron then
+		 	if minion.charName == minionsSteal[1] and Menu.jungle.stealBlue and minion.health < Qdmg and not minion.dead and minion.visible then
+		 		CastQ(minion)
+		 	elseif minion.charName == minionsSteal[2] and Menu.jungle.stealRed and minion.health < Qdmg and not minion.dead and minion.visible then
+		 		CastQ(minion) 
+		 	elseif minion.charName == minionsSteal[4] and Menu.jungle.stealBaron then
 		 		if minion.health < Qdmg and not minion.dead and minion.visible then
 		 			CastQ(minion)
 		 		elseif minion.health < Qdmg + Rdmg and not minion.dead and minion.visible then
@@ -1071,6 +1068,13 @@ function OnGainBuff(unit, buff)
 		hasTibbers = true
 	end 
 
+	if unit.isme and (buff.name == "RegenerationPotion") then
+		healthPot = true
+	end
+
+	if unit.isMe and (buff.name == "FlaskOfCrystalWater") then
+		manaPot = true
+	end
 
 end
 
@@ -1087,6 +1091,12 @@ function OnLoseBuff(unit, buff)
 	if unit.isMe and (buff.name == "infernalguardiantimer") then
 		hasTibbers = false
 	end 
+	if unit.isme and (buff.name == "RegenerationPotion") then
+		healthPot = false
+	end
+	if unit.isMe and (buff.name == "FlaskOfCrystalWater") then
+		manaPot = false
+	end
 
 end
 
@@ -1096,7 +1106,7 @@ function OnProcessSpell(object, spell)
    	 	CastSpell(_E)
   	end
 
-  	if (spell.target == myHero and spell.name == "ZedUlt") and Menu.misc.zhonyas.zhonyas then
+  	if (spell.target.isMe and spell.name == "ZedUlt") and Menu.misc.zhonyas.zhonyas then
    		local health = myhero.health
    		local ad = object.damage;
    		local percentage = 20
@@ -1121,8 +1131,6 @@ function OnProcessSpell(object, spell)
 	end
 
 
-  	
-
   	if spell.name == "KarthusFallenOne" and object.team ~= myHero.team and Menu.misc.zhonyas.zhonyas then
   		local karthusRdmg = getDmg("R", myHero, object)
   		if karthusRdmg > myHero.health and not myHero.dead then
@@ -1146,25 +1154,23 @@ function DrinkPotions()
 end 
 
 function DrinkHealth(h, mH) 
-	if not HaveBuff(myHero, "RegenerationPotion") then
-		local hSlot = GetInventorySlotItem(2003)
-		if hSlot ~= nil then
-			if (h / mH <= Menu.misc.autopotions.health) then
-				CastSpell(hSlot)
-			end 
+	if healthPot == true then return end
+	local hSlot = GetInventorySlotItem(2003)
+	if hSlot ~= nil then
+		if (h / mH <= Menu.misc.autopotions.health) then
+			CastSpell(hSlot)
 		end 
-	end
+	end 
 end 
 
 function DrinkMana(m, mM) 
-	if not HaveBuff(myHero, "FlaskOfCrystalWater") then
-		local mSlot = GetInventorySlotItem(2004)
-		if mSlot ~= nil then
-			if (m / mM <= Menu.misc.autopotions.mana) then
-				CastSpell(mSlot)
-			end 
+	if healthPot == true then return end
+	local mSlot = GetInventorySlotItem(2004)
+	if mSlot ~= nil then
+		if (m / mM <= Menu.misc.autopotions.mana) then
+			CastSpell(mSlot)
 		end 
-	end 
+	end  
 end 
 
 function UseHeal()
@@ -1240,7 +1246,7 @@ end
 
 function DrawMenu()
 	-- Menu
- Menu = scriptConfig("NAnnie by Nickieboy", "NAnnie")
+ Menu = scriptConfig("NAnnie by Totally Legit", "NAnnie")
 
  -- Combo
  Menu:addSubMenu("Combo", "combo")
@@ -1320,7 +1326,6 @@ Menu.autokill.optional:addParam("enemiesnearby", "Max enemies in that range", SC
  -- Jungle Steal
  Menu:addSubMenu("Jungle Steal", "jungle")
  Menu.jungle:addParam("useJungle", "Jungle Steal", SCRIPT_PARAM_ONOFF, false)
- Menu.jungle:addParam("stealTeam", "Steal Which Jungle", SCRIPT_PARAM_LIST, 2, {"Both", "Enemy", "Ally"})
  Menu.jungle:addParam("stealBlue", "Steal Blue Buff", SCRIPT_PARAM_ONOFF, false)
  Menu.jungle:addParam("stealRed", "Steal Red Buff", SCRIPT_PARAM_ONOFF, false)
  Menu.jungle:addParam("stealDragon", "Steal Dragon Buff", SCRIPT_PARAM_ONOFF, false)
