@@ -1,1 +1,1 @@
-Updated Totally Swain, adjusted TotallyLib and a possible fix for Tryndamere
+Buffmanager and NaN spam is BoL related and has nothing to do with my scripts
