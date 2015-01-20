@@ -71,6 +71,8 @@
 				Integration with SxOrbWalk tweaked
 			* 0.3 (9 Jan)
 				Few more tweaks and optimalizations
+			* 0.5 (20 Jan)
+				Thanks to Redprince I possibly found the issue of the 'ipairs nil' spam
 
 
 
@@ -90,7 +92,7 @@ function Say(text)
 	print("<font color=\"#FF0000\"><b>Totally LeBlanc:</b></font> <font color=\"#FFFFFF\">" .. text .. "</font>")
 end
 --[[		Auto Update		]]
-local version = "0.4"
+local version = "0.5"
 local author = "Totally Legit"
 local SCRIPT_NAME = "LeBlanc"
 local AUTOUPDATE = true
@@ -1340,8 +1342,6 @@ function SmartCombo(targ)
 			end 
 		end 
 	end
-
-	if myHero:GetSpellData(_Q).cd <= 2 and Wready and not (Eready and Rready) then return end
 				if Menu.debug.useDebug then
 					Say("Damage 1: " .. (Qdmg + RQdmg + QMarkProcDamage + QMarkProcDamage + Wdmg))
 					Say("Damage 2: " .. (Wdmg + RWdmg + Qdmg))

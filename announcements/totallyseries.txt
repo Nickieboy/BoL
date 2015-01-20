@@ -1,1 +1,1 @@
-Buffmanager and NaN spam is BoL related and has nothing to do with my scripts
+Possibly fixed the ipairs error on Totally LeBlanc
