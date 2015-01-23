@@ -1,1 +1,1 @@
-Possibly fixed the ipairs error on Totally LeBlanc
+Target spam fix for Totally Annie
