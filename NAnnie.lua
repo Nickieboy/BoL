@@ -128,6 +128,9 @@
 			2.30
 				Realised something didn't work, so took it out
 
+			2.31
+				target spam fix
+
 
 
 		Script Coded by Totally Legt.
@@ -150,7 +153,7 @@ assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQIKAAAABgBAAEFAAA
 
 
 --[[		Auto Update		]]
-local version = "2.30"
+local version = "2.31"
 local author = "Totally Legit"
 local SCRIPT_NAME = "NAnnie"
 local AUTOUPDATE = true
@@ -1106,7 +1109,7 @@ function OnProcessSpell(object, spell)
    	 	CastSpell(_E)
   	end
 
-  	if (spell.target.isMe and spell.name == "ZedUlt") and Menu.misc.zhonyas.zhonyas then
+  	if (spell.name == "ZedUlt" and spell.target.isMe) and Menu.misc.zhonyas.zhonyas then
    		local health = myhero.health
    		local ad = object.damage;
    		local percentage = 20
