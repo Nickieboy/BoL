@@ -128,6 +128,9 @@
 			2.30
 				Realised something didn't work, so took it out
 
+			2.33
+				Deleted Spell Damage Library requirement
+
 
 
 		Script Coded by Totally Legt.
@@ -141,7 +144,7 @@ if myHero.charName ~= "Annie" then return end
 
 
 --[[		Auto Update		]]
-local version = "2.32"
+local version = "2.33"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Annie"
 local AUTOUPDATE = true
@@ -171,8 +174,7 @@ end
 
 -- Lib Updater
 local REQUIRED_LIBS = {
-	["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua",
-	["Spell Damage Library"] = "https://raw.githubusercontent.com/Nickieboy/BoL/master/lib/Spell_Damage_Library.lua",
+	["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua"
 }
 
 local DOWNLOADING_LIBS, DOWNLOAD_COUNT = false, 0
