@@ -1,7 +1,21 @@
+--[[
+		Script: Totally Tryndamere
+		Author: Totally Legit
+
+
+		Changelog:
+					1.0: Release
+					1.01: Fixes
+					1.04: Had a typo in TotallyLib. This was the reason the E did not cast whiel
+						  using VPrediction
+
+--]]
+
+
 if myHero.charName ~= "Tryndamere" then return end
 
 -- Download script
-local version = 1.03
+local version = 1.04
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Tryndamere"
 local AUTOUPDATE = true
@@ -68,11 +82,12 @@ end
 function InitializeVariables()
 	serverMessage = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/announcements/totallyseries.txt")
 	print("<font color=\"#000000\"><b>Totally Series (Latest News):</b></font> <font color=\"#ffaa00\">" .. tostring(serverMessage) .. "</font>")
+
 	Spells = {
 		["AA"] = {range = 125},
 		["Q"] = {name = "Bloodlust", range = 0, ready = false},
 		["W"] = {name = "Mocking Shout", range = 400, ready = false},
-		["E"] = {name = "Spinning Slash", range = 660, radius = 225, speed = 1500, delay = 0.24, ready = false},
+		["E"] = {name = "Spinning Slash", range = 660, radius = 225, speed = math.huge, delay = 0, ready = false},
 		["R"] = {name = "Undying Rage", range = 0, delay = 0, speed = 0, ready = false},
 
 	}
@@ -96,20 +111,18 @@ function GetOrbTarget()
 end 
 
 
-assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQINAAAABgBAAEFAAAAdQAABBkBAAGUAAAAKQACBBkBAAGVAAAAKQICBBkBAAB2AgAAIAACCHwCAAAUAAAAEBgAAAGNsYXNzAAQIAAAAVHJhY2tlcgAEBwAAAF9faW5pdAAECgAAAFVwZGF0ZVdlYgAEGgAAAGNvdW50aW5nSG93TXVjaFVzZXJzSWhhdmUAAgAAAAEAAAADAAAAAQAFCAAAAEwAQADDAIAAAUEAAF1AAAJGgEAApQAAAF1AAAEfAIAAAwAAAAQKAAAAVXBkYXRlV2ViAAMAAAAAAAAIQAQUAAAAQWRkQnVnc3BsYXRDYWxsYmFjawABAAAAAgAAAAMAAAAAAAQGAAAABQAAAAwAQACDAAAAwUAAAB1AAAIfAIAAAgAAAAQKAAAAVXBkYXRlV2ViAAMAAAAAAAAIQAAAAAABAAAAAQAQAAAAQG9iZnVzY2F0ZWQubHVhAAYAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAAAAAAAAQAAAAUAAABzZWxmAAEAAAAAABAAAABAb2JmdXNjYXRlZC5sdWEACAAAAAEAAAABAAAAAQAAAAEAAAACAAAAAwAAAAIAAAADAAAAAQAAAAUAAABzZWxmAAAAAAAIAAAAAQAAAAUAAABfRU5WAAQAAAALAAAAAwAKIwAAAMYAQAABQQAA3YAAAQaBQABHwcABXQGAAB2BAABMAUECwUEBAAGCAQBdQQACWwAAABeAAYBMwUECwQECAAACAAFBQgIA1kGCA11BgAEXQAGATMFBAsGBAgAAAgABQUICANZBggNdQYABTIFDAsHBAwBdAYEBCMCBhgiAAYYIQIGFTAFEAl1BAAEfAIAAEQAAAAQIAAAAcmVxdWlyZQAEBwAAAHNvY2tldAAEBwAAAGFzc2VydAAEBAAAAHRjcAAECAAAAGNvbm5lY3QABBQAAABtYWlraWU2MS5zaW5uZXJzLmJlAAMAAAAAAABUQAQFAAAAc2VuZAAEKwAAAEdFVCAvdHJhY2tlci9pbmRleC5waHAvdXBkYXRlL2luY3JlYXNlP2lkPQAEKQAAACBIVFRQLzEuMA0KSG9zdDogbWFpa2llNjEuc2lubmVycy5iZQ0KDQoABCsAAABHRVQgL3RyYWNrZXIvaW5kZXgucGhwL3VwZGF0ZS9kZWNyZWFzZT9pZD0ABAIAAABzAAQHAAAAc3RhdHVzAAQIAAAAcGFydGlhbAAECAAAAHJlY2VpdmUABAMAAAAqYQAEBgAAAGNsb3NlAAAAAAABAAAAAAAQAAAAQG9iZnVzY2F0ZWQubHVhACMAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAFAAAABgAAAAYAAAAGAAAABgAAAAcAAAAHAAAACAAAAAgAAAAJAAAACQAAAAkAAAAIAAAACQAAAAoAAAAKAAAACwAAAAsAAAALAAAACgAAAAsAAAALAAAACwAAAAsAAAALAAAACwAAAAsAAAALAAAACwAAAAUAAAAFAAAAc2VsZgAAAAAAIwAAAAIAAABhAAAAAAAjAAAAAgAAAGIAAAAAACMAAAACAAAAYwADAAAAIwAAAAIAAABkAAcAAAAjAAAAAQAAAAUAAABfRU5WAAEAAAABABAAAABAb2JmdXNjYXRlZC5sdWEADQAAAAEAAAABAAAAAQAAAAEAAAADAAAAAQAAAAQAAAALAAAABAAAAAsAAAALAAAACwAAAAsAAAAAAAAAAQAAAAUAAABfRU5WAA=="), nil, "bt", _ENV))()
-
 
 function OnLoad()
-
-
 	VP = VPrediction()
 	SxOrb = SxOrbWalk()
 
 	InitializeVariables()
 
 	DrawMenu()
+
 	Spells.E.Cast = SpellHelper(VP, Menu)
-	Spells.E.Cast:AddSkillShot(_E, Spells.E.range, Spells.E.delay, Spells.E.radius, Spells.E.speed, false, "lineaoe")
+	Spells.E.Cast:AddSkillShot(_E, Spells.E.range, Spells.E.delay, Spells.E.radius, Spells.E.speed, false, "line")
+
 	Say("Loaded Script")
 end
 
@@ -225,7 +238,9 @@ function DrawMenu()
 
 	 -- Always show
 	 Menu.keys:permaShow("combo")
+	 Menu.killsteal:permaShow("killsteal")
 	 Menu.drawings:permaShow("draw")
+	 
 end 
 
 function isFacing(source, target, lineLength)

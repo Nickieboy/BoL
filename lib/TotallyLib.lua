@@ -13,10 +13,18 @@
 
 			* 0.22
 				Few more bug fixes
+				
+			* 0.25
+				Chargeable spell support
+
+			* 0.26
+				Fixed typo in Prediction helper
+				Added support for Chargeable spells, this will soon be completely
+				Deleted DFG in ItemSupport
 
 --]]
 
-local version = 0.22
+local version = 0.26
 local AUTO_UPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Nickieboy/BoL/master/lib/TotallyLib.lua".."?rand="..math.random(1,10000)
@@ -144,14 +152,6 @@ bufflist = {
 	}
 
 
-ccobjectlist = {
-				["LOC_fear.troy"] = "Fear",
-				["LOC_Silence"] = "Silence",
-				["LOC_Surpress"] = "Surpression"
-				}
-
-
-
 class 'Summoners'
 
 function Summoners:__init(menu)
@@ -165,7 +165,6 @@ function Summoners:__init(menu)
 	end
 
 	AddTickCallback(function() self:OnTick() end)
-	AddCreateObjCallback(function(obj) self:OnCreateObj(obj) end)
 	if VIP_USER then
 		AdvancedCallback:bind("GainBuff", function(unit, buff) self:OnGainBuff(unit, buff) end)
 	end 
@@ -213,11 +212,7 @@ function Summoners:LoadToMenu(menu)
 			if not oneAdded then
 				self.menu.autocleanse:addParam("info", "ERROR", SCRIPT_PARAM_INFO, "No buffs found to be added")
 			end 
-		else
-			for object, stuff in pairs(ccobjectlist) do
-				self.menu.autocleanse:addParam(object, object .. " - " .. stuff, SCRIPT_PARAM_ONOFF, true)
-			end
-		end 
+		end
 	end 
 end
 
@@ -229,13 +224,6 @@ function Summoners:OnGainBuff(unit, buff)
 	end 
 end
 
-function Summoners:OnCreateObj(obj)
-	if not VIP_USER and self.cleanse ~= nil and self.menu.autocleanse.useCleanse and self.menu.autocleanse[obj.name] and GetDistanceSqr(obj) < 2500 then
-		if IsSpellReady(self.cleanse) then
-			CastSpell(self.cleanse)
-		end 
-	end 
-end
 
 function Summoners:UpdateSummoners()
 	self.heal = GetSummonerSlot("summonerheal")
@@ -326,24 +314,31 @@ function SpellHelper:InRange(slot, target)
 	return GetDistanceSqr(target) < self.Spells[slot].range * self.Spells[slot].range
 end
 
-function SpellHelper:Cast(slot, target, value)
+function SpellHelper:GetRange(slot)
+	return self.Spells[slot].range
+end
 
+function SpellHelper:Cast(slot, target, value)
 	if self.Spells[slot].skillShot then
 		local castPosition = self.Predict:PredictSpell(target, self.Spells[slot].delay, self.Spells[slot].width, self.Spells[slot].range, self.Spells[slot].speed, self.Spells[slot].collision, self.Spells[slot].typeSkill)
 		if castPosition ~= nil and self:Ready(self.Spells[slot].slot) and self:InRange(self.Spells[slot].slot, target) then
 			CastSpell(self.Spells[slot].slot, castPosition.x, castPosition.z)
+			return true
 		end
 	else
 		if not value and target then
 			if self:Ready(self.Spells[slot].slot) and self:InRange(self.Spells[slot].slot, target) then
 				CastSpell(self.Spells[slot].slot, target)
+				return true
 			end
 		elseif value and target then
 			if self:Ready(self.Spells[slot].slot) and self:InRange(self.Spells[slot].slot, target) then
 				CastSpell(self.Spells[slot].slot, target.x, value.z)
+				return true
 			end
 		end
 	end
+	return false
 end
 
 function SpellHelper:CastAll(target, value)
@@ -389,7 +384,7 @@ function PredictionHelper:PredictSpell(target, delay, radius, range, speed, coll
 		elseif typeSkill == "lineaoe" then
 			local castPosition, hitChance = self.VP:GetLineAOECastPosition(target, delay, radius, range, speed, myHero)
 		elseif typeSkill == "line" then
-			local castPosition, hitChance = self.VP:GetCircularCastPosition(target, delay, radius, range, speed, myHero, collision)
+			local castPosition, hitChance = self.VP:GetLineCastPosition(target, delay, radius, range, speed, myHero, collision)
 			if hitChance >= self.menu.prediction.hitchance then
 				return castPosition
 			end
@@ -438,14 +433,74 @@ function PredictionHelper:PredictSpell(target, delay, radius, range, speed, coll
 end 
 
 
+class 'ChargeSpell'
+function ChargeSpell:__init(slot, spellname, minrange, maxRange, chargeduration, timeToMax, objectName)
+	self.slot = slot
+	self.name = spellname
+	self.minRange = minrange
+	self.range = minrange 
+	self.maxRange = maxRange
+	self.timeToMax = timeToMax
+	self.isCharged = false
+	self.chargeDuration = chargeduration
+	self.objectName = objectName
+	AddTickCallback(function() self:OnTick() end)
+    AddProcessSpellCallback(function(unit, spell) self:OnProcessSpell(unit, spell) end)
+    AddCreateObjCallback(function(obj) self:OnCreateObj(obj) end)
+	AddDeleteObjCallback(function(obj) self:OnDeleteObj(obj) end)
+
+	self.CheckChargeObject = false
+end
+
+function ChargeSpell:OnTick()
+	if not self.isCharged and self.range ~= self.minRange then
+		self.range = self.minRange
+	end
+	if self:IsCharging() then
+		self.range = (math.min(self.initialRange + (self.maxRange - self.initialRange) * ((os.clock() - self.chargedTime) / self.timeToMax), self.maxRange))
+	end
+end
+
+function ChargeSpell:OnCreateObj(obj) 
+	if obj.name == self.objectName and GetDistance(obj, myHero) <= 50 then
+		self.CheckChargeObject = true 
+	end
+end
+
+function ChargeSpell:OnDeleteObj(obj) 
+	if obj.name == self.objectName and GetDistance(obj, myHero) <= 50 then
+		self.CheckChargeObject = false 
+		self.isCharged = false
+	end
+end
+
+function ChargeSpell:OnProcessSpell(unit, spell)
+	if spell.name == self.name and not self.isCharged then
+		self.isCharged = true
+		self.initialRange = self.range
+		self.chargedTime = os.clock()
+	end
+end
+
+function ChargeSpell:IsCharging()
+	return self.isCharged
+end
+
+function ChargeSpell:Cast(param1, parmam2)
+	if not self.isCharged then
+		CastSpell(self.slot, mousePos)
+	else
+		CastSpell2(self.slot, param1, param2)
+	end
+end
+
+
 itemlist = {
 	["Athene's Unholy Grail"] = 3174,
 	["Avarice Blade"] = 3093,
 	["Blade of The Ruined King"] = 3153,
 	["bortk"] = 3153,
 	["Crystalline Flask"] = 2041,
-	["Deathire Grasp"] = 3128,
-	["DFG"] = 3124,
 	["Dervish Blade"] = 3137,
 	["Zhonya's Hourglass"] = 3157,
 	["zhonyas"] = 3003,
@@ -468,7 +523,6 @@ itemlist = {
 	["Ruby Sightstone"] = 2045,
 	["Total Biscuit of Rejuvenation"] = 2009
 }
-
 
 class 'ItemHelper'
 function ItemHelper:__init(name)
