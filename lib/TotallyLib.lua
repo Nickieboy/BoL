@@ -21,10 +21,12 @@
 				Fixed typo in Prediction helper
 				Added support for Chargeable spells, this will soon be completely
 				Deleted DFG in ItemSupport
+			* 0.27
+				Fixed spam with barrier
 
 --]]
 
-local version = 0.26
+local version = 0.27
 local AUTO_UPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Nickieboy/BoL/master/lib/TotallyLib.lua".."?rand="..math.random(1,10000)
@@ -273,7 +275,7 @@ end
 
 function Summoners:Barrier()
 	if myHero:CanUseSpell(self.barrier) == READY then
-		if ((myHero.health / myHero.maxHealth) <= Menu.misc.autobarrier.amountOfHealth) then
+		if ((myHero.health / myHero.maxHealth) <= self.menu.autobarrier.amountOfHealth) then
 			CastSpell(self.barrier)
 		end 
 	end 
