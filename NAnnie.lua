@@ -131,6 +131,11 @@
 			2.33
 				Deleted Spell Damage Library requirement
 
+			2.5
+				Completely removed DFG
+				Made a workaround for the buff stacking
+					It should now detect the buffs, BUT you have to make sure you have 0 stacks when you start the script
+
 
 
 		Script Coded by Totally Legt.
@@ -144,7 +149,7 @@ if myHero.charName ~= "Annie" then return end
 
 
 --[[		Auto Update		]]
-local version = "2.33"
+local version = "2.5"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Annie"
 local AUTOUPDATE = true
@@ -153,7 +158,7 @@ local UPDATE_PATH = "/Nickieboy/BoL/master/NAnnie.lua".."?rand="..math.random(1,
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
-function AutoupdaterMsg(msg) print("<font color=\"#FF0000\"><b>NAnnie:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
+function AutoupdaterMsg(msg) print("<font color=\"#FF0000\"><b>Totally annie:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
 if AUTOUPDATE then
 	local ServerData = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/version/NAnnie.version")
 	if ServerData then
@@ -216,9 +221,15 @@ local enemyJunglers = {}
 local allyJunglers = {}
 local AAdisabled = false
 local healthPot, manaPot = false, false
-local manaPot
-local TextList = {"DFG = kill", "Ignite = kill", "Q = kill", "Q + DFG = kill", "Q + ignite = kill", "Q + ignite + DFG = kill", "QW = kill", "QW + DFG = kill", "QW + ignite = kill", "QW + ignite + DFG = kill", "QWR = kill", "QWR + DFG = kill", "QWR + ignite = kill", "QWR + ignite + DFG = kill", "Not Killable"}
+local TextList = {"Ignite = kill", "Q = kill", "Q + ignite = kill", "QW = kill", "QW + ignite = kill", "QWR = kill", "QWR + ignite = kill", "Not Killable"}
 local KillText = {}
+local spells = {
+					["Disintegrate"] = true,
+					["Incinerate"] = true,
+					["MoltenShield"] = true,
+					["InfernalGuardian"] = true
+				}
+local tempPassiveStacks = 0
 
 
 
@@ -266,6 +277,8 @@ end
 
 -- Perform every time
 function OnTick()
+	if myHero.dead and tempPassiveStacks ~= 0 then tempPassiveStacks = 0 end
+	if not canStun and tempPassiveStacks == 4 then canStun = true end
 
 	target = GetOrbTarget()
 
@@ -303,11 +316,6 @@ function OnTick()
 		KillStealPrecise() 
 	end 
 
-	--[[ Temporary disabled
-	if Menu.misc.autolevel.levelAuto then
-		AutoLevel()
-	end 
-	--]]
 	if Menu.misc.autopotions.usePotions then
 		DrinkPotions()
 	end 
@@ -421,16 +429,6 @@ function AutoHarass()
  			CastQ(target)
  		end 
 	end 
-	--[[
-	if VIP_USER then
-		if Menu.harass.autoQW and passiveStacks >= 3 and not Menu.combo.combo and ManaManager() then 
-	 		if target ~= nil and ValidTarget(target, 575) then
-	 			CastQ(target)
-	 			DelayAction(function() if canStun then CastW(target) end end, 0.5)
-	 		end 
-	 	end 
-	end 
-	--]]
 end 
 
 function Combo()
@@ -454,13 +452,6 @@ function Combo()
 end 
 
 function ComboQ()
-	if Menu.combo.comboDFG then
-		local DFGslot = GetInventorySlotItem(3128)
-		if DFGslot ~= nil and myHero:CanUseSpell(DFGslot) == READY then
-			CastSpell(DFGslot, target)
-		end 
-	end 
-
 	if Menu.combo.comboQ then
 		CastQ(target)
 	end 
@@ -479,12 +470,6 @@ function ComboQ()
 end
 
 function ComboW()
-	if Menu.combo.comboDFG then
-		local DFGslot = GetInventorySlotItem(3128)
-		if DFGslot ~= nil and myHero:CanUseSpell(DFGslot) == READY then
-			CastSpell(DFGslot, target)
-		end 
-	end 
 
 	if Menu.combo.comboW then
 		CastW(target)
@@ -504,13 +489,6 @@ function ComboW()
 end 
 
 function ComboRQ()
-	if Menu.combo.comboDFG then
-		local DFGslot = GetInventorySlotItem(3128)
-		if DFGslot ~= nil and myHero:CanUseSpell(DFGslot) == READY then
-			CastSpell(DFGslot, target)
-		end 
-	end 
-
 	if Menu.combo.comboR and Menu.combo.RUsage[target.charName] and Menu.combo.RUsage.howR == 1 then
 		CastR(target)  
 	elseif Menu.combo.comboR and Menu.combo.RUsage[target.charName] and Menu.combo.RUsage.howR == 2 then
@@ -529,13 +507,6 @@ function ComboRQ()
 end 
 
 function ComboRW()
-	if Menu.combo.comboDFG then
-		local DFGslot = GetInventorySlotItem(3128)
-		if DFGslot ~= nil and myHero:CanUseSpell(DFGslot) == READY then
-			CastSpell(DFGslot, target)
-		end 
-	end 
-
 	if Menu.combo.comboR and Menu.combo.RUsage[target.charName] and Menu.combo.RUsage.howR == 1 then
 		CastR(target)  
 	elseif Menu.combo.comboR and Menu.combo.RUsage[target.charName] and Menu.combo.RUsage.howR == 2 then
@@ -555,17 +526,9 @@ function ComboRW()
 end 
 
 function ComboRStun()
-
 	if canStun and Menu.combo.comboR then
 		CastR(target)
 	end 
-
-	if Menu.combo.comboDFG then
-		local DFGslot = GetInventorySlotItem(3128)
-		if DFGslot ~= nil and myHero:CanUseSpell(DFGslot) == READY then
-			CastSpell(DFGslot, target)
-		end 
-	end
 
 	if Menu.combo.comboWay == 1 then
 		if Menu.combo.comboQ then
@@ -616,7 +579,7 @@ function AutoUlt()
 			local flashPos = Vector(myHero.visionPos) + (Vector(Rtarget) - myHero.visionPos):normalized() * 400
 			if not IsWall(D3DXVECTOR3(flashPos.x, flashPos.y, flashPos.z)) then
 				CastSpell(flash, flashPos.x, flashPos.z)
-				DelayAction(CastR(Rtarget), 0.3)
+				DelayAction(function() CastR(Rtarget) end, 0.3)
 			end 
 		end 
 	end  
@@ -827,9 +790,6 @@ function KillStealPrecise()
 	local useW = Menu.autokill.spells.autokillW
 	local useR = Menu.autokill.spells.autokillR
 	local useIgnite = Menu.autokill.spells.autokillIgnite
-	local useDFG = Menu.autokill.spells.autokillDFG
-	local DFGSlot = GetInventorySlotItem(3128)
-	local DFGready = (DFGSlot ~= nil and myHero:CanUseSpell(DFGSlot) == READY)
 	local Qmana = myHero:GetSpellData(_Q).mana
 	local Wmana = myHero:GetSpellData(_W).mana
 	local Rmana = myHero:GetSpellData(_R).mana
@@ -845,53 +805,18 @@ function KillStealPrecise()
 			Wdmg = ((useW and Wready and Wdmg) or 0)
 			Rdmg = ((useR and Rready and not HaveBuff(myHero, "infernalguardiantimer") and Rdmg) or 0)
 			iDmg = ((useIgnite and Iready and getDmg("IGNITE", enemy, myHero)) or 0)
-			DFGdmg = ((useDFG and DFGready and getDmg("DFG", enemy, myHero)) or 0)
-
-			local QDFGdmg = 0
-			local WDFGdmg = 0
-			local RDFGdmg = 0
-
-			if DFGdmg > 0 then
-				QDFGdmg = Qdmg * 1.2
-				WDFGdmg = Wdmg * 1.2
-				RDFGdmg = Rdmg * 1.2
-			end 
 
 
-			if DFGdmg > enemy.health then
-				CastSpell(DFGSlot, enemy)
-			elseif iDmg > enemy.health then
+			if iDmg > enemy.health then
 				CastSpell(ignite, enemy)
 			elseif Wdmg > Qdmg and Qdmg > enemy.health and myHero.mana > Qmana then
 				CastQ(enemy)
 			elseif Wdmg > enemy.health and myHero.mana > Wmana then
 				CastW(enemy)
-			elseif Wdmg > Qdmg and QDFGdmg + DFGdmg > enemy.health and myHero.mana > Qmana then
-				CastSpell(DFGSlot, enemy)
-				CastQ(enemy)
-			elseif WDFGdmg + DFGdmg > enemy.health and myHero.mana > Wmana then
-				CastSpell(DFGSlot, enemy)
-				CastW(enemy)
-			elseif Wdmg > Qdmg and QDFGdmg + DFGdmg + iDmg > enemy.health and myHero.mana > Qmana then
-				CastSpell(DFGSlot, enemy)
-				CastQ(enemy)
-				CastSpell(ignite, enemy)
-			elseif WDFGdmg + DFGdmg + iDmg > enemy.health and myHero.mana > Wmana then
-				CastSpell(DFGSlot, enemy)
-				CastW(enemy)
-				CastSpell(ignite, enemy)
 			elseif Qdmg + Rdmg > enemy.health and myHero.mana > Qmana + Rmana then
 				CastQ(enemy)
 				CastR(enemy)
 			elseif Wdmg + Rdmg > enemy.health and myHero.mana > Wmana + Rmana then
-				CastW(enemy)
-				CastR(enemy)
-			elseif QDFGdmg + RDFGdmg + DFGdmg > enemy.health and myHero.mana > Qmana + Rmana then
-				CastSpell(DFGSlot, enemy)
-				CastQ(enemy)
-				CastR(enemy)
-			elseif WDFGdmg + RDFGdmg + DFGdmg > enemy.health and myHero.mana > Wmana + Rmana then
-				CastSpell(DFGSlot, enemy)
 				CastW(enemy)
 				CastR(enemy)
 			elseif Qdmg + Rdmg + iDmg > enemy.health and myHero.mana > Qmana + Rmana then
@@ -902,31 +827,10 @@ function KillStealPrecise()
 				CastW(enemy)
 				CastR(enemy)
 				CastSpell(ignite, enemy)
-			elseif QDFGdmg + RDFGdmg + DFGdmg + iDmg > enemy.health and myHero.mana > Qmana + Rmana then
-				CastSpell(DFGSlot, enemy)
-				CastQ(enemy)
-				CastR(enemy)
-				CastSpell(ignite, enemy)
-			elseif WDFGdmg + RDFGdmg + DFGdmg + iDmg > enemy.health and myHero.mana > Wmana + Rmana then
-				CastSpell(DFGSlot, enemy)
-				CastW(enemy)
-				CastR(enemy)
-				CastSpell(ignite, enemy)
 			elseif Qdmg + Wdmg + Rdmg > enemy.health and myHero.mana > Qmana + Rmana + Wmana then
 				CastQ(enemy)
 				CastW(enemy)
 				CastR(enemy)
-			elseif QDFGdmg + WDFGdmg + RDFGdmg + DFGdmg > enemy.health and myHero.mana > Qmana + Rmana + Wmana then
-				CastSpell(DFGSlot, enemy)
-				CastQ(enemy)
-				CastW(enemy)
-				CastR(enemy)
-			elseif QDFGdmg + WDFGdmg + RDFGdmg + DFGdmg + iDmg > enemy.health and myHero.mana > Qmana + Rmana + Wmana then
-				CastSpell(DFGSlot, enemy)
-				CastQ(enemy)
-				CastW(enemy)
-				CastR(enemy)
-				CastSpell(ignite, enemy)
 			end 
 		end 
 	end 
@@ -961,11 +865,7 @@ function DrawKillable()
 		local enemy = heroManager:getHero(i)
 		if ValidTarget(enemy) then
 			if enemy.team ~= myHero.team then 
-				local DFGSlot = GetInventorySlotItem(3128)
-				local DFGready = (DFGSlot ~= nil and myHero:CanUseSpell(DFGSlot) == READY)
 				
-				DFGdmg = (((Menu.combo.comboDFG or Menu.autokill.spells.autokillDFG) and DFGready and getDmg("DFG", enemy, myHero)) or 0)
-
 				iDmg = ((ignite ~= nil and Iready and getDmg("IGNITE", enemy, myHero)) or 0)
 
 				local Qdmg, Wdmg, Rdmg = CalcSpellDamage(enemy)
@@ -973,44 +873,22 @@ function DrawKillable()
 				Wdmg = ((Wready and Wdmg) or 0)
 				Rdmg = ((Rready and not HaveBuff(myHero, "infernalguardiantimer") and Rdmg) or 0)
 
-				local QDFGdmg, WDFGdmg, RDFGdmg = 0, 0, 0
-
-				if DFGdmg > 0 then
-					QDFGdmg = Qdmg * 1.2
-					WDFGdmg = Wdmg * 1.2
-					RDFGdmg = Rdmg * 1.2
-				end
-      
-                if DFGdmg > enemy.health then
+                if iDmg > enemy.health then
                 	KillText[i] = 1
-                elseif iDmg > enemy.health then
-                	KillText[i] = 2
 				elseif Qdmg > enemy.health then
-					KillText[i] = 3
-				elseif QDFGdmg + DFGdmg > enemy.health then
-					KillText[i] = 4
+					KillText[i] = 2
 				elseif Qdmg + iDmg > enemy.health then
-					KillText[i] = 5
-				elseif Qdmg + iDmg + DFGdmg > enemy.health then
-					KillText[i] = 6
+					KillText[i] = 3
 				elseif Qdmg + Wdmg > enemy.health then
-					KillText[i] = 7
-				elseif QDFGdmg + WDFGdmg + DFGdmg > enemy.health then
-					KillText[i] = 8
+					KillText[i] = 4
 				elseif Qdmg + Wdmg + iDmg > enemy.health then
-					KillText[i] = 9
-				elseif QDFGdmg + WDFGdmg + iDmg + DFGdmg > enemy.health then
-					KillText[i] = 10
+					KillText[i] = 5
 				elseif Qdmg + Wdmg + Rdmg > enemy.health then
-					KillText[i] = 11
-				elseif DFGdmg + QDFGdmg + WDFGdmg + RDFGdmg > enemy.health then
-					KillText[i] = 12
+					KillText[i] = 6
 				elseif Qdmg + Wdmg + Rdmg + iDmg > enemy.health then
-					KillText[i] = 13
-				elseif QDFGdmg + WDFGdmg + RDFGdmg + iDmg + DFGdmg > enemy.health then
-					KillText[i] = 14
+					KillText[i] = 7
 				else
-					KillText[i] = 15
+					KillText[i] = 8
 				end 
 			end 
 		end 
@@ -1052,7 +930,8 @@ function OnDeleteObj(object)
 end
  
 
-function OnGainBuff(unit, buff)
+function OnApplyBuff(unit, target, buff)
+	if unit.isMe then print(buff) end
 	if unit.isMe and (buff.name == "pyromania") then
 		passiveStacks = 1
 	end
@@ -1077,7 +956,7 @@ function OnUpdateBuff(unit, buff)
 	end 
 end
 
-function OnLoseBuff(unit, buff)
+function OnRemoveBuff(unit, buff)
 	if unit.isMe and (buff.name == "pyromania_particle") then
 		passiveStacks = 0
 	end 
@@ -1097,6 +976,14 @@ end
 function OnProcessSpell(object, spell)
   	if (spell.target == myHero and string.find(spell.name, "BasicAttack")) and object.type == "Obj_AI_Hero" and Menu.misc.Esettings.useEonAttack then
    	 	CastSpell(_E)
+  	end
+
+  	if object.isMe and spells[spell.name] == true then
+  		tempPassiveStacks = tempPassiveStacks + 1 
+  		if tempPassiveStacks ==  5 then
+  			canStun = false
+  			tempPassiveStacks = 0
+  		end
   	end
 
   	if (spell.name == "ZedUlt" and spell.target.isMe) and Menu.misc.zhonyas.zhonyas then
@@ -1246,7 +1133,6 @@ function DrawMenu()
  Menu.combo:addParam("comboWay", "Cast Combo", SCRIPT_PARAM_LIST, 1, {"QWR", "WQR", "RQW", "RWQ"})
  Menu.combo:addParam("combo", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, 32)
  Menu.combo:addParam("disableAA", "Disable AA in Combo", SCRIPT_PARAM_ONOFF, false)
- Menu.combo:addParam("comboDFG", "Use DFG", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboW", "Use W", SCRIPT_PARAM_ONOFF, true)
  Menu.combo:addParam("comboR", "Use R", SCRIPT_PARAM_ONOFF, true)
@@ -1280,7 +1166,6 @@ function DrawMenu()
  Menu:addSubMenu("Auto Kill", "autokill")
  Menu.autokill:addParam("autokill", "Auto Kill - KillSteal", SCRIPT_PARAM_ONOFF, false)
  Menu.autokill:addSubMenu("Use Spells", "spells")
- Menu.autokill.spells:addParam("autokillDFG", "Use DFG", SCRIPT_PARAM_ONOFF, true)
  if ignite ~= nil then
  	Menu.autokill.spells:addParam("autokillIgnite", "Use Ignite", SCRIPT_PARAM_ONOFF, true)
  end
