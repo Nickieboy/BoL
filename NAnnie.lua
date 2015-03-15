@@ -149,7 +149,7 @@ if myHero.charName ~= "Annie" then return end
 
 
 --[[		Auto Update		]]
-local version = "2.5"
+local version = "2.6"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Annie"
 local AUTOUPDATE = true
@@ -950,9 +950,9 @@ function OnApplyBuff(unit, target, buff)
 
 end
 
-function OnUpdateBuff(unit, buff)
-	if unit.isMe and (buff.name == "pyromania") then
-		passiveStacks = passiveStacks + 1
+function OnUpdateBuff(unit, buff, stacks)
+	if unit and unit.isMe and buff and (buff.name == "pyromania") then
+		passiveStacks = stacks
 	end 
 end
 
