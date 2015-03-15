@@ -931,7 +931,6 @@ end
  
 
 function OnApplyBuff(unit, target, buff)
-	if unit.isMe then print(buff) end
 	if unit.isMe and (buff.name == "pyromania") then
 		passiveStacks = 1
 	end
