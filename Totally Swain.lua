@@ -22,6 +22,9 @@
 						> 1.37
 								Temp fixes
 
+						> 1.42
+								Rito changed some values, so now back to the old way of retrieving whether the ult is active or not
+
 				Donate: Look link in thread
 				Bugs: Post in thread
 				Appreciation: Post comment on bol.b00st and in thread
@@ -31,8 +34,8 @@
 if myHero.charName ~= "Swain" then return end
 
 -- Download script
-local version = 1.41
-local author = "Nickieboy"
+local version = 1.42
+local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Swain"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
@@ -94,8 +97,8 @@ if VIP_USER and FileExist(LIB_PATH.."Prodiction.lua") then
 	require "Prodiction"
 end
 
-if not FileExist(LIB_PATH .. "SxOrbWalk.lua") then return Say("You need SxOrbWalk for this script. Please download this library.") end
-if not FileExist(LIB_PATH .. "TotallyLib.lua") then return Say("You need TotallyLib for this script. Please download this library.") end
+if not FileExist(LIB_PATH .. "SxOrbWalk.lua") then return Say("You need SxOrbWalk for this script. Please download this library before running the script.") end
+if not FileExist(LIB_PATH .. "TotallyLib.lua") then return Say("You need TotallyLib for this script. Please download this library before running the script.") end
 
 function InitializeVariables()
 	serverMessage = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/announcements/totallyseries.txt")
@@ -129,10 +132,12 @@ function InitializeVariables()
 		BFT = { id = 3188, range = 750, reqTarget = true, slot = nil },
 		RND = { id = 3143, range = 275, reqTarget = false, slot = nil }
 	}
+
+	ultActive = false
 end
 
 function GetOrbTarget()
-	if SxOrbloaded then return SxOrb:GetTarget() end
+	--if SxOrbloaded then return SxOrb:GetTarget() end
 	return ts.target
 end 
 
@@ -152,6 +157,9 @@ function OnLoad()
 	-- Drawing Menu
 	Menu()
 
+	-- Checking whether ult is active or not
+	ultActive = TargetHaveBuff("swainmetamorphism", myHero)
+
 	-- TotallyLib Spell initializing
 	Abilities = SpellHelper(VP, Menu)
 	Abilities:AddSpell(_Q, Spells.Q.range)
@@ -164,10 +172,8 @@ function OnLoad()
 end
 
 function OnTick()
-
 	EnemyMinions:update()
 	target = GetOrbTarget()
-
 	if Menu.keys.combo then Combo() end 
 
 	if Menu.keys.harass then Harass() end 
@@ -183,6 +189,9 @@ function OnTick()
  		RcastedThroughBot = false
  	end 
 
+ 	if myHero.dead and ultActive then
+ 		ultActive = false
+ 	end
 end
 
 
@@ -204,6 +213,19 @@ function OnDraw()
 	end 
 
 end
+
+function OnApplyBuff(source, target, buff) 
+	if source and source.isMe and buff and buff.name:lower():find("swainmetamorphism") then
+		ultActive = true
+	end
+end
+
+function OnRemoveBuff(source, buff) 
+	if source and source.isMe and buff and buff.name:lower():find("swainmetamorphism") then
+		ultActive = false
+	end
+end
+
 
 function Combo()
 	if myHero.dead then return end
@@ -348,12 +370,12 @@ end
 
 
 function ultActive()
-	return (myHero:GetSpellData(_Q).range + GetDistance(myHero.minBBox)/2) > 60
+	return ultActive
 end
 
 function Menu()
 
-	Menu = scriptConfig("Totally Swain by Nickieboy", "TotallySwain.cfg")
+	Menu = scriptConfig("Totally Swain by Totally Legit", "TotallySwain.cfg")
 
 	Menu:addSubMenu("Key Settings", "keys")
 	Menu.keys:addParam("combo", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, 32)

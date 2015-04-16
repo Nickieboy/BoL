@@ -23,10 +23,12 @@
 				Deleted DFG in ItemSupport
 			* 0.27
 				Fixed spam with barrier
+			* 0.28
+				Updated some stuff to current standards
 
 --]]
 
-local version = 0.27
+local version = 0.28
 local AUTO_UPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Nickieboy/BoL/master/lib/TotallyLib.lua".."?rand="..math.random(1,10000)
@@ -167,10 +169,7 @@ function Summoners:__init(menu)
 	end
 
 	AddTickCallback(function() self:OnTick() end)
-	if VIP_USER then
-		AdvancedCallback:bind("GainBuff", function(unit, buff) self:OnGainBuff(unit, buff) end)
-	end 
-
+	AddApplyBuffCallback(function(source, unit, buff) self:OnApplyBuff(source, unit, buff) end)
 
 end 
 
@@ -200,26 +199,26 @@ function Summoners:LoadToMenu(menu)
 	if self.cleanse ~= nil then
 		self.menu:addSubMenu("Auto Cleanse", "autocleanse")
 		self.menu.autocleanse:addParam("useCleanse", "Use Cleanse", SCRIPT_PARAM_ONOFF, true)
-		if VIP_USER then
-			for i, enemy in ipairs(GetEnemyHeroes()) do
+		for i, enemy in ipairs(GetEnemyHeroes()) do
+			if enemy then
 				table.insert(self.enemyNames, enemy.charName)
-			end 
-			local oneAdded = false
-			for buff, data in pairs(bufflist) do
-				if table.contains(self.enemyNames, data.charName) then
-					oneAdded = true
-					self.menu.autocleanse:addParam(buff, data.spellname .. " - " .. data.charName .. " (" .. data.spell .. ")", SCRIPT_PARAM_ONOFF, true)
-				end
-			end 
-			if not oneAdded then
-				self.menu.autocleanse:addParam("info", "ERROR", SCRIPT_PARAM_INFO, "No buffs found to be added")
-			end 
-		end
+			end
+		end 
+		local oneAdded = false
+		for buff, data in ipairs(bufflist) do
+			if buff and data and table.contains(self.enemyNames, data.charName) then
+				oneAdded = true
+				self.menu.autocleanse:addParam(buff, data.spellname .. " - " .. data.charName .. " (" .. data.spell .. ")", SCRIPT_PARAM_ONOFF, true)
+			end
+		end 
+		if not oneAdded then
+			self.menu.autocleanse:addParam("info", "ERROR", SCRIPT_PARAM_INFO, "No buffs found to be added")
+		end 
 	end 
 end
 
-function Summoners:OnGainBuff(unit, buff)
-	if VIP_USER and self.cleanse ~= nil and self.menu.autocleanse.useCleanse and self.menu.autocleanse[buff.name] and unit.isMe then
+function Summoners:OnApplyBuff(source, unit, buff)
+	if self.cleanse ~= nil and self.menu.autocleanse.useCleanse and self.menu.autocleanse[buff.name] and unit and unit.isMe then
 		if IsSpellReady(self.cleanse) then
 			CastSpell(self.cleanse)
 		end 
