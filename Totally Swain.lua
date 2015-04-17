@@ -21,11 +21,12 @@
 								Dead Check
 						> 1.37
 								Temp fixes
-
 						> 1.42
-								Rito changed some values, so now back to the old way of retrieving whether the ult is active or not
+								Fixed few stuff
 
-				Donate: Look link in thread
+						> 1.43
+								Ult really works now
+
 				Bugs: Post in thread
 				Appreciation: Post comment on bol.b00st and in thread
 				Need more features: Post in thread. Everything is considered
@@ -34,7 +35,7 @@
 if myHero.charName ~= "Swain" then return end
 
 -- Download script
-local version = 1.42
+local version = 1.43
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Swain"
 local AUTOUPDATE = true
@@ -97,8 +98,9 @@ if VIP_USER and FileExist(LIB_PATH.."Prodiction.lua") then
 	require "Prodiction"
 end
 
-if not FileExist(LIB_PATH .. "SxOrbWalk.lua") then return Say("You need SxOrbWalk for this script. Please download this library before running the script.") end
-if not FileExist(LIB_PATH .. "TotallyLib.lua") then return Say("You need TotallyLib for this script. Please download this library before running the script.") end
+if not FileExist(LIB_PATH .. "SxOrbWalk.lua") then return Say("You need SxOrbWalk for this script. Please download this library before running this script.") end
+if not FileExist(LIB_PATH .. "VPrediction.lua") then return Say("You need VPrediction for this script. Please download this library before running this script.") end
+if not FileExist(LIB_PATH .. "TotallyLib.lua") then return Say("You need TotallyLib for this script. Please download this library before running this script.") end
 
 function InitializeVariables()
 	serverMessage = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/announcements/totallyseries.txt")
@@ -123,7 +125,6 @@ function InitializeVariables()
 	Items = {
 		BRK = { id = 3153, range = 450, reqTarget = true, slot = nil },
 		BWC = { id = 3144, range = 400, reqTarget = true, slot = nil },
-		DFG = { id = 3128, range = 750, reqTarget = true, slot = nil },
 		HGB = { id = 3146, range = 400, reqTarget = true, slot = nil },
 		RSH = { id = 3074, range = 350, reqTarget = false, slot = nil },
 		STD = { id = 3131, range = 350, reqTarget = false, slot = nil },
@@ -137,6 +138,7 @@ function InitializeVariables()
 end
 
 function GetOrbTarget()
+	ts:update()
 	--if SxOrbloaded then return SxOrb:GetTarget() end
 	return ts.target
 end 
@@ -158,7 +160,7 @@ function OnLoad()
 	Menu()
 
 	-- Checking whether ult is active or not
-	ultActive = TargetHaveBuff("swainmetamorphism", myHero)
+	ultActive = TargetHaveParticle("swain_demonForm_idle.troy", myHero, 50)
 
 	-- TotallyLib Spell initializing
 	Abilities = SpellHelper(VP, Menu)
@@ -172,15 +174,17 @@ function OnLoad()
 end
 
 function OnTick()
+	
 	EnemyMinions:update()
 	target = GetOrbTarget()
+
 	if Menu.keys.combo then Combo() end 
 
 	if Menu.keys.harass then Harass() end 
 
 	if Menu.keys.laneclear then LaneClear() end
 
- 	if RcastedThroughBot and not Menu.keys.combo and not Menu.keys.laneclear and ultActive() and CountEnemyHeroInRange(Spells.R.range) < 1 then
+ 	if RcastedThroughBot and not Menu.keys.combo and not Menu.keys.laneclear and isUltActive() and CountEnemyHeroInRange(Spells.R.range) < 1 then
  		CastSpell(_R)
  		RcastedThroughBot = false
  	end
@@ -189,7 +193,7 @@ function OnTick()
  		RcastedThroughBot = false
  	end 
 
- 	if myHero.dead and ultActive then
+ 	if myHero.dead and isUltActive() then
  		ultActive = false
  	end
 end
@@ -214,6 +218,19 @@ function OnDraw()
 
 end
 
+function OnCreateObj(obj) 
+	if obj and obj.name and obj.name == "swain_demonForm_idle.troy" and GetDistance(obj) <= 50 then
+		ultActive = true
+	end
+end
+
+function OnDeleteObj(obj)
+	if obj and obj.name and obj.name == "swain_demonForm_idle.troy" and GetDistance(obj) <= 50 then
+		ultActive = false
+	end
+end
+
+--[[
 function OnApplyBuff(source, target, buff) 
 	if source and source.isMe and buff and buff.name:lower():find("swainmetamorphism") then
 		ultActive = true
@@ -225,6 +242,7 @@ function OnRemoveBuff(source, buff)
 		ultActive = false
 	end
 end
+--]]
 
 
 function Combo()
@@ -232,14 +250,14 @@ function Combo()
 
 	if target ~= nil then
 		if Menu.combo.comboR then
-			if IsSpellReady(_R) and not ultActive() and CountEnemyHeroInRange(Spells.R.range) >= Menu.combo.comboRx then
+			if IsSpellReady(_R) and not isUltActive() and CountEnemyHeroInRange(Spells.R.range) >= Menu.combo.comboRx then
 				RcastedThroughBot = true
 				CastSpell(_R) 
-			elseif IsSpellReady(_R) and ultActive() and CountEnemyHeroInRange(Spells.R.range) < Menu.combo.comboRx then
+			elseif IsSpellReady(_R) and isUltActive() and CountEnemyHeroInRange(Spells.R.range) < Menu.combo.comboRx then
 				CastSpell(_R)
 				RcastedThroughBot = false
 			end 
-			if ultActive() and not RcastedThroughBot then
+			if isUltActive() and not RcastedThroughBot then
 				RcastedThroughBot = true
 			end
 		end 
@@ -260,7 +278,7 @@ function Combo()
 			Abilities:Cast(_W, target)
 		end
 	else
-		if ultActive() and RcastedThroughBot and not (CountEnemyHeroInRange(Spells.R.range) >= Menu.combo.comboRx) then
+		if isUltActive() and RcastedThroughBot and not (CountEnemyHeroInRange(Spells.R.range) >= Menu.combo.comboRx) then
  			CastSpell(_R) 
  		end
  	end
@@ -293,10 +311,10 @@ function LaneClear()
 		end 
 	end 
 
-	if Menu.laneclear.laneclearR and IsSpellReady(_R) and not ultActive() and CountMinions(EnemyMinions.objects, Spells.R.range) >= 1 then
+	if Menu.laneclear.laneclearR and IsSpellReady(_R) and not isUltActive() and CountMinions(EnemyMinions.objects, Spells.R.range) >= 1 then
 		CastSpell(_R)
 		RcastedThroughBot = true
-	elseif Menu.laneclear.laneclearR and IsSpellReady(_R) and ultActive() and CountMinions(EnemyMinions.objects, Spells.R.range) < 1 then
+	elseif Menu.laneclear.laneclearR and IsSpellReady(_R) and isUltActive() and CountMinions(EnemyMinions.objects, Spells.R.range) < 1 then
 		CastSpell(_R)
 		RcastedThroughBot = false
 	end
@@ -368,10 +386,10 @@ function getHitBoxRadius(target)
 end
 
 
-
-function ultActive()
+function isUltActive()
 	return ultActive
 end
+
 
 function Menu()
 
@@ -395,7 +413,7 @@ function Menu()
 	Menu.combo:addParam("comboW", "Use " .. Spells.W.name .. " (W)", SCRIPT_PARAM_ONOFF, true)
 	Menu.combo:addParam("comboE", "Use " .. Spells.E.name .. " (E)", SCRIPT_PARAM_ONOFF, true)
 	Menu.combo:addParam("comboR", "Use " .. Spells.R.name .. " (R)", SCRIPT_PARAM_ONOFF, true)
-	Menu.combo:addParam("comboRx", "Min amount of people nearby", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
+	Menu.combo:addParam("comboRx", "Min amount of people nearby", SCRIPT_PARAM_SLICE, 1, 1, 5, 0)
 	Menu.combo:addParam("info", "Info:", SCRIPT_PARAM_INFO, "Above option is to only R if x people in range in combo")
 
 	 -- Harass
