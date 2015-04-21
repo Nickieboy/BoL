@@ -25,10 +25,12 @@
 				Fixed spam with barrier
 			* 0.28
 				Updated some stuff to current standards
+			* 0.29
+				Cleaned up 2 lines
 
 --]]
 
-local version = 0.28
+local version = 0.29
 local AUTO_UPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Nickieboy/BoL/master/lib/TotallyLib.lua".."?rand="..math.random(1,10000)
@@ -117,7 +119,7 @@ end
 
 function MenuMisc:OnCreateObj(obj)
 	if obj.name:find("TeleportHome.troy") then
-		if GetDistance(obj) <= 70 then
+		if GetDistance(obj) <= 50 then
 			self.isRecalling = true
 		end
 	end
@@ -125,7 +127,7 @@ end
 
 function MenuMisc:OnDeleteObj(obj)
 	if obj.name:find("TeleportHome.troy") then
-		if GetDistance(obj) <= 70 then
+		if GetDistance(obj) <= 50 then
 			self.isRecalling = false
 		end
 	end
@@ -255,7 +257,6 @@ function Summoners:UseHeal()
 end
 
 function Summoners:Ignite()
-	self:IgniteDamage()
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		if GetDistance(enemy, myHero) < 600 and ValidTarget(enemy, 600) and self.menu.autoignite[enemy.charName] then
 			if myHero:CanUseSpell(self.ignite) == READY  then
