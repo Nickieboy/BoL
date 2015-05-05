@@ -27,10 +27,12 @@
 				Updated some stuff to current standards
 			* 0.29
 				Cleaned up 2 lines
+			* 0.35
+				Fixed support for chargeable spells
 
 --]]
 
-local version = 0.29
+local version = 0.35
 local AUTO_UPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Nickieboy/BoL/master/lib/TotallyLib.lua".."?rand="..math.random(1,10000)
@@ -293,9 +295,12 @@ end
 
 class 'SpellHelper'
 
-function SpellHelper:__init(VP, menu)
+function SpellHelper:__init(VP, menu, HS)
 	self.Spells = {}
-	if VP and menu then
+	if VP and HS and menu then
+		self.HS = HS
+		self.Predict = PredictionHelper(VP, menu, HS)
+	elseif VP and menu then
 		self.Predict = PredictionHelper(VP, menu)
 	end
 end
@@ -322,7 +327,7 @@ end
 
 function SpellHelper:Cast(slot, target, value)
 	if self.Spells[slot].skillShot then
-		local castPosition = self.Predict:PredictSpell(target, self.Spells[slot].delay, self.Spells[slot].width, self.Spells[slot].range, self.Spells[slot].speed, self.Spells[slot].collision, self.Spells[slot].typeSkill)
+		local castPosition = self.Predict:PredictSpell(target, self.Spells[slot].delay, self.Spells[slot].width, self.Spells[slot].range, self.Spells[slot].speed, self.Spells[slot].collision, self.Spells[slot].typeSkill, self.Spells[slot].slot)
 		if castPosition ~= nil and self:Ready(self.Spells[slot].slot) and self:InRange(self.Spells[slot].slot, target) then
 			CastSpell(self.Spells[slot].slot, castPosition.x, castPosition.z)
 			return true
@@ -350,8 +355,11 @@ function SpellHelper:CastAll(target, value)
 end
 
 class 'PredictionHelper'
-function PredictionHelper:__init(VP, menu)
+function PredictionHelper:__init(VP, menu, HS)
 	self.VP = VP
+	if HS then
+		self.HS = HS 
+	end
 	if menu then
 		self:LoadToMenu(menu)
 	end
@@ -359,9 +367,9 @@ end
 
 function PredictionHelper:LoadToMenu(Menu)
 	Menu:addSubMenu("Prediction Type", "prediction")
-	if VIP_USER and FileExist(LIB_PATH.."Prodiction.lua") then
-		Menu.prediction:addParam("type", "Prediction:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction", "Prodiction"})
-	elseif self.VP then
+	if self.VP and self.HS then
+		Menu.prediction:addParam("type", "Prediction:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction", "HPrediction"})
+	elseif self.VP and not self.HS then
 		Menu.prediction:addParam("type", "Prediction:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction"})
 	end
 	Menu.prediction:addParam("hitchance", "Hitchance", SCRIPT_PARAM_LIST, 2, {"Low hitchance", "High HitChance", "Slowed", "Immobile"})
@@ -369,7 +377,7 @@ function PredictionHelper:LoadToMenu(Menu)
 	self.menu = Menu
 end
 
-function PredictionHelper:PredictSpell(target, delay, radius, range, speed, collision, typeSkill)
+function PredictionHelper:PredictSpell(target, delay, radius, range, speed, collision, typeSkill, slot)
 	if self.menu.prediction.type == 1 then
 		local castPosition, coll = TargetPrediction(range, speed, delay, radius):GetPrediction(target)
 		if collision == true and not coll then
@@ -385,6 +393,9 @@ function PredictionHelper:PredictSpell(target, delay, radius, range, speed, coll
 			end
 		elseif typeSkill == "lineaoe" then
 			local castPosition, hitChance = self.VP:GetLineAOECastPosition(target, delay, radius, range, speed, myHero)
+			if hitChance >= self.menu.prediction.hitchance then
+				return castPosition
+			end
 		elseif typeSkill == "line" then
 			local castPosition, hitChance = self.VP:GetLineCastPosition(target, delay, radius, range, speed, myHero, collision)
 			if hitChance >= self.menu.prediction.hitchance then
@@ -397,38 +408,10 @@ function PredictionHelper:PredictSpell(target, delay, radius, range, speed, coll
 			end
 		end
 	elseif self.menu.prediction.type == 3 then
-		if typeSkill == "circaoe" then
-			local castPosition, info = Prodiction.GetCircularAOEPrediction(target, range, speed, delay, radius, myHero)
-			if collision and not info.mCollision() then
-				return castPosition
-			end
-			if not collision then
-				return castPosition
-			end 
-		elseif typeSkill == "lineaoe" then
-			local castPosition, info = Prodiction.GetLineAOEPrediction(target, range, speed, delay, width, myHero)
-			if collision and not info.mCollision() then
-				return castPosition
-			end
-			if not collision then
-				return castPosition
-			end
-		elseif typeSkill == "line" then
-			local castPosition, info = Prodiction.GetPrediction(target, range, speed, delay, width, source)
-			if collision and not info.mCollision() then
-				return castPosition
-			end
-			if not collision then
-				return castPosition
-			end
-		elseif typeSkill == "circ" then
-			local castPosition, info = Prodiction.GetCircularCastPosition(target, delay, radius, range, speed, myHero, collision)
-			if collision and not info.mCollision() then
-				return castPosition
-			end
-			if not collision then
-				return castPosition
-			end
+		local castPosition, hitChance = self.HS:GetPredict(Spell_Q, target, myHero)
+		if castPosition and hitChance >= Menu.prediction.hitchance then
+			print("HPred has castPos")
+			return castPosition
 		end
 	end
 	return nil
@@ -451,11 +434,15 @@ function ChargeSpell:__init(slot, spellname, minrange, maxRange, chargeduration,
     AddCreateObjCallback(function(obj) self:OnCreateObj(obj) end)
 	AddDeleteObjCallback(function(obj) self:OnDeleteObj(obj) end)
 
-	self.CheckChargeObject = false
 end
 
 function ChargeSpell:OnTick()
 	if not self.isCharged and self.range ~= self.minRange then
+		self.range = self.minRange
+	end
+	if self.isCharged and self.chargedTime + ((self.timeToMax + self.chargeDuration) + 1) < os.clock() then
+		print("Lost ontick: " .. (self.isCharged and "true"))
+		self.isCharged = false
 		self.range = self.minRange
 	end
 	if self:IsCharging() then
@@ -463,16 +450,21 @@ function ChargeSpell:OnTick()
 	end
 end
 
-function ChargeSpell:OnCreateObj(obj) 
-	if obj.name == self.objectName and GetDistance(obj, myHero) <= 50 then
-		self.CheckChargeObject = true 
+function ChargeSpell:OnCreateObj(obj)
+	if GetDistance(obj, myHero) <= 50 then
+		print(obj.name)
+	end
+	if obj and obj.name == self.objectName and GetDistance(obj, myHero) <= 50 then
+		self.isCharged = true
+		print(obj.name)
+		print("Gained object: " .. (self.isCharged and "true"))
 	end
 end
 
 function ChargeSpell:OnDeleteObj(obj) 
-	if obj.name == self.objectName and GetDistance(obj, myHero) <= 50 then
-		self.CheckChargeObject = false 
+	if obj and obj.name == self.objectName and GetDistance(obj, myHero) <= 50 then
 		self.isCharged = false
+		print("Lost object: " .. (not self.isCharged and "false"))
 	end
 end
 
@@ -488,11 +480,14 @@ function ChargeSpell:IsCharging()
 	return self.isCharged
 end
 
-function ChargeSpell:Cast(param1, parmam2)
+function ChargeSpell:Cast(pos)
 	if not self.isCharged then
-		CastSpell(self.slot, mousePos)
+		CastSpell(self.slot, mousePos.x, mousePos.z)
 	else
-		CastSpell2(self.slot, param1, param2)
+		if not pos.y then
+			pos.y = 0
+		end
+		CastSpell2(self.slot, D3DXVECTOR3(pos.x, pos.y, pos.z))
 	end
 end
 
@@ -554,6 +549,17 @@ end
 
 
 
+function slotToString(slot) 
+	if slot == _Q then
+		return "Q"
+	elseif slot == _W then
+		return "W" 
+	elseif slot == _E then
+		return "E"
+	elseif slot == _R then
+		return "R" 
+	end
+end
 
 
 
