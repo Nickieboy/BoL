@@ -9,74 +9,6 @@
 
 
 		Changelog
-			* 0.01 (20 Dec)
-				Started coding
-			* 0.02 (21 Dec)
-				Figuring out LeBlancs W tactics by playing her
-			* 0.021 (22 Dec)
-				Working on full integrated debug
-				Fixing bugs
-				Adding makings of R technologies and W technologies
-			* 0.03 (25 Dec)
-				Working on Harass
-				Working on Farm
-				Got a kinda working smart combo already 
-				Got Prod/Vpred and inbuild Pred alrdy :3
-			* 0.04 (26 Dec)
-				Somehow made it possible for the combo to bugsplat :3
-				Made killsteal
-				Fixed Prodiction
-				Items used in combo
-				Added double W in smart combo
-			* 0.05 (27 Dec)
-				Made Farm complete
-				working on laneclear
-				BoL down, can't test :(
-			* 0.06 (28 Dec)
-				Laneclear complete
-				Mixed mode complete
-				Finished Smart W somehow
-					Probs not really Smart, but hey, it's something.
-			* 0.07 (29 Dec)
-				Killsteal done
-				Thinking about autokill, but hmm, so many possibilities to avoid overkill
-				Made laneclear and mixed smoother
-				R doesn't cast :c
-				Killtext (is inaccurate though)
-			* 0.08 (30 dec)
-				Rewrote some parts
-				Suddenly getting huge fps spikes
-				Suddenly W won't work
-			* 0.09 (31 Dev)
-				Smoother smartcombo
-				Deleted unneccesary code
-				Fixed Kill Text (Should now be accurate)
-				Combo works perfectly
-				Harass works
-				Laneclear works
-				Mixed more works
-				Farm works
-				Smart W return, idk
-				Almost ready for release
-				Only killsteal that has to be re-checked
-				In killText, I'll maybe also add DFG, I'll think about that.
-			* 0.1 (1 January)
-				Happy New Year!
-				Testing last stuff with a headache 
-			* 0.2 (5 January)
-				Deleted Mixed Mode
-				Deleted Potions
-				Deleted Health summoner support
-				Deleted few other stuff
-				Tweaked combination with Orbwalker
-				Tweaked Smart W
-				Tweaked Smart Combo
-				Integration with SxOrbWalk tweaked
-			* 0.3 (9 Jan)
-				Few more tweaks and optimalizations
-			* 0.5 (20 Jan)
-				Thanks to Redprince I possibly found the issue of the 'ipairs nil' spam
-
 			* 1.0
 				OFFICIALLY COMPLETELY OUT OF BETA
 					Divine Prediction added
@@ -98,6 +30,10 @@
 				Fixed the other combos
 				Tweaked some stuff
 
+			* 1.20
+				!!!!!! SAC SUPPORT IS HERE !!!!!!!!!
+				Including the following support: Working DivinePrediction support & added HPred for E
+
 --]]
 
 
@@ -110,7 +46,7 @@ function Say(text)
 end
 
 --[[		Auto Update		]]
-local version = "1.15"
+local version = "1.20"
 local author = "Totally Legit"
 local SCRIPT_NAME = "LeBlanc"
 local AUTOUPDATE = true
@@ -137,13 +73,11 @@ if AUTOUPDATE then
 	end
 end
 
-local prodLoaded = false
-local SxOrbloaded = false
-local divinePredLoaded = false
+local SxOrbloaded, SAC, prodLoaded, divinePredLoaded, hPredLoaded, orbWalkLoaded = false
+local HPred = nil
 
 -- Lib Updater
 local REQUIRED_LIBS = {
-	["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua",
 	["VPrediction"] = "https://raw.githubusercontent.com/Ralphlol/BoLGit/master/VPrediction.lua"
 }
 
@@ -168,13 +102,14 @@ for DOWNLOAD_LIB_NAME, DOWNLOAD_LIB_URL in pairs(REQUIRED_LIBS) do
 end
 
 
-if FileExist(LIB_PATH.."SxOrbWalk.lua") then
-	SxOrbloaded = true
-end 
-
 if FileExist(LIB_PATH.."DivinePred.lua") then
 	divinePredLoaded = true
 	require "DivinePred"
+end 
+
+if FileExist(LIB_PATH.."HPrediction.lua") then
+	hPredLoaded = true
+	require "HPrediction"
 end 
 
 function DeclareVariables()
@@ -239,8 +174,6 @@ function DeclareVariables()
 	ts = TargetSelector(TARGET_LOW_HP_PRIORITY, 700)
 	tsLong = TargetSelector(TARGET_LOW_HP_PRIORITY, 1500)
 	exampleTarget = nil
-	divineTarget = nil
-	divineTargetKS = nil
 
 	--MinionManager
 	enemyMinions = minionManager(MINION_ENEMY, 600, myHero, MINION_SORT_HEALTH_DEC)
@@ -290,26 +223,90 @@ function DeclareVariables()
 
 	-- Divine Prediction
 	if divinePredLoaded then
-		eSS = LineSS(Spells.E.speed, Spells.E.range, (Spells.E.radius - 7), (Spells.E.delay * 1000), 0)
+		eSS = LineSS(Spells.E.speed, Spells.E.range, Spells.E.radius, (Spells.E.delay * 1000), 0)
 		wSS = CircleSS(Spells.W.speed, (Spells.W.range + 100), Spells.W.radius, (Spells.W.delay * 1000), math.huge)
+		LoadDivinePrediction()
 	end
 
-	divinePredictionTargetTable = {}
+	
+	-- HPrediction
+	if hPredLoaded then
+		HPred = HPrediction()
+		LoadHPrediction()  
+	end
+
+	
+
+end 
+
+function LoadHPrediction() 
+	Spell_W.collisionM['Leblanc'] = false
+  	Spell_W.collisionH['Leblanc'] = false -- or false (sometimes, it's better to not consider it)
+  	Spell_W.delay['Leblanc'] = Spells.W.delay
+  	Spell_W.range['Leblanc'] = (Spells.W.range + 100)
+  	Spell_W.speed['Leblanc'] = Spells.W.speed
+  	Spell_W.type['Leblanc'] = "DelayCircle" -- 
+  	Spell_W.width['Leblanc'] = Spells.W.radius
+
+	Spell_E.collisionM['Leblanc'] = true
+  	Spell_E.collisionH['Leblanc'] = true -- or false (sometimes, it's better to not consider it)
+  	Spell_E.delay['Leblanc'] = Spells.E.delay
+  	Spell_E.range['Leblanc'] = Spells.E.range
+  	Spell_E.speed['Leblanc'] = Spells.E.speed
+  	Spell_E.type['Leblanc'] = "DelayLine" -- (it has tail like comet)
+  	Spell_E.width['Leblanc'] = Spells.E.radius
+end
+
+function LoadDivinePrediction()
 	if divinePredLoaded then
+		divinePredictionTargetTable = {}
 		for i, enemy in pairs(GetEnemyHeroes()) do
 			if enemy and enemy.type and enemy.type == myHero.type then
 				divinePredictionTargetTable[enemy.networkID] = DPTarget(enemy)
 			end
 		end
 	end
+end
 
-end 
+
+function CheckOrbWalker() 
+	if _G.Reborn_Initialised then
+		SACLoaded = true 
+		Menu.orbwalker:addParam("info", "Detected SAC", SCRIPT_PARAM_INFO, "")
+		_G.AutoCarry.Skills:DisableAll()
+	elseif FileExist(LIB_PATH .. "SxOrbWalk.lua") then
+		require("SxOrbWalk")
+		SxOrbloaded = true 
+		Menu.keysettings:addParam("useCombo", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+ 		Menu.keysettings:addParam("useHarass", "Harass Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
+ 		Menu.keysettings:addParam("useLaneclear", "LaneClear Key", SCRIPT_PARAM_ONKEYDOWN, false,   string.byte("L"))
+ 		Menu.keysettings:addParam("useLastHit", "LastHit Key", SCRIPT_PARAM_ONKEYDOWN, false,  string.byte("X"))
+		_G.SxOrb:LoadToMenu(Menu.orbwalker, true)
+		_G.SxOrb:RegisterHotKey('fight',     Menu.keysettings, 'useCombo')
+		_G.SxOrb:RegisterHotKey('harass',    Menu.keysettings, 'useHarass')
+		_G.SxOrb:RegisterHotKey('laneclear', Menu.keysettings, 'useLaneclear')
+		_G.SxOrb:RegisterHotKey('lasthit',   Menu.keysettings, 'useLastHit')
+		Menu.keysettings:permaShow("useCombo")
+	 	Menu.keysettings:permaShow("useHarass")
+	 	Menu.keysettings:permaShow("useLaneclear")
+	 	Menu.keysettings:permaShow("useLastHit")
+	end
+	if SACLoaded or SxOrbloaded then
+		orbWalkLoaded = true
+		Menu.keysettings:addParam("useFarm", "Farm Key", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("K"))
+		Menu.keysettings:permaShow("useFarm")
+	end
+	if not orbWalkLoaded then 
+		Say("You need either SAC or SxOrbWalk for this script. Please download one of them.") 
+	else
+		Say("Succesfully Loaded. Enjoy the script! Report bugs on the thread.")
+	end
+end
 
 
 function OnLoad()
 
 	DeclareVariables()
-			Say("loading... Please hang on!")
 		 
 	Summoners()
 		 
@@ -324,7 +321,9 @@ function OnLoad()
 	NormalWPred = TargetPrediction(Spells.W.range, Spells.W.speed, Spells.W.delay, Spells.W.radius)
 	NormalEPred = TargetPrediction(Spells.E.range, Spells.E.speed, Spells.E.delay, Spells.E.radius)
 
-	Say("Succesfully Loaded - Please report any bugs on the thread. Give me all information: Keys used, Settings used, Region you're playing on, ...")
+	Say("Checking whether user has SAC or SxOrbWalk. Please wait...")
+    Say("Loading...")
+    DelayAction(function() CheckOrbWalker() end, 5)
 
 	DrawMenu()
 
@@ -340,7 +339,7 @@ function OnLoad()
 end
 
 function OnDraw()
-	if myHero.dead then return end
+	if not orbWalkLoaded or myHero.dead then return end
 
 	if Menu.drawings.draw then
 		if Menu.drawings.drawQ and CanDrawSpell(_Q) then
@@ -397,6 +396,7 @@ end
 
 
 function OnTick()
+	if not orbWalkLoaded or myHero.dead then return end
 	SpellReadyChecks()
 	enemyMinions:update()
 	target = GetOrbTarget()
@@ -404,7 +404,7 @@ function OnTick()
 	CalcDamage()
 
 
-	if SxOrb:GetMode() == 1 then
+	if (SxOrbloaded and _G.SxOrb:GetMode() == 1) or (SACLoaded and _G.AutoCarry.Keys.AutoCarry) then
 		Combo()
 	end 
 
@@ -412,33 +412,41 @@ function OnTick()
 		LeBlancSpecificSpellChecks()
 	end 
 
-	if Menu.combo.comboAA and SxOrb:GetMode() == 1 then
+	if Menu.combo.comboAA and ((SxOrbloaded and _G.SxOrb:GetMode() == 1) or (SACLoaded and _G.AutoCarry.Keys.AutoCarry)) then
 		if AAdisabled then
-			SxOrb:EnableAttacks()
+			if SxOrbloaded then
+				_G.SxOrb:DisableAttacks()
+			elseif SACLoaded then
+				_G.AutoCarry.MyHero:AttacksEnabled(true)
+			end
 			AAdisabled = false
 		end 
 	end 
 
-	if SxOrb:GetMode() == 1 and not Menu.combo.comboAA then
+	if ((SxOrbloaded and _G.SxOrb:GetMode() == 1) or (SACLoaded and _G.AutoCarry.Keys.AutoCarry)) and not Menu.combo.comboAA then
 		if not AAdisabled then
-			SxOrb:DisableAttacks()
+			if SxOrbloaded then
+				_G.SxOrb:DisableAttacks()
+			elseif SACLoaded then
+				_G.AutoCarry.MyHero:AttacksEnabled(false)
+			end
 			AAdisabled = true
 		end 
 	end
 
-	if SxOrb:GetMode() == 2 then
+	if (SxOrbloaded and _G.SxOrb:GetMode() == 2) or (SACLoaded and _G.AutoCarry.Keys.MixedMode) then
 		Harass()
 	end 
 
-	if Menu.keysettings.useFarm and not SxOrb:GetMode() == 1 and not SxOrb:GetMode() == 2 and not SxOrb:GetMode() == 3 then
+	if Menu.keysettings.useFarm and ((SxOrbloaded and not _G.SxOrb:GetMode() == 1 and not _G.SxOrb:GetMode() == 2 and not _G.SxOrb:GetMode() == 3) or (SACLoaded and not _G.AutoCarry.Keys.AutoCarry and not _G.AutoCarry.Keys.MixedMode and not _G.AutoCarry.Keys.LaneClear)) then
 		Farm() 
 	end
 
-	if SxOrb:GetMode() == 3 then
+	if (SxOrbloaded and _G.SxOrb:GetMode() == 3) or (SACLoaded and _G.AutoCarry.Keys.LaneClear) then
 		LaneClear()
 	end 
 
-	if Menu.killsteal.killsteal and SxOrb:GetMode() == 0 then
+	if Menu.killsteal.killsteal and not ((SxOrbloaded and _G.SxOrb:GetMode() == 1) or (SACLoaded and _G.AutoCarry.Keys.AutoCarry)) then
 		KillSteal()
 	end 
 
@@ -743,7 +751,7 @@ end
 function Farm()
 	local hasCasted = false
 
-	if Menu.farm.farmAA and SxOrb:CanAttack() == true then return end
+	if Menu.farm.farmAA and ((SxOrbloaded and _G.SxOrb:CanAttack() == true) or (SACLoaded and _G.AutoCarry.Orbwalker:CanShoot())) then return end
 
 	if Menu.farm.farmQ then
 		for i, minion in ipairs(enemyMinions.objects) do
@@ -833,7 +841,6 @@ end
 
 function KillSteal()
 	if not canCastSpells then return end
-	divineTargetKS = nil
 	for i, enemy in ipairs(GetEnemyHeroes()) do 
 		if ValidTarget(enemy) and not enemy.dead and enemy.visible and Menu.killsteal.enemies[enemy.charName] then
 			local Qdmg, RQdmg, QdmgMark, Wdmg, RWdmg, Edmg = 0
@@ -849,32 +856,27 @@ function KillSteal()
 			end
 			if GetDistance(enemy) <= 650 then
 				if Qdmg > Wdmg and Wdmg > enemy.health then
-					divineTargetKS = divinePredictionTargetTable[enemy.networkID]
 					CastW(enemy)
 				elseif Qdmg > enemy.health then
 					CastQ(enemy) 
 				elseif ECast ~= nil and Edmg > enemy.health then
-					divineTargetKS = divinePredictionTargetTable[enemy.networkID]
 					CastE(enemy)
 				elseif RQdmg > RWdmg and RWdmg > enemy.health then
-					divineTargetKS = divinePredictionTargetTable[enemy.networkID]
 					CastRW(enemy)
 				elseif RQdmg > enemy.health then
 					CastRQ(enemy)
 				end 
-		 	elseif Menu.killsteal.killstealGap and GetDistance(enemy) >= 600 and GetDistance(enemy) <= (Spells.Q.range + Spells.W.range) and Wready and not wUsed() then
+		 	elseif Menu.killsteal.killstealGap and GetDistance(enemy) >= 600 and GetDistance(enemy) <= (Spells.Q.range + Spells.W.range) and Wready and not wUsed() and HasManaToGapClose() then
 				if Qdmg > enemy.health then
 					if GapClose(enemy) then
 						CastQ(enemy) 
 					end
 				elseif ECast ~= nil and Edmg > enemy.health then
 					if GapClose(enemy) then
-						divineTargetKS = divinePredictionTargetTable[enemy.networkID]
 						CastE(enemy)
 					end
 				elseif RQdmg > RWdmg and RWdmg > enemy.health then
 					if GapClose(enemy) then
-						divineTargetKS = divinePredictionTargetTable[enemy.networkID]
 						CastRW(enemy)
 					end
 				elseif Menu.killsteal.killstealQR and RQdmg + QdmgMark + Qdmg > enemy.health and Qready and Rready then 
@@ -895,16 +897,11 @@ end
 function GetOrbTarget()
 	local t = nil
 	local temp = nil
-	divineTarget = nil
 
 	ts:update()
 	tsLong:update()
 
-	if not SxOrbloaded then 
-		t = SxOrb:GetTarget(1500) 
-	else 
-		t = tsLong.target
-	end
+	t = tsLong.target
 
 	temp = t
 
@@ -923,11 +920,7 @@ function GetOrbTarget()
 		end
 
 		if t == nil then
-			if not SxOrbloaded then 
-				t = SxOrb:GetTarget(700) 
-			else
-				t = ts.target
-			end
+			t = ts.target
 		end
 
 		if t == nil and temp ~= nil then
@@ -936,14 +929,6 @@ function GetOrbTarget()
 
 		if t and ((t.type and t.type ~= myHero.type) or not t.type) then
 			t = nil
-		end
-
-		if t ~= nil then
-			if DivinePredLoaded() then
-				divineTarget = divinePredictionTargetTable[t.networkID]
-			end
-		else
-			divineTarget = nil
 		end
 	end
 
@@ -1098,15 +1083,6 @@ function DrawMenu()
 
 	-- KeySettings
 	Menu:addSubMenu(name .. "Key Settings", "keysettings")
- 	Menu.keysettings:addParam("useCombo", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
- 	Menu.keysettings:addParam("useHarass", "Harass Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
- 	Menu.keysettings:addParam("useLaneclear", "LaneClear Key", SCRIPT_PARAM_ONKEYDOWN, false,   string.byte("L"))
- 	Menu.keysettings:addParam("useLastHit", "LastHit Key", SCRIPT_PARAM_ONKEYDOWN, false,  string.byte("X"))
- 	Menu.keysettings:addParam("useFarm", "Farm Key", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("K"))
- 	SxOrb:RegisterHotKey('fight',     Menu.keysettings, 'useCombo')
-	SxOrb:RegisterHotKey('harass',    Menu.keysettings, 'useHarass')
-	SxOrb:RegisterHotKey('laneclear', Menu.keysettings, 'useLaneclear')
-	SxOrb:RegisterHotKey('lasthit',   Menu.keysettings, 'useLastHit')
 
 	-- Combo
 	Menu:addSubMenu(name .. "Combo", "combo")
@@ -1175,11 +1151,16 @@ function DrawMenu()
  	Menu.drawings:addParam("drawSpellReady", "Don't draw if spell is CD", SCRIPT_PARAM_ONOFF, false)
 
  	Menu:addSubMenu(name .. "Prediction", "prediction")
- 	if divinePredLoaded then
-		Menu.prediction:addParam("usePrediction", "Prediction Type:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction", "Divine Pred"})
+ 	if divinePredLoaded and hPredLoaded then
+		Menu.prediction:addParam("usePrediction", "Prediction Type:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction", "DivinePrediction", "HPrediction"})
+	elseif divinePredLoaded and not hPredLoaded then
+		Menu.prediction:addParam("usePrediction", "Prediction Type:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction", "DivinePrediction"})
+	elseif hPredLoaded and not divinePredLoaded then
+		Menu.prediction:addParam("usePrediction", "Prediction Type:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction", "HPrediction"})
 	else
 		Menu.prediction:addParam("usePrediction", "Prediction Type:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction"})
 	end 
+
 
  	--Misc
  	Menu:addSubMenu(name .. "Misc", "misc")
@@ -1198,17 +1179,11 @@ function DrawMenu()
 
 	--Orbwalker
 	Menu:addSubMenu(name .. "OrbWalker", "orbwalker")
-	SxOrb:LoadToMenu(Menu.orbwalker, true)
 
 	Menu:addParam("info2", "Author", SCRIPT_PARAM_INFO, author)
 	Menu:addParam("info", "Version", SCRIPT_PARAM_INFO, version)
 
 	 -- Always show
-	 Menu.keysettings:permaShow("useCombo")
-	 Menu.keysettings:permaShow("useHarass")
-	 Menu.keysettings:permaShow("useLaneclear")
-	 Menu.keysettings:permaShow("useLastHit")
-	 Menu.keysettings:permaShow("useFarm")
 	 Menu.killsteal:permaShow("killsteal")
 	 Menu.drawings:permaShow("draw")
 end 
@@ -1340,15 +1315,18 @@ function GetWPrediction(target)
 	elseif Menu.prediction.usePrediction == 2 then
 		WCast = VP:GetCircularCastPosition(target, Spells.W.delay, Spells.W.radius, Spells.W.range, Spells.W.speed)
 	elseif DivinePredLoaded() then 
-		local state, hitPos, perc = nil
-		if divineTargetKS ~= nil then
-			state, hitPos, perc = dp:predict(divineTargetKS, eSS)
-		else
-			state, hitPos, perc = dp:predict(divineTarget, eSS)
+		local tempDivineTarget = nil
+		if divinePredictionTargetTable[target.networkID] ~= nil then
+			tempDivineTarget = divinePredictionTargetTable[target.networkID]
 		end
-		if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil then
-			WCast = hitPos
+		if tempDivineTarget then
+			local state, hitPos, perc = dp:predict(tempDivineTarget, wSS)
+			if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil then
+				WCast = hitPos
+			end
 		end
+	elseif HPredMenuLoaded() then
+		WCast = VP:GetCircularCastPosition(target, Spells.W.delay, Spells.W.radius, Spells.W.range, Spells.W.speed)
 	end
 	return WCast
 end
@@ -1366,17 +1344,32 @@ function GetEPrediction(target)
 			ECast = castPos
 		end 		
 	elseif DivinePredLoaded() then 
-		local state, hitPos, perc = nil
-		if divineTargetKS ~= nil then
-			state, hitPos, perc = dp:predict(divineTargetKS, eSS)
-		else
-			state, hitPos, perc = dp:predict(divineTarget, eSS)
+		local tempDivineTarget = nil
+		if divinePredictionTargetTable[target.networkID] ~= nil then
+			tempDivineTarget = divinePredictionTargetTable[target.networkID]
 		end
-		if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil then
-			ECast = hitPos
+		if tempDivineTarget then
+			local state, hitPos, perc = dp:predict(tempDivineTarget, eSS)
+			if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil then
+				ECast = hitPos
+			end
 		end
-	end 
+	elseif HPredMenuLoaded() then
+		local CastPos, HitChance = HPred:GetPredict("E", target, myHero)
+		if CastPos then
+			ECast = CastPos 
+		end
+	end
+
 	return ECast
+end
+
+function DivinePredLoaded()
+	return divinePredLoaded and Menu.prediction.usePrediction == 3 
+end
+
+function HPredMenuLoaded()
+	return (hPredLoaded and divinePredLoaded and Menu.prediction.usePrediction == 4) or (hPredLoaded and not divinePredLoaded and Menu.prediction.usePrediction == 3) 
 end
 
 
@@ -1422,13 +1415,18 @@ function GapClose(target)
 	if target and target.type and target.type == myHero.type then
 		local newPos = Vector(myHero) + (Vector(target) - myHero):normalized() * Spells.W.range
 
-		if not UnderTurret(newPos, true) and not wUsed() then
+		if not UnderTurret(newPos, true) and not wUsed() and Spells.W.ready then
 			CastSpell(_W, newPos.x, newPos.z)
 			return true
 		end
 	end
 	return false
 end 
+
+function HasManaToGapClose()
+	return (Spells.Q.ready and myHero:GetSpellData(_Q).mana + myHero:GetSpellData(_W).mana < myHero.mana) or (Spells.E.ready and myHero:GetSpellData(_E).mana + myHero:GetSpellData(_W).mana < myHero.mana)
+end
+
 
 function CastE(target)
 	if target and not target.dead and GetDistanceSqr(target) <= (Spells.E.range * Spells.E.range) and target.type and target.type == myHero.type or target.type == "obj_AI_Minion" then
@@ -1510,7 +1508,7 @@ function SmartCombo(targ)
 			RSkill = "Q"
 			RSkillTime = os.clock()
 		end
-	elseif Menu.combo.comboGap and GetDistance(targ) > Spells.Q.range and GetDistance(targ) < (Spells.Q.range + Spells.W.range) and Qready and Wready and not wUsed() and Rready then
+	elseif Menu.combo.comboGap and GetDistance(targ) > Spells.Q.range and GetDistance(targ) < (Spells.Q.range + Spells.W.range) and Qready and Wready and not wUsed() and Rready and HasManaToGapClose() then
 		if GapClose(targ) then
 			if CastQ(targ) then
 				canCastSpells = false
@@ -1518,7 +1516,7 @@ function SmartCombo(targ)
 				RSkillTime = os.clock()
 			end
 		end
-	elseif Menu.combo.comboGap and GetDistance(targ) > Spells.Q.range and GetDistance(targ) < (Spells.Q.range + Spells.W.range) and Qready and Wready and not wUsed() and Eready then
+	elseif Menu.combo.comboGap and GetDistance(targ) > Spells.Q.range and GetDistance(targ) < (Spells.Q.range + Spells.W.range) and Qready and Wready and not wUsed() and Eready and HasManaToGapClose() then
 		if GapClose(targ) then
 			CastQ(targ)
 			CastE(targ)
@@ -1531,10 +1529,6 @@ function SmartCombo(targ)
 		CastW(targ)
 		CastE(targ)
 	end
-end
-
-function DivinePredLoaded()
-	return divinePredLoaded and Menu.prediction.usePrediction == 3 
 end
 
 
