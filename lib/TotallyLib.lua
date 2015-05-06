@@ -29,10 +29,12 @@
 				Cleaned up 2 lines
 			* 0.35
 				Fixed support for chargeable spells
+			* 0.36
+				My bad, forgot to remove debugging stuff
 
 --]]
 
-local version = 0.35
+local version = 0.36
 local AUTO_UPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Nickieboy/BoL/master/lib/TotallyLib.lua".."?rand="..math.random(1,10000)
@@ -410,7 +412,6 @@ function PredictionHelper:PredictSpell(target, delay, radius, range, speed, coll
 	elseif self.menu.prediction.type == 3 then
 		local castPosition, hitChance = self.HS:GetPredict(Spell_Q, target, myHero)
 		if castPosition and hitChance >= Menu.prediction.hitchance then
-			print("HPred has castPos")
 			return castPosition
 		end
 	end
@@ -441,7 +442,6 @@ function ChargeSpell:OnTick()
 		self.range = self.minRange
 	end
 	if self.isCharged and self.chargedTime + ((self.timeToMax + self.chargeDuration) + 1) < os.clock() then
-		print("Lost ontick: " .. (self.isCharged and "true"))
 		self.isCharged = false
 		self.range = self.minRange
 	end
@@ -451,20 +451,14 @@ function ChargeSpell:OnTick()
 end
 
 function ChargeSpell:OnCreateObj(obj)
-	if GetDistance(obj, myHero) <= 50 then
-		print(obj.name)
-	end
 	if obj and obj.name == self.objectName and GetDistance(obj, myHero) <= 50 then
 		self.isCharged = true
-		print(obj.name)
-		print("Gained object: " .. (self.isCharged and "true"))
 	end
 end
 
 function ChargeSpell:OnDeleteObj(obj) 
 	if obj and obj.name == self.objectName and GetDistance(obj, myHero) <= 50 then
 		self.isCharged = false
-		print("Lost object: " .. (not self.isCharged and "false"))
 	end
 end
 
@@ -478,6 +472,10 @@ end
 
 function ChargeSpell:IsCharging()
 	return self.isCharged
+end
+
+function ChargeSpell:ForceCharge(value)
+	self.isCharged = value
 end
 
 function ChargeSpell:Cast(pos)
@@ -694,6 +692,41 @@ function GetKillableMinions(minionTable, range, spell, source)
 	end 
 	return minions
 end 
+
+
+function GetBestLineFarmPosition(range, width, objects)
+
+    local BestPos 
+    local BestHit = 0
+    for i, object in ipairs(objects) do
+        local EndPos = Vector(myHero) + range * (Vector(object) - Vector(myHero)):normalized()
+        local hit = CountObjectsOnLineSegment(myHero, EndPos, width, objects)
+        if hit > BestHit then
+            BestHit = hit
+            BestPos = Vector(object)
+            if BestHit == #objects then
+               break
+            end
+         end
+    end
+
+    return BestPos, BestHit
+
+end
+
+function CountObjectsOnLineSegment(StartPos, EndPos, width, objects)
+
+    local n = 0
+    for i, object in ipairs(objects) do
+        local pointSegment, pointLine, isOnSegment = VectorPointProjectionOnLineSegment(StartPos, EndPos, object)
+        if isOnSegment and GetDistanceSqr(pointSegment, object) < width * width then
+            n = n + 1
+        end
+    end
+
+    return n
+
+end
 
 
 function CountMinions(objectTable, range)
