@@ -34,6 +34,9 @@
 				!!!!!! SAC SUPPORT IS HERE !!!!!!!!!
 				Including the following support: Working DivinePrediction support & added HPred for E
 
+			* 1.21
+				Fixed typo for Farm
+
 --]]
 
 
@@ -46,7 +49,7 @@ function Say(text)
 end
 
 --[[		Auto Update		]]
-local version = "1.20"
+local version = "1.21"
 local author = "Totally Legit"
 local SCRIPT_NAME = "LeBlanc"
 local AUTOUPDATE = true
@@ -755,7 +758,7 @@ function Farm()
 
 	if Menu.farm.farmQ then
 		for i, minion in ipairs(enemyMinions.objects) do
-			if Menu.farm.farmRange and GetDistanceSqr(minion) < Spells.AA.range * Spells.AA.range and GetDistanceSqe(minion) < Spells.Q.range * Spells.Q.range then
+			if Menu.farm.farmRange and GetDistanceSqr(minion) < Spells.AA.range * Spells.AA.range and GetDistanceSqr(minion) < Spells.Q.range * Spells.Q.range then
 				if getDmg("Q", minion, myHero) > minion.health then
 					if CastQ(minion, false) then hasCasted = true end 
 				end 
