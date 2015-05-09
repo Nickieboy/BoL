@@ -37,6 +37,9 @@
 			* 1.21
 				Fixed typo for Farm
 
+			* 1.22
+				Changed HPred
+
 --]]
 
 
@@ -49,7 +52,7 @@ function Say(text)
 end
 
 --[[		Auto Update		]]
-local version = "1.21"
+local version = "1.22"
 local author = "Totally Legit"
 local SCRIPT_NAME = "LeBlanc"
 local AUTOUPDATE = true
@@ -243,6 +246,9 @@ function DeclareVariables()
 end 
 
 function LoadHPrediction() 
+	HPred:AddSpell("W", "Leblanc", {collisionM = false, collisionH = false, delay = Spells.W.delay, range = (Spells.W.range + 100), speed = Spells.E.speed, type = "DelayLine", width = Spells.E.radius})
+	HPred:AddSpell("E", "Leblanc", {collisionM = true, collisionH = true, delay = Spells.E.delay, range = Spells.E.range, speed = Spells.E.speed, type = "DlayCircle", width = Spells.E.radius})
+	--[[
 	Spell_W.collisionM['Leblanc'] = false
   	Spell_W.collisionH['Leblanc'] = false -- or false (sometimes, it's better to not consider it)
   	Spell_W.delay['Leblanc'] = Spells.W.delay
@@ -258,6 +264,7 @@ function LoadHPrediction()
   	Spell_E.speed['Leblanc'] = Spells.E.speed
   	Spell_E.type['Leblanc'] = "DelayLine" -- (it has tail like comet)
   	Spell_E.width['Leblanc'] = Spells.E.radius
+  	--]]
 end
 
 function LoadDivinePrediction()
