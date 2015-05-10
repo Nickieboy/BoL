@@ -40,6 +40,10 @@
 			* 1.22
 				Changed HPred
 
+			* 1.23
+				Better SAC detection
+				Faster Combo
+
 --]]
 
 
@@ -52,7 +56,7 @@ function Say(text)
 end
 
 --[[		Auto Update		]]
-local version = "1.22"
+local version = "1.23"
 local author = "Totally Legit"
 local SCRIPT_NAME = "LeBlanc"
 local AUTOUPDATE = true
@@ -246,8 +250,8 @@ function DeclareVariables()
 end 
 
 function LoadHPrediction() 
-	HPred:AddSpell("W", "Leblanc", {collisionM = false, collisionH = false, delay = Spells.W.delay, range = (Spells.W.range + 100), speed = Spells.E.speed, type = "DelayLine", width = Spells.E.radius})
-	HPred:AddSpell("E", "Leblanc", {collisionM = true, collisionH = true, delay = Spells.E.delay, range = Spells.E.range, speed = Spells.E.speed, type = "DlayCircle", width = Spells.E.radius})
+	HPred:AddSpell("W", "Leblanc", {collisionM = false, collisionH = false, delay = Spells.W.delay, range = (Spells.W.range + 100), speed = Spells.W.speed, type = "DelayLine", width = Spells.W.radius})
+	HPred:AddSpell("E", "Leblanc", {collisionM = true, collisionH = true, delay = Spells.E.delay, range = Spells.E.range, speed = Spells.E.speed, type = "DelayCircle", radius = Spells.E.radius})
 	--[[
 	Spell_W.collisionM['Leblanc'] = false
   	Spell_W.collisionH['Leblanc'] = false -- or false (sometimes, it's better to not consider it)
@@ -284,10 +288,10 @@ function CheckOrbWalker()
 		SACLoaded = true 
 		Menu.orbwalker:addParam("info", "Detected SAC", SCRIPT_PARAM_INFO, "")
 		_G.AutoCarry.Skills:DisableAll()
+		Say("SAC Detected.")
 	elseif FileExist(LIB_PATH .. "SxOrbWalk.lua") then
 		require("SxOrbWalk")
 		SxOrbloaded = true 
-		Menu.keysettings:addParam("useCombo", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
  		Menu.keysettings:addParam("useHarass", "Harass Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
  		Menu.keysettings:addParam("useLaneclear", "LaneClear Key", SCRIPT_PARAM_ONKEYDOWN, false,   string.byte("L"))
  		Menu.keysettings:addParam("useLastHit", "LastHit Key", SCRIPT_PARAM_ONKEYDOWN, false,  string.byte("X"))
@@ -296,10 +300,10 @@ function CheckOrbWalker()
 		_G.SxOrb:RegisterHotKey('harass',    Menu.keysettings, 'useHarass')
 		_G.SxOrb:RegisterHotKey('laneclear', Menu.keysettings, 'useLaneclear')
 		_G.SxOrb:RegisterHotKey('lasthit',   Menu.keysettings, 'useLastHit')
-		Menu.keysettings:permaShow("useCombo")
 	 	Menu.keysettings:permaShow("useHarass")
 	 	Menu.keysettings:permaShow("useLaneclear")
 	 	Menu.keysettings:permaShow("useLastHit")
+	 	Say("SxOrb detected.")
 	end
 	if SACLoaded or SxOrbloaded then
 		orbWalkLoaded = true
@@ -333,7 +337,7 @@ function OnLoad()
 
 	Say("Checking whether user has SAC or SxOrbWalk. Please wait...")
     Say("Loading...")
-    DelayAction(function() CheckOrbWalker() end, 5)
+    DelayAction(function() CheckOrbWalker() end, 10)
 
 	DrawMenu()
 
@@ -361,7 +365,6 @@ function OnDraw()
 		end
 
 		if Menu.drawings.drawTarget and target and ValidTarget(target) then
-			DrawCircle(target.x, target.y, target.z, Spells.W.radius, RGB(255, 51, 153))
 			local barPos = WorldToScreen(D3DXVECTOR3(target.x, target.y, target.z))
 			local PosX = barPos.x - 35
 			local PosY = barPos.y - 40
@@ -406,7 +409,6 @@ end
 
 
 function OnTick()
-	if not orbWalkLoaded or myHero.dead then return end
 	SpellReadyChecks()
 	enemyMinions:update()
 	target = GetOrbTarget()
@@ -414,13 +416,15 @@ function OnTick()
 	CalcDamage()
 
 
-	if (SxOrbloaded and _G.SxOrb:GetMode() == 1) or (SACLoaded and _G.AutoCarry.Keys.AutoCarry) then
+	if Menu.keysettings.useCombo then
 		Combo()
 	end 
 
 	if Menu.settingsW.useOptional then
 		LeBlancSpecificSpellChecks()
 	end 
+
+	if not orbWalkLoaded or myHero.dead then return end
 
 	if Menu.combo.comboAA and ((SxOrbloaded and _G.SxOrb:GetMode() == 1) or (SACLoaded and _G.AutoCarry.Keys.AutoCarry)) then
 		if AAdisabled then
@@ -497,15 +501,15 @@ function OnRemoveBuff(unit, buff)
 end
 
 function OnProcessSpell(obj, spell)
-    if obj.isMe and spell.name == Spells.W.spellname then
+    if obj and obj.isMe and spell.name == Spells.W.spellname then
 	    Spells.W.startPos = spell.startPos
     end
 
-    if obj.isMe and spell.name == Spells.WR.spellname then
+    if obj and obj.isMe and spell.name == Spells.WR.spellname then
 	    Spells.WR.startPos = spell.startPos
 	end
 
-    if obj.isMe and ((spell.name == Spells.Q.spellname) or (spell.name == Spells.W.spellname) or (spell.name == Spells.E.spellname)) then
+    if obj and obj.isMe and ((spell.name == Spells.Q.spellname) or (spell.name == Spells.W.spellname) or (spell.name == Spells.E.spellname)) then
     	lastActivated = spell.name
     end 
 
@@ -514,7 +518,6 @@ function OnProcessSpell(obj, spell)
 		RSkill = nil
 	end
 end
-
 
 
 function Combo()
@@ -922,9 +925,9 @@ function GetOrbTarget()
 			local Qdmg = ((Qready and SpellDmgCalculations("Q", t)) or 0)
 			local RQdmg = ((Qready and lastActivated == Spells.Q.spellname and SpellDmgCalculations("RQ", t)) or 0)
 			local QdmgMark = (((Qready or Rready) and SpellDmgCalculations("QProc", t)) or 0)
-			local totalDmg = (Rready and Qready and (Qdmg + RQdmg + QdmgMark))
+			local totalDmg = ((Rready and Qready and (Qdmg + RQdmg + QdmgMark)) or 0)
 
-			if GetDistance(t) > 700 and CountEnemyHeroInRange(600) >= 3 and totalDmg < t.health then
+			if GetDistance(t) > 700 and CountEnemyHeroInRange(600, t) >= 3 and totalDmg < t.health then
 				t = nil
 			end
 		end
@@ -1093,6 +1096,8 @@ function DrawMenu()
 
 	-- KeySettings
 	Menu:addSubMenu(name .. "Key Settings", "keysettings")
+	Menu.keysettings:addParam("useCombo", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+
 
 	-- Combo
 	Menu:addSubMenu(name .. "Combo", "combo")
@@ -1194,6 +1199,7 @@ function DrawMenu()
 	Menu:addParam("info", "Version", SCRIPT_PARAM_INFO, version)
 
 	 -- Always show
+	 Menu.keysettings:permaShow("useCombo")
 	 Menu.killsteal:permaShow("killsteal")
 	 Menu.drawings:permaShow("draw")
 end 
@@ -1219,6 +1225,11 @@ function SpellReadyChecks()
 		_G.DrawCircle = DrawCircle2
 	else
 		_G.DrawCircle = _G.oldDrawCircle 
+	end
+
+	if not Spells.R.ready and (canCastSpells == false or RSkill ~= nil) then
+		canCastSpells = true
+		RSkill = nil
 	end
 end 
  
