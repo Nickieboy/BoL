@@ -136,6 +136,12 @@
 				Made a workaround for the buff stacking
 					It should now detect the buffs, BUT you have to make sure you have 0 stacks when you start the script
 
+			2.7
+				Using buffs to check stun again
+				SAC Integration
+
+
+
 
 
 		Script Coded by Totally Legt.
@@ -149,7 +155,7 @@ if myHero.charName ~= "Annie" then return end
 
 
 --[[		Auto Update		]]
-local version = "2.6"
+local version = "2.7"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Annie"
 local AUTOUPDATE = true
@@ -158,7 +164,7 @@ local UPDATE_PATH = "/Nickieboy/BoL/master/NAnnie.lua".."?rand="..math.random(1,
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
-function AutoupdaterMsg(msg) print("<font color=\"#FF0000\"><b>Totally annie:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
+function AutoupdaterMsg(msg) print("<font color=\"#FF0000\"><b>Totally Annie:</b></font> <font color=\"#FFFFFF\">"..msg..".</font>") end
 if AUTOUPDATE then
 	local ServerData = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/version/NAnnie.version")
 	if ServerData then
@@ -177,31 +183,6 @@ if AUTOUPDATE then
 	end
 end
 
--- Lib Updater
-local REQUIRED_LIBS = {
-	["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua"
-}
-
-local DOWNLOADING_LIBS, DOWNLOAD_COUNT = false, 0
-
-function AfterDownload()
-	DOWNLOAD_COUNT = DOWNLOAD_COUNT - 1
-	if DOWNLOAD_COUNT == 0 then
-		DOWNLOADING_LIBS = false
-		print("<b><font color=\"#6699FF\">Required libraries downloaded successfully, please reload (double F9).</font>")
-	end
-end
-
-for DOWNLOAD_LIB_NAME, DOWNLOAD_LIB_URL in pairs(REQUIRED_LIBS) do
-	if FileExist(LIB_PATH .. DOWNLOAD_LIB_NAME .. ".lua") then
-		require(DOWNLOAD_LIB_NAME)
-	else
-		DOWNLOADING_LIBS = true
-		DOWNLOAD_COUNT = DOWNLOAD_COUNT + 1
-		DownloadFile(DOWNLOAD_LIB_URL, LIB_PATH .. DOWNLOAD_LIB_NAME..".lua", AfterDownload)
-	end
-end
-
 -- Declaring variables
 local lastLevel = myHero.level - 1
 local Qdmg, Wdmg, Rdmg, DFGdmg, iDmg, totalDamage, health, mana, maxHealth, maxMana = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -216,7 +197,6 @@ local isRecalling = false
 local target, Rtarget = nil, nil
 local Qready, Wready, Eready, Rready, Hready, Bready, Iready, Fready = false, false, false, false, false, false, false, false, false
 local useFlash = false
-local SxOrbLoaded, SACLoaded, MMALoaded = false, false, false
 local enemyJunglers = {}
 local allyJunglers = {}
 local AAdisabled = false
@@ -229,6 +209,7 @@ local spells = {
 					["MoltenShield"] = true,
 					["InfernalGuardian"] = true
 				}
+local SACLoaded, SxOrbLoaded, orbWalkLoaded = false
 local tempPassiveStacks = 0
 
 
@@ -240,21 +221,6 @@ assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQINAAAABgBAAEFAAA
 --Perform on load
 function OnLoad()
 
-	
-	if _G.AutoCarry ~= nil then
-		print("<font color = \"#FF0000\"><b>Totally Annie:</b> </font><font color = \"#fff8e7\">SAC found</font>")
-		SACLoaded = true
-	elseif _G.MMA_Loaded ~= nil then
-		print("<font color = \"#FF0000\"><b>Totally Annie:</b> </font><font color = \"#fff8e7\">MMA found</font>")
-		MMALoaded = true
-	else
-		print("<font color = \"#FF0000\"><b>Totally Annie:</b> </font><font color = \"#fff8e7\">SxOrbWalk found</font>")
-		SxOrbLoaded = true
-	end
-	
- 	-- OrbWalker
-	OrbWalk = SxOrbWalk()
-
 	FindSummoners() 
 
 	FindJunglers()
@@ -264,25 +230,52 @@ function OnLoad()
 			[2] = { _W, _Q, _W, _E, _W, _R, _W, _Q, _W, _Q, _R, _Q, _Q, _E, _E, _R, _E, _E },
 	}
 
+	DelayAction(function() CheckOrbWalker() end, 10)
+
  	-- TargetSelector
  	ts = TargetSelector(TARGET_LOW_HP_PRIORITY, 625)
 
  	DrawMenu()
-
- 	if SACLoaded or MMALoaded then
- 		Menu.Orbwalker.General.Enabled = false
- 	end
-
 end 
+
+function Say(text)
+	print("<font color=\"#FF0000\"><b>Totally Annie:</b></font> <font color=\"#FFFFFF\">" .. text .. "</font>")
+end
+
+function CheckOrbWalker() 
+	if _G.Reborn_Initialised then
+		SACLoaded = true 
+		Menu.orbwalker:addParam("info", "Detected SAC", SCRIPT_PARAM_INFO, "")
+		_G.AutoCarry.Skills:DisableAll()
+		Say("SAC Detected.")
+	elseif FileExist(LIB_PATH .. "SxOrbWalk.lua") then
+		require("SxOrbWalk")
+		SxOrbLoaded = true 
+		_G.SxOrb:LoadToMenu(Menu.orbwalker)
+		Say("SxOrb Detected.")
+		Menu.combo:addParam("disableAA", "Disable AA", SCRIPT_PARAM_LIST, 1, {"Not in skill range", "Always", "Never"})
+	end
+
+	if SACLoaded or SxOrbLoaded then
+		orbWalkLoaded = true
+	end
+
+	if not orbWalkLoaded then 
+		Say("You need either SAC or SxOrbWalk for this script. Please download one of them.") 
+	else
+		Say("Succesfully Loaded. Enjoy the script! Report bugs on the thread.")
+	end
+end
 
 -- Perform every time
 function OnTick()
-	if myHero.dead and tempPassiveStacks ~= 0 then tempPassiveStacks = 0 end
-	if not canStun and tempPassiveStacks == 4 then canStun = true end
-
 	target = GetOrbTarget()
 
 	SpellChecks()
+
+	if Menu.misc.autolevel.autoLevel then
+		AutoLevel()
+	end
 
 	if Menu.harass.harass or Menu.harass.harassT then
 		Harass()
@@ -294,14 +287,14 @@ function OnTick()
 
 	if Menu.combo.disableAA and Menu.combo.combo then
 		if SxOrbLoaded and not AAdisabled then
-			OrbWalk:DisableAttacks()
+			_G.SxOrb:DisableAttacks()
 			AAdisabled = true
 		end 
 	end 
 		
-	if Menu.combo.disableAA and not Menu.combo.combo and AAdisabled then
-		if SxOrbLoaded then
-			OrbWalk:EnableAttacks()
+	if Menu.combo.disableAA and not Menu.combo.combo then
+		if SxOrbLoaded and AAdisabled then
+			_G.SxOrb:EnableAttacks()
 			AAdisabled = false
 		end 
 	end
@@ -336,10 +329,10 @@ function OnTick()
 		CastE()
 	end 
 
-	if Menu.misc.Esettings.procEW and InFountain() and Eready and Wready and canStun ~= true then
+	if Menu.misc.Esettings.procEW and InFountain() and Eready and Wready and canStun ~= true and passiveStacks <= 2 then
 		CastE()
 		DelayAction(function() 
-			if canStun ~= true then
+			if canStun ~= true and passiveStacks <= 3 then
 				CastSpell(_W, mousePos.x, mousePos.z)
 			end 
 		end, 0.5)
@@ -402,9 +395,8 @@ function OnDraw()
 
 function GetOrbTarget()
 	ts:update()
-	if _G.MMA_Target and _G.MMA_Target.type == myHero.type then return _G.MMA_Target end
-	if _G.AutoCarry and _G.AutoCarry.Crosshair and _G.AutoCarry.Attack_Crosshair and _G.AutoCarry.Attack_Crosshair.target and _G.AutoCarry.Attack_Crosshair.target.type == myHero.type then return _G.AutoCarry.Attack_Crosshair.target end
-	if SxOrbLoaded then return OrbWalk:GetTarget() end 
+	if SACLoaded then return _G.AutoCarry.Crosshair:GetTarget() end
+	if SxOrbLoaded then return _G.SxOrb:GetTarget() end 
 	return ts.target
 end 
 
@@ -907,23 +899,13 @@ function HaveBuff(unit,buffname)
 end 
 
 function OnCreateObj(object)
-    if object.name == "StunReady.troy" and GetDistance(object, myHero) < 50 then
-        canStun = true
-    end
-
     if object.name == "TeleportHome.troy" and GetDistance(object, myHero) < 50 then
     	isRecalling = true
     end 
-
-
 end 
 
 
 function OnDeleteObj(object)
-    if object.name == "StunReady.troy" and GetDistance(object, myHero) < 50 then
-        canStun = false
-    end
-
     if object.name == "TeleportHome.troy" and GetDistance(object, myHero) < 50 then
     	isRecalling = false
     end 
@@ -931,8 +913,8 @@ end
  
 
 function OnApplyBuff(unit, target, buff)
-	if unit.isMe and (buff.name == "pyromania") then
-		passiveStacks = 1
+	if unit.isMe and (buff and buff.name and buff.name == "pyromania_particle") then
+		canStun = true 
 	end
 
 	if unit.isMe and (buff.name == "infernalguardiantimer") then
@@ -956,9 +938,14 @@ function OnUpdateBuff(unit, buff, stacks)
 end
 
 function OnRemoveBuff(unit, buff)
-	if unit.isMe and (buff.name == "pyromania_particle") then
+	if unit and unit.isMe and buff and (buff.name == "pyromania") then
 		passiveStacks = 0
 	end 
+
+	if unit.isMe and (buff and buff.name and buff.name == "pyromania_particle") then
+		canStun = true 
+	end
+
 	if unit.isMe and (buff.name == "infernalguardiantimer") then
 		hasTibbers = false
 	end 
@@ -977,45 +964,13 @@ function OnProcessSpell(object, spell)
    	 	CastSpell(_E)
   	end
 
-  	if object.isMe and spells[spell.name] == true then
-  		tempPassiveStacks = tempPassiveStacks + 1 
-  		if tempPassiveStacks ==  5 then
-  			canStun = false
-  			tempPassiveStacks = 0
-  		end
-  	end
-
-  	if (spell.name == "ZedUlt" and spell.target.isMe) and Menu.misc.zhonyas.zhonyas then
-   		local health = myhero.health
-   		local ad = object.damage;
-   		local percentage = 20
-		if spell.level == 1 then
-			percentage = 20
-		elseif spell.level == 2 then
-			percentage = 35
-		elseif spell.level == 3 then
-			percentage = 20
-		end
-		DelayAction(function(health, ad, percentage)  
-			if myHero.dead then return end
-			  local damageDealth = health - myHero.health
-			  local totalDamage = ((damageDealth / 100) * percentage) + ad
-			  if totalDamage > myHero.health then
-			  	local zSlot = GetInventorySlotItem(3157)
-			   	if zSlot ~= nil and myHero:CanUseSpell(zSlot) == READY then
-					CastItem(3157)
-				end 
-			end  
-   		end, 3, {health, ad, percentage})
-	end
-
 
   	if spell.name == "KarthusFallenOne" and object.team ~= myHero.team and Menu.misc.zhonyas.zhonyas then
   		local karthusRdmg = getDmg("R", myHero, object)
   		if karthusRdmg > myHero.health and not myHero.dead then
   			local zSlot = GetInventorySlotItem(3157)
   			if zSlot ~= nil and myHero:CanUseSpell(zSlot) == READY then
-				DelayAction(function() CastSpell(zSlot) end, 2) 
+				DelayAction(function() if zSlot ~= nil and myHero:CanUseSpell(zSlot) == READY then CastSpell(zSlot) end end, 2) 
 			end 
   		end 
   	end 
@@ -1112,7 +1067,6 @@ function ManaManager()
 	return true 
 end 
 
---[[ Temporary disabled
 function AutoLevel()
 
 	if Menu.misc.autolevel.levelAuto == 1 or myHero.level <= lastLevel then return end
@@ -1121,11 +1075,11 @@ function AutoLevel()
 	lastLevel = myHero.level
 
 end
---]]
+
 
 function DrawMenu()
 	-- Menu
- Menu = scriptConfig("Totally Annie by Totally Legit", "NAnnie")
+ Menu = scriptConfig("Totally Annie - Totally Legit", "NAnnie")
 
  -- Combo
  Menu:addSubMenu("Combo", "combo")
@@ -1232,11 +1186,11 @@ Menu.autokill.optional:addParam("enemiesnearby", "Max enemies in that range", SC
  Menu.misc.Esettings:addParam("useEonAttack", "Auto E when attacked", SCRIPT_PARAM_ONOFF, false)
  Menu.misc.Esettings:addParam("info", "CAN NOT BE BOTH ON", SCRIPT_PARAM_INFO, "CAREFUL")
 
---[[ Temporary disabled
+---[[ Temporary disabled
   -- Auto Level
  Menu.misc:addSubMenu("Auto Level", "autolevel")
  Menu.misc.autolevel:addParam("autoLevel", "Auto Level Spells", SCRIPT_PARAM_ONOFF, false)
- Menu.misc.autolevel:addParam("levelAuto", "Auto Level Spells", SCRIPT_PARAM_LIST, 1, { "Off", "QWER", "WQER"})
+ Menu.misc.autolevel:addParam("levelAuto", "Auto Level Spells", SCRIPT_PARAM_LIST, 1, { "QWER", "WQER"})
  --]]
 
  -- Auto Potions
@@ -1280,9 +1234,7 @@ end
  Interrupter(Menu.misc.ai, castStunInterruptable)
 
  -- Orbwalker to menu
- Menu:addSubMenu("Orbwalker", "Orbwalker")
- OrbWalk:LoadToMenu(Menu.Orbwalker)
-
+ Menu:addSubMenu("Orbwalker", "orbwalker")
 
   -- Default Information
  Menu:addParam("Version", "Version", SCRIPT_PARAM_INFO, version)
@@ -1292,7 +1244,6 @@ end
  Menu.combo:permaShow("combo")
  Menu.harass:permaShow("harass")
  Menu.harass:permaShow("harassT")
- --Menu.killsteal:permaShow("killsteal")
  Menu.autokill:permaShow("autokill")
  Menu.farm:permaShow("farm")
  Menu.jungle:permaShow("useJungle")
