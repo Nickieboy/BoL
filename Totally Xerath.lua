@@ -18,7 +18,7 @@ if myHero.charName:lower() ~= "xerath" then return end
 --[[		Auto Update		]]
 local version = "1.00"
 local author = "Totally Legit"
-local SCRIPT_NAME = "Totally LeBlanc"
+local SCRIPT_NAME = "Totally Xerath"
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Nickieboy/BoL/master/Totally Xerath.lua".."?rand="..math.random(1,10000)
