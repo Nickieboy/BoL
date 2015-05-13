@@ -31,10 +31,13 @@
 				Fixed support for chargeable spells
 			* 0.36
 				My bad, forgot to remove debugging stuff
+			* 0.40
+				Added Chargeable spell support in SpellHelper class
+				Added Build-In support for HPRed + DivinePred - only thing that needs to be added by user is DP & HPred instances
 
 --]]
 
-local version = 0.36
+local version = 0.40
 local AUTO_UPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Nickieboy/BoL/master/lib/TotallyLib.lua".."?rand="..math.random(1,10000)
@@ -122,7 +125,7 @@ end
  end 
 
 function MenuMisc:OnCreateObj(obj)
-	if obj.name:find("TeleportHome.troy") then
+	if obj and obj.name and obj.name:find("TeleportHome.troy") then
 		if GetDistance(obj) <= 50 then
 			self.isRecalling = true
 		end
@@ -130,7 +133,7 @@ function MenuMisc:OnCreateObj(obj)
 end
 
 function MenuMisc:OnDeleteObj(obj)
-	if obj.name:find("TeleportHome.troy") then
+	if obj and obj.name and obj.name:find("TeleportHome.troy") then
 		if GetDistance(obj) <= 50 then
 			self.isRecalling = false
 		end
@@ -224,7 +227,7 @@ function Summoners:LoadToMenu(menu)
 end
 
 function Summoners:OnApplyBuff(source, unit, buff)
-	if self.cleanse ~= nil and self.menu.autocleanse.useCleanse and self.menu.autocleanse[buff.name] and unit and unit.isMe then
+	if unit and buff and buff.name and self.cleanse ~= nil and self.menu.autocleanse.useCleanse and self.menu.autocleanse[buff.name] and unit and unit.isMe then
 		if IsSpellReady(self.cleanse) then
 			CastSpell(self.cleanse)
 		end 
@@ -297,13 +300,93 @@ end
 
 class 'SpellHelper'
 
-function SpellHelper:__init(VP, menu, HS)
+function SpellHelper:__init(VP, menu)
 	self.Spells = {}
-	if VP and HS and menu then
-		self.HS = HS
-		self.Predict = PredictionHelper(VP, menu, HS)
-	elseif VP and menu then
+	self.divineLoaded = false
+	self.HSLoaded = false
+	if VP and menu then
 		self.Predict = PredictionHelper(VP, menu)
+	elseif VP and not menu then
+		self.VP = VP
+	end
+end
+
+function SpellHelper:InitializePrediction(menu)
+	self.Predict = PredictionHelper(self.VP)
+	if self.divineLoaded then
+		self.Predict:DivinePred(self.DP)
+		self.Predict:AddCircleSS(self.CircleSS)
+		self.Predict:AddLineSS(self.LineSS)
+	end
+	if self.HSLoaded then
+		self.Predict:AddHPred(self.HS)
+	end
+
+	self.Predict:LoadToMenu(menu)
+end
+
+function SpellHelper:AddDivinePrediction(DP, addSpells)
+	self.divineLoaded = true
+	self.DP = DP
+	self.CircleSS = {}
+	self.LineSS = {}
+
+	if addSpells then
+		for slot, data in pairs(self.Spells) do
+			if self.Spells[slot].skillShot then
+				if self.Spells[slot].typeSkill:find("line") then
+					local collision = 0
+					if self.Spells[slot].collision == false then
+						collision = math.huge 
+					end
+					self.LineSS[slot] = LineSS(self.Spells[slot].speed, self.Spells[slot].range, self.Spells[slot].radius, (self.Spells[slot].delay * 1000), collision)
+				elseif self.Spells[slot].typeSkill:find("circ") then
+					local collision = 0
+					if self.Spells[slot].collision == false then
+						collision = math.huge 
+					end
+					self.CircleSS[slot] = CircleSS(self.Spells[slot].speed, self.Spells[slot].range, self.Spells[slot].radius, (self.Spells[slot].delay * 1000), collision)
+				end
+			end
+		end
+	end
+
+end
+
+function SpellHelper:AddDP(typeSkill, slot)
+	if self.divineLoaded then
+		if typeSkill then
+			if typeSkill == "Line" then
+				local collision = 0
+				if self.Spells[slot].collision == false then
+					collision = math.huge 
+				end
+				self.LineSS[slot] = LineSS(self.Spells[slot].speed, self.Spells[slot].range, self.Spells[slot].radius, (self.Spells[slot].delay * 1000), collision)
+			elseif typeSkill == "Circle" then
+				local collision = 0
+				if self.Spells[slot].collision == false then
+					collision = math.huge 
+				end
+				self.CircleSS[slot] = CircleSS(self.Spells[slot].speed, self.Spells[slot].range, self.Spells[slot].radius, (self.Spells[slot].delay * 1000), collision)
+			end
+		end
+	end
+end
+
+function SpellHelper:AddHPred(HS, addSpells)
+	self.HS = HS 
+	self.HSLoaded = true
+
+	if addSpells then
+		for slot, data in pairs(self.Spells) do
+			if self.Spells[slot].skillShot then
+				if self.Spells[slot].typeSkill == "circ" or self.Spells[slot].typeSkill == "circaoe" then
+					self.HS:AddSpell(slotToString(slot), myHero.charName, {collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, type = "DelayCircle", radius = self.Spells[slot].radius})
+				elseif self.Spells[slot].typeSkill == "line" or self.Spells[slot].typeSkill == "lineaoe" then
+					self.HS:AddSpell(slotToString(slot), myHero.charName, {collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, type = "DelayLine", width = self.Spells[slot].radius})
+				end
+			end
+		end
 	end
 end
 
@@ -312,7 +395,7 @@ function SpellHelper:AddSpell(slot, range)
 end
 
 function SpellHelper:AddSkillShot(slot, range, delay, width, speed, collision, typeSkill)
-	self.Spells[slot] = {slot = slot, range = range, delay = delay, width = width, speed = speed, collision = collision, typeSkill = typeSkill, skillShot = true}
+	self.Spells[slot] = {slot = slot, range = range, delay = delay, radius = width, width = width, speed = speed, collision = collision, typeSkill = typeSkill, skillShot = true, isChargeable = false}
 end
 
 function SpellHelper:Ready(slot)
@@ -323,16 +406,137 @@ function SpellHelper:InRange(slot, target)
 	return GetDistanceSqr(target) < self.Spells[slot].range * self.Spells[slot].range
 end
 
+function SpellHelper:ChangeRange(slot, range)
+	self.Spells[slot].range = range
+	if self.Spells[slot].skillShot then
+		if self.divineLoaded then
+			local SS = nil
+			if self.Spells[slot].typeSkill:find("line") then
+				local collision = 0
+				if self.Spells[slot].collision == false then
+					collision = math.huge 
+				end
+				SS = LineSS(self.Spells[slot].speed, self.Spells[slot].range, self.Spells[slot].radius, (self.Spells[slot].delay * 1000), collision)
+			elseif self.Spells[slot].typeSkill:find("circ") then
+				local collision = 0
+				if self.Spells[slot].collision == false then
+					collision = math.huge 
+				end
+				SS = CircleSS(self.Spells[slot].speed, self.Spells[slot].range, self.Spells[slot].radius, (self.Spells[slot].delay * 1000), collision)
+			end
+			self.Predict:ChangeDPred(slot, SS)
+		end
+		if self.HSLoaded then
+			self.HS:AddSpell(slotToString(slot), myHero.charName, {collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, type = "DelayCircle", radius = self.Spells[slot].radius})
+			self.Predict:ChangeHPred(self.HS)
+		end
+	end
+end
+
 function SpellHelper:GetRange(slot)
 	return self.Spells[slot].range
 end
 
+function SpellHelper:SetCharged(slot, spellname, minrange, maxRange, chargeduration, timeToMax, objectName)
+	self.Spells[slot].isChargeable = true
+	self.chargedSlot = slot
+	self.name = spellname
+	self.minRange = minrange
+	self.range = minrange 
+	self.maxRange = maxRange
+	self.timeToMax = timeToMax
+	self.isCharged = false
+	self.chargeDuration = chargeduration
+	self.objectName = objectName
+	AddTickCallback(function() self:OnTick() end)
+    AddProcessSpellCallback(function(unit, spell) self:OnProcessSpell(unit, spell) end)
+    AddCreateObjCallback(function(obj) self:OnCreateObj(obj) end)
+	AddDeleteObjCallback(function(obj) self:OnDeleteObj(obj) end)
+end
+
+function SpellHelper:GetChargedRange()
+	return math.floor(self.range)
+end
+
+
+function SpellHelper:OnTick()
+	if not self.isCharged and self.range ~= self.minRange then
+		self.range = self.minRange
+	end
+	if self.isCharged and self.chargedTime + ((self.timeToMax + self.chargeDuration) + 1) < os.clock() then
+		self.isCharged = false
+		self.range = self.minRange
+	end
+	if self:IsCharging() then
+		self.range = (math.min(self.initialRange + (self.maxRange - self.initialRange) * ((os.clock() - self.chargedTime) / self.timeToMax), self.maxRange))
+	end
+end
+
+function SpellHelper:OnCreateObj(obj)
+	if obj and obj.name == self.objectName and GetDistance(obj, myHero) <= 50 then
+		self.isCharged = true
+	end
+end
+
+function SpellHelper:OnDeleteObj(obj) 
+	if obj and obj.name == self.objectName and GetDistance(obj, myHero) <= 50 then
+		self.isCharged = false
+	end
+end
+
+function SpellHelper:OnProcessSpell(unit, spell)
+	if spell.name == self.name and not self.isCharged then
+		self.isCharged = true
+		self.initialRange = self.range
+		self.chargedTime = os.clock()
+	end
+end
+
+function SpellHelper:IsCharging()
+	return self.isCharged
+end
+
+function SpellHelper:ForceCharge(value)
+	self.isCharged = value
+end
+
+function SpellHelper:CastCharged(slot, target)
+	if self.Spells[slot].isChargeable then
+		if not self.isCharged then
+			CastSpell(slot, mousePos.x, mousePos.z)
+		else
+			if target and target.type and target.type == myHero.type then
+				local castPosition = self.Predict:PredictSpell(target, self.Spells[slot].delay, self.Spells[slot].width, self.range, self.Spells[slot].speed, self.Spells[slot].collision, self.Spells[slot].typeSkill, self.Spells[slot].slot)
+				if castPosition and not castPosition.y then
+					castPosition.y = 0
+				end
+				if castPosition then
+					CastSpell2(slot, D3DXVECTOR3(castPosition.x, castPosition.y, castPosition.z))
+				end
+			elseif target then
+				if target and not target.y then
+					target.y = 0
+				end
+				CastSpell2(slot, D3DXVECTOR3(target.x, target.y, target.z))
+			end
+		end
+	end
+end
+
+
 function SpellHelper:Cast(slot, target, value)
 	if self.Spells[slot].skillShot then
-		local castPosition = self.Predict:PredictSpell(target, self.Spells[slot].delay, self.Spells[slot].width, self.Spells[slot].range, self.Spells[slot].speed, self.Spells[slot].collision, self.Spells[slot].typeSkill, self.Spells[slot].slot)
-		if castPosition ~= nil and self:Ready(self.Spells[slot].slot) and self:InRange(self.Spells[slot].slot, target) then
-			CastSpell(self.Spells[slot].slot, castPosition.x, castPosition.z)
-			return true
+		if target and value then
+			if self:Ready(self.Spells[slot].slot) and GetDistanceSqr(Point(target, value)) <= self.Spells[slot].range * self.Spells[slot].range then
+				CastSpell(self.Spells[slot].slot, target, value)
+				return true
+			end
+		elseif target and not value then
+			local castPosition = self.Predict:PredictSpell(target, self.Spells[slot].delay, self.Spells[slot].width, self.Spells[slot].range, self.Spells[slot].speed, self.Spells[slot].collision, self.Spells[slot].typeSkill, self.Spells[slot].slot)
+			if castPosition ~= nil and self:Ready(self.Spells[slot].slot) and self:InRange(self.Spells[slot].slot, target) then
+				CastSpell(self.Spells[slot].slot, castPosition.x, castPosition.z)
+				return true
+			end
 		end
 	else
 		if not value and target then
@@ -341,7 +545,7 @@ function SpellHelper:Cast(slot, target, value)
 				return true
 			end
 		elseif value and target then
-			if self:Ready(self.Spells[slot].slot) and self:InRange(self.Spells[slot].slot, target) then
+			if self:Ready(self.Spells[slot].slot) and GetDistanceSqr(Point(target, value)) <= self.Spells[slot].range * self.Spells[slot].range then
 				CastSpell(self.Spells[slot].slot, target.x, value.z)
 				return true
 			end
@@ -357,26 +561,78 @@ function SpellHelper:CastAll(target, value)
 end
 
 class 'PredictionHelper'
-function PredictionHelper:__init(VP, menu, HS)
+function PredictionHelper:__init(VP, menu)
 	self.VP = VP
-	if HS then
-		self.HS = HS 
-	end
+	self.divineLoaded = false
+	self.HSLoaded = false
 	if menu then
 		self:LoadToMenu(menu)
 	end
 end
 
+function PredictionHelper:DivinePred(DP)
+	self.divineLoaded = true
+	self.DP = DP
+	self.enemyDPTable = {}
+	for i, enemy in pairs(GetEnemyHeroes()) do
+		if enemy and enemy.type and enemy.type == myHero.type then
+			self.enemyDPTable[enemy.networkID] = DPTarget(enemy)
+		end
+	end
+	self.CircleSS = {}
+	self.LineSS = {}
+end
+
+function PredictionHelper:AddCircleSS(table)
+	self.CircleSS = table
+end
+
+function PredictionHelper:AddLineSS(table) 
+	self.LineSS = table
+end
+
+function PredictionHelper:ChangeDPred(slot, SS)
+	if slot and SS then
+		if self.LineSS[slot] ~= nil then
+			self.LineSS[slot] = SS
+		elseif self.CircleSS[slot] ~= nil then
+			self.CircleSS[slot] = SS 
+		end
+	end
+end
+
+function PredictionHelper:AddHPred(HS)
+	self.HS = HS 
+	self.HSLoaded = true
+end
+
+function PredictionHelper:ChangeHPred(HS)
+	self.HS = HS
+end
+
+
 function PredictionHelper:LoadToMenu(Menu)
 	Menu:addSubMenu("Prediction Type", "prediction")
-	if self.VP and self.HS then
+	if self.VP and self.HSLoaded and self.divineLoaded then
+		Menu.prediction:addParam("type", "Prediction:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction", "DivinePrediction", "HPrediction"})
+	elseif self.VP and self.divineLoaded and not self.HSLoaded then
+		Menu.prediction:addParam("type", "Prediction:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction", "DivinePrediction"})
+	elseif self.VP and not self.divineLoaded and self.HSLoaded then
 		Menu.prediction:addParam("type", "Prediction:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction", "HPrediction"})
-	elseif self.VP and not self.HS then
+	elseif self.VP and not self.divineLoaded and not self.HSLoaded then
 		Menu.prediction:addParam("type", "Prediction:", SCRIPT_PARAM_LIST, 2, {"Normal", "VPrediction"})
 	end
 	Menu.prediction:addParam("hitchance", "Hitchance", SCRIPT_PARAM_LIST, 2, {"Low hitchance", "High HitChance", "Slowed", "Immobile"})
 	
 	self.menu = Menu
+end
+
+function PredictionHelper:DivineLoaded()
+	return self.divineLoaded and self.menu.prediction.type == 3
+end
+
+function PredictionHelper:HPredLoaded()
+	return (self.HSLoaded and self.divineLoaded and self.menu.prediction.type == 4) or (self.HSLoaded and not self.divineLoaded and self.menu.prediction.type == 3)
 end
 
 function PredictionHelper:PredictSpell(target, delay, radius, range, speed, collision, typeSkill, slot)
@@ -409,14 +665,38 @@ function PredictionHelper:PredictSpell(target, delay, radius, range, speed, coll
 				return castPosition
 			end
 		end
-	elseif self.menu.prediction.type == 3 then
-		local castPosition, hitChance = self.HS:GetPredict(Spell_Q, target, myHero)
-		if castPosition and hitChance >= Menu.prediction.hitchance then
-			return castPosition
+	elseif self:DivineLoaded() then
+		local tempDivineTarget = nil
+		if self.enemyDPTable[target.networkID] ~= nil then
+			tempDivineTarget = self.enemyDPTable[target.networkID]
+		end
+		if tempDivineTarget then
+			local SS = nil
+			if typeSkill == "line" or typeSkill == "lineaoe" then
+				SS = self.LineSS[slot]
+			elseif typeSkill == "circ" or typeSkill == "circaoe" then
+				SS = self.CircleSS[slot]
+			end
+			if SS then
+				local state, hitPos, perc = self.DP:predict(tempDivineTarget, SS)
+				if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil then
+					return hitPos
+				end
+			end
+		end
+	elseif self:HPredLoaded() then
+		local CastPos, HitChance = self.HS:GetPredict(slotToString(slot), target, myHero)
+		if CastPos and HitChance and type(HitChance) >= "number" and HitChance >= 0 then
+			return CastPos 
 		end
 	end
 	return nil
 end 
+
+
+
+
+
 
 
 class 'ChargeSpell'
@@ -565,7 +845,6 @@ function IsSpellReady(spell)
 	return myHero:CanUseSpell(spell) == READY
 end
 
--- Thank you Hellsing/Honda for the idea of this, save so much lines and makes everything much smoother
 function GetSummonerSlot(name)
 	return ((myHero:GetSpellData(SUMMONER_1).name:find(name) and SUMMONER_1) or (myHero:GetSpellData(SUMMONER_2).name:find(name) and SUMMONER_2))
 end
@@ -668,7 +947,7 @@ end
 function GetKillableMinions(minionTable, range, spell, source)
 	assert(spell == _Q or spell == _W or spell == _E, "TotallyLib: Correct spell not detected")
 	assert(minionTable and type(minionTable) == "table", "TotallyLib: Invalid table in: minionTable, first parameter")
-	assert(source == myHero.type, "TotallyLib: Invalid Source. The type must be obj_AI_Hero")
+	assert(source and source.type and source.type == myHero.type "TotallyLib: Invalid Source. The type must be obj_AI_Hero")
 
 	local range = range and range * range or myHero
 	local minions = {}
