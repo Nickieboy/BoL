@@ -7,6 +7,8 @@ if myHero.charName:lower() ~= "xerath" then return end
 
 			1.0
 				Release
+			1.01
+				Fixed
 
 
 
@@ -14,9 +16,12 @@ if myHero.charName:lower() ~= "xerath" then return end
 
 --]]
 
+function Say(text)
+	print("<font color=\"#FF0000\"><b>Totally Xerath:</b></font> <font color=\"#FFFFFF\">" .. tostring(text) .. "</font>")
+end
 
 --[[		Auto Update		]]
-local version = "1.00"
+local version = "1.01"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Xerath"
 local AUTOUPDATE = true
@@ -43,9 +48,7 @@ if AUTOUPDATE then
 	end
 end
 
-function Say(text)
-	print("<font color=\"#FF0000\"><b>Totally Xerath:</b></font> <font color=\"#FFFFFF\">" .. tostring(text) .. "</font>")
-end
+
 
 if not FileExist(LIB_PATH.."TotallyLib.lua") then return Say("Please download TotallyLib before running this script, thank you.") end
 
@@ -78,7 +81,7 @@ end
 local divinePredLoaded = false
 local hPredLoaded = false
 
-if FileExist(LIB_PATH.."DivinePred.lua") then
+if VIP_USER and FileExist(LIB_PATH.."DivinePred.lua") then
 	divinePredLoaded = true
 	require "DivinePred"
 end 
