@@ -34,10 +34,12 @@
 			* 0.40
 				Added Chargeable spell support in SpellHelper class
 				Added Build-In support for HPRed + DivinePred - only thing that needs to be added by user is DP & HPred instances
+			* 0.41
+				Better HPred support
 
 --]]
 
-local version = 0.40
+local version = 0.41
 local AUTO_UPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Nickieboy/BoL/master/lib/TotallyLib.lua".."?rand="..math.random(1,10000)
@@ -373,6 +375,12 @@ function SpellHelper:AddDP(typeSkill, slot)
 	end
 end
 
+function SpellHelper:HPredStyle(slot, typeHS)
+	if not typeHS then return end
+	if typeHS ~= "DelayLine" and typeHS ~= "PromptLine" and typeHS ~= "DelayCircle" and typeHS ~= "PromptCircle" then print("TotallyLib: Not a Valid HPred Type") return end
+	self.Spells[slot].hPredStyle = typeHS
+end
+
 function SpellHelper:AddHPred(HS, addSpells)
 	self.HS = HS 
 	self.HSLoaded = true
@@ -380,10 +388,14 @@ function SpellHelper:AddHPred(HS, addSpells)
 	if addSpells then
 		for slot, data in pairs(self.Spells) do
 			if self.Spells[slot].skillShot then
-				if self.Spells[slot].typeSkill == "circ" or self.Spells[slot].typeSkill == "circaoe" then
-					self.HS:AddSpell(slotToString(slot), myHero.charName, {collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, type = "DelayCircle", radius = self.Spells[slot].radius})
-				elseif self.Spells[slot].typeSkill == "line" or self.Spells[slot].typeSkill == "lineaoe" then
-					self.HS:AddSpell(slotToString(slot), myHero.charName, {collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, type = "DelayLine", width = self.Spells[slot].radius})
+				if self.Spells[slot].hPredStyle then
+					self.HS:AddSpell(slotToString(slot), myHero.charName, {collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, type = self.Spells[slot].hPredStyle, radius = self.Spells[slot].radius})
+				else
+					if self.Spells[slot].typeSkill == "circ" or self.Spells[slot].typeSkill == "circaoe" then
+						self.HS:AddSpell(slotToString(slot), myHero.charName, {collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, type = "DelayCircle", radius = self.Spells[slot].radius})
+					elseif self.Spells[slot].typeSkill == "line" or self.Spells[slot].typeSkill == "lineaoe" then
+						self.HS:AddSpell(slotToString(slot), myHero.charName, {collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, type = "DelayLine", width = self.Spells[slot].radius})
+					end
 				end
 			end
 		end

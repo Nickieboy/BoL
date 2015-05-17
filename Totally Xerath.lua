@@ -11,6 +11,8 @@ if myHero.charName:lower() ~= "xerath" then return end
 				Fixed
 			1.02
 				Fixed ult
+			1.03
+				Better HPred Prediction
 
 
 
@@ -23,7 +25,7 @@ function Say(text)
 end
 
 --[[		Auto Update		]]
-local version = "1.02"
+local version = "1.03"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Xerath"
 local AUTOUPDATE = true
@@ -101,7 +103,7 @@ function InitializeVariables()
 	-- Spells
 	Spells = {
 				["AA"] = {range = 600, disabled = false},
-				["Q"] = {name = "Arcanopulse", range = {min = 750, max = 1600}, speed = math.huge, radius = 100, Target = nil, ready = false, delay = 0.6, Charge = nil},
+				["Q"] = {name = "Arcanopulse", range = {min = 750, max = 1450}, speed = math.huge, radius = 100, Target = nil, ready = false, delay = 0.6, Charge = nil},
 				["W"] = {name = "Eye of Destruction", range = 1150, radius = 200, delay = 0.65, speed = math.huge, ready = false},
 				["E"] = {name = "Shocking Orb", range = 1000, speed = 1200, radius = 60, delay = 0, ready = false},
 				["R"] = {name = "Rite of the Arcane", range = {3200, 4400, 5600}, speed = math.huge, radius = 180, delay = 0.5, ready = false, Target = {old = nil, new = nil}, isChanneled = false, x = 0, lastCast = os.clock()},
@@ -191,14 +193,12 @@ function OnLoad()
     Spells.Helper:SetCharged(_Q, "XerathArcanopulseChargeUp", Spells.Q.range.min, Spells.Q.range.max, 3, 1.5, "Xerath_Base_Q_cas_charge.troy")
     if divinePredLoaded then
     	Spells.Helper:AddDivinePrediction(DP, true)
-    	--[[Spells.Helper:AddDP("Line", _Q)
-    	Spells.Helper:AddDP("Circle", _W)
-    	Spells.Helper:AddDP("Circle", _R)
-    	Spells.Helper:AddDP("Line", _E)
-    	--]]
     end
 
     if hPredLoaded then
+    	Spells.Helper:HPredStyle(_Q, "PromptLine")
+    	Spells.Helper:HPredStyle(_W, "PromptCircle")
+    	Spells.Helper:HPredStyle(_R, "PromptCircle")
     	Spells.Helper:AddHPred(HPred, true)
     end
 
@@ -213,7 +213,6 @@ function OnTick()
 	CastR()
 	if Menu.harass.useHarassToggle or Menu.harass.useHarass then PerformHarass() end
 	if Menu.laneclear.useLaneClear then PerformLaneClear() end
-	--if Menu.killsteal.useKillSteal then PerformKillSteal() end
 end
 
 -- Checks same with FPS
@@ -564,7 +563,7 @@ function TargetChecks()
 		end 
 	end 
 
-	if Spells.R.Target.new and Spells.Target and Spells.R.Target.new ~= Spells.Target then
+	if Spells.R.Target.new and Spells.Target and Spells.R.Target.new ~= Spells.Target and Spells.R.Target.new.health >= (getDmg("R", Spells.R.Target.new, myHero) * (3 - Spells.R.x)) then
 		if ValidTarget(Spells.Target, Spells.R.range[myHero:GetSpellData(_R).level]) then
 			Spells.R.Target.new = Spells.Target
 		end
@@ -589,15 +588,14 @@ function TargetChecks()
 
 	if Spells.R.Target.new and myHero:GetSpellData(_R).level >= 1 and GetDistanceSqr(Spells.R.Target.new) >= Spells.R.range[myHero:GetSpellData(_R).level]  * Spells.R.range[myHero:GetSpellData(_R).level] then
 		for i, enemy in pairs(GetEnemyHeroes()) do
-			if enemy and GetDistanceSqr(Spells.R.Target.new) <= Spells.R.range[myHero:GetSpellData(_R).level] * Spells.R.range[myHero:GetSpellData(_R).level] and ValidTarget(enemy) then
+			if enemy and ValidTarget(enemy) and GetDistanceSqr(enemy) <= Spells.R.range[myHero:GetSpellData(_R).level] * Spells.R.range[myHero:GetSpellData(_R).level] then
 				Spells.R.Target.new = enemy 
 				break
 			end
 		end
-
 	end
 
-	if Spells.R.Target.old and Spells.R.Target.new and Spells.R.Target.new.networkID ~= Spells.R.Target.old.networkID and myHero:GetSpellData(_R).level >= 1 and GetDistanceSqr(Spells.R.Target.old) <= Spells.R.range[myHero:GetSpellData(_R).level]  * Spells.R.range[myHero:GetSpellData(_R).level] then
+	if Spells.R.Target.old and not Spells.R.Target.old.dead and ValidTarget(Spells.R.Target.old) and Spells.R.Target.new and Spells.R.Target.new.networkID ~= Spells.R.Target.old.networkID and myHero:GetSpellData(_R).level >= 1 and GetDistanceSqr(Spells.R.Target.old) <= Spells.R.range[myHero:GetSpellData(_R).level]  * Spells.R.range[myHero:GetSpellData(_R).level] then
 		if Spells.R.Target.old.visible and getDmg("R", Spells.R.Target.old, myHero) >= Spells.R.Target.old.health then
 			Spells.R.Target.new = Spells.R.Target.old 
 		end
@@ -606,6 +604,15 @@ function TargetChecks()
 
 	if Spells.Q.Target and Spells.Q.Target.type and Spells.Q.Target.type ~= myHero.type then
 		Spells.Q.Target = nil 
+	end
+
+	if not Spells.R.Target.new and Spells.R.isChanneled then
+		for i, enemy in pairs(GetEnemyHeroes()) do
+			if enemy and GetDistanceSqr(enemy) <= Spells.R.range[myHero:GetSpellData(_R).level] * Spells.R.range[myHero:GetSpellData(_R).level] and ValidTarget(enemy) then
+				Spells.R.Target.new = enemy 
+				break
+			end
+		end
 	end
 end
 
