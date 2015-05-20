@@ -140,6 +140,9 @@
 				Using buffs to check stun again
 				SAC Integration
 
+			2.71 
+				flix'd
+
 
 
 
@@ -155,7 +158,7 @@ if myHero.charName ~= "Annie" then return end
 
 
 --[[		Auto Update		]]
-local version = "2.7"
+local version = "2.71"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Annie"
 local AUTOUPDATE = true
@@ -270,7 +273,6 @@ end
 -- Perform every time
 function OnTick()
 	target = GetOrbTarget()
-
 	SpellChecks()
 
 	if Menu.misc.autolevel.autoLevel then
@@ -585,26 +587,26 @@ function FlashSettings()
 end
 
 function CastQ(target) 
-	if Qready and myHero.canAttack and not myHero.dead then
+	if Qready and not myHero.dead then
    	 	CastSpell(_Q, target)
    	end
 end
 
 
 function CastW(target) 
-	if Wready and myHero.canAttack and not myHero.dead then
+	if Wready and not myHero.dead then
     	CastSpell(_W, target)
   	end
 end
 
 function CastE()
-	if Eready and myHero.canAttack and not myHero.dead then
+	if Eready and not myHero.dead then
 		CastSpell(_E)
     end
 end
 
 function CastR(target)
-	if Rready and myHero.canAttack and not myHero.dead and not hasTibbers then
+	if Rready and not myHero.dead and not hasTibbers then
 		CastSpell(_R, target)
     end
 end
