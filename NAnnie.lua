@@ -143,6 +143,9 @@
 			2.71 
 				flix'd
 
+			2.72
+				Ultimate crash fix
+
 
 
 
@@ -158,7 +161,7 @@ if myHero.charName ~= "Annie" then return end
 
 
 --[[		Auto Update		]]
-local version = "2.71"
+local version = "2.72"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Annie"
 local AUTOUPDATE = true
@@ -200,6 +203,7 @@ local isRecalling = false
 local target, Rtarget = nil, nil
 local Qready, Wready, Eready, Rready, Hready, Bready, Iready, Fready = false, false, false, false, false, false, false, false, false
 local useFlash = false
+local ultActive = false
 local enemyJunglers = {}
 local allyJunglers = {}
 local AAdisabled = false
@@ -797,7 +801,7 @@ function KillStealPrecise()
 
 			Qdmg = ((useQ and Qready and Qdmg) or 0)
 			Wdmg = ((useW and Wready and Wdmg) or 0)
-			Rdmg = ((useR and Rready and not HaveBuff(myHero, "infernalguardiantimer") and Rdmg) or 0)
+			Rdmg = ((useR and Rready and not ultActive and Rdmg) or 0)
 			iDmg = ((useIgnite and Iready and getDmg("IGNITE", enemy, myHero)) or 0)
 
 
@@ -865,7 +869,7 @@ function DrawKillable()
 				local Qdmg, Wdmg, Rdmg = CalcSpellDamage(enemy)
 				Qdmg = ((Qready and Qdmg) or 0)
 				Wdmg = ((Wready and Wdmg) or 0)
-				Rdmg = ((Rready and not HaveBuff(myHero, "infernalguardiantimer") and Rdmg) or 0)
+				Rdmg = ((Rready and not ultActive and Rdmg) or 0)
 
                 if iDmg > enemy.health then
                 	KillText[i] = 1
@@ -889,17 +893,6 @@ function DrawKillable()
 	end 
 end
 
-function HaveBuff(unit,buffname)
-	local result = false
-	for i = 1, unit.buffCount, 1 do 
-		if unit:getBuff(i) ~= nil and unit:getBuff(i).name == buffname and unit:getBuff(i).valid and BuffIsValid(unit:getBuff(i)) then 
-			result = true 
-			break 
-		end 
-	end 
-	return result
-end 
-
 function OnCreateObj(object)
     if object.name == "TeleportHome.troy" and GetDistance(object, myHero) < 50 then
     	isRecalling = true
@@ -917,6 +910,9 @@ end
 function OnApplyBuff(unit, target, buff)
 	if unit.isMe and (buff and buff.name and buff.name == "pyromania_particle") then
 		canStun = true 
+	end
+	if unit and unit.isMe and buff and buff.name and buff.name:lower():find("infernalguardiantimer") then
+		ultActive = true 
 	end
 
 	if unit.isMe and (buff.name == "infernalguardiantimer") then
@@ -943,6 +939,10 @@ function OnRemoveBuff(unit, buff)
 	if unit and unit.isMe and buff and (buff.name == "pyromania") then
 		passiveStacks = 0
 	end 
+
+	if unit and unit.isMe and buff and buff.name and buff.name:lower():find("infernalguardiantimer") then
+		ultActive = false 
+	end
 
 	if unit.isMe and (buff and buff.name and buff.name == "pyromania_particle") then
 		canStun = true 
