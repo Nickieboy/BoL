@@ -36,10 +36,11 @@
 				Added Build-In support for HPRed + DivinePred - only thing that needs to be added by user is DP & HPred instances
 			* 0.41
 				Better HPred support
+			* 0.42 Crash fix
 
 --]]
 
-local version = 0.41
+local version = 0.42
 local AUTO_UPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Nickieboy/BoL/master/lib/TotallyLib.lua".."?rand="..math.random(1,10000)
@@ -91,15 +92,41 @@ function MenuMisc:__init(Menu, includeSummoners)
 	self.menu = Menu
 
 	self.isRecalling = false
+	self.healthActive = false
+	self.manaActive = false
 
 	AddTickCallback(function() self:OnTick() end)
 	AddCreateObjCallback(function(obj) self:OnCreateObj(obj) end)
 	AddDeleteObjCallback(function(obj) self:OnDeleteObj(obj) end)
+	AddApplyBuffCallback(function(source, unit, buff) self:ApplyBuff(source, unit, buff) end)
+	AddRemoveBuffCallback(function(unit, buff) self:RemoveBuff(unit, buff) end)
 end 
+
+function MenuMisc:ApplyBuff(source, unit, buff) 
+	if source and source.isMe and buff and buff.name then
+		if buff.name:find("RegenerationPotion") then
+			self.healthActive = true 
+		end
+		if buff.name:find("FlaskOfCrystalWater") then
+			self.manaActive = true 
+		end
+	end
+end
+
+function MenuMisc:RemoveBuff(unit, buff)
+	if unit and unit.isMe and buff and buff.name then
+		if buff.name:find("RegenerationPotion") then
+			self.healthActive = false 
+		end
+		if buff.name:find("FlaskOfCrystalWater") then
+			self.manaActive = false 
+		end
+	end
+end
 
 
 function MenuMisc:DrinkPotions()
-	if not TargetHaveBuff("RegenerationPotion", myHero) and not self.isRecalling and not InFountain() then
+	if not self.healthActive and not self.isRecalling and not InFountain() then
 		local healthSlot = GetInventorySlotItem(2003)
 		if healthSlot ~= nil then
 			if (myHero.health / myHero.maxHealth <= self.menu.autopotions.health) then
@@ -107,7 +134,7 @@ function MenuMisc:DrinkPotions()
 			end 
 		end 
 	end
-	if not TargetHaveBuff("FlaskOfCrystalWater", myHero) and not self.isRecalling and not InFountain() then
+	if not self.manaActive and not self.isRecalling and not InFountain() then
 		local manaSlot = GetInventorySlotItem(2004)
 		if manaSlot ~= nil then
 			if (myHero.mana / myHero.maxMana <= self.menu.autopotions.mana) then
@@ -384,16 +411,29 @@ end
 function SpellHelper:AddHPred(HS, addSpells)
 	self.HS = HS 
 	self.HSLoaded = true
+	self.HSSpells = {}
 
 	if addSpells then
 		for slot, data in pairs(self.Spells) do
 			if self.Spells[slot].skillShot then
 				if self.Spells[slot].hPredStyle then
+					if myHero.charName:lower() == "xerath" and slot == _Q then
+					else
+						if self.Spells[slot].hPredStyle:find("circle") then
+							self.HS:AddSpell(slotToString(slot), myHero.charName, {collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, type = self.Spells[slot].hPredStyle, radius = self.Spells[slot].radius})
+							--self.HSSpells[slot] = HPSkillshot({type = self.Spells[slot].hPredStyle, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, radius = self.Spells[slot].radius, collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision})
+						else
+							self.HS:AddSpell(slotToString(slot), myHero.charName, {collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, type = self.Spells[slot].hPredStyle, width = self.Spells[slot].radius})
+							--self.HSSpells[slot] = HPSkillshot({type = self.Spells[slot].hPredStyle, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, width = self.Spells[slot].radius, collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision})
+						end
+					end
 					self.HS:AddSpell(slotToString(slot), myHero.charName, {collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, type = self.Spells[slot].hPredStyle, radius = self.Spells[slot].radius})
 				else
 					if self.Spells[slot].typeSkill == "circ" or self.Spells[slot].typeSkill == "circaoe" then
+						--self.HSSpells[slot] = HPSkillshot({type = "DelayCircle", delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, radius = self.Spells[slot].radius, collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision})
 						self.HS:AddSpell(slotToString(slot), myHero.charName, {collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, type = "DelayCircle", radius = self.Spells[slot].radius})
 					elseif self.Spells[slot].typeSkill == "line" or self.Spells[slot].typeSkill == "lineaoe" then
+						--self.HSSpells[slot] = HPSkillshot({type = "DelayLine", delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, width = self.Spells[slot].radius, collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision})
 						self.HS:AddSpell(slotToString(slot), myHero.charName, {collisionM = self.Spells[slot].collision, collisionH = self.Spells[slot].collision, delay = self.Spells[slot].delay, range = self.Spells[slot].range, speed = self.Spells[slot].speed, type = "DelayLine", width = self.Spells[slot].radius})
 					end
 				end
@@ -697,7 +737,12 @@ function PredictionHelper:PredictSpell(target, delay, radius, range, speed, coll
 			end
 		end
 	elseif self:HPredLoaded() then
-		local CastPos, HitChance = self.HS:GetPredict(slotToString(slot), target, myHero)
+		local CastPos, HitChance = nil, 0
+		if myHero.charName == "Xerath" and slot == _Q then
+			CastPos, HitChance = self.HS:GetPredict(HPrediction.Presets['Xerath']["Q"], target, myHero)
+		else
+			CastPos, HitChance = self.HS:GetPredict(slotToString(slot), target, myHero)
+		end
 		if CastPos and HitChance and type(HitChance) >= "number" and HitChance >= 0 then
 			return CastPos 
 		end
