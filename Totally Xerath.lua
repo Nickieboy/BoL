@@ -13,6 +13,12 @@ if myHero.charName:lower() ~= "xerath" then return end
 				Fixed ult
 			1.03
 				Better HPred Prediction
+			1.04
+				Added option for tab ultign
+				Added another type of ult
+					Tab R Mouse
+						This means that it will shoot ultimate to whereever you LEFT click. If a target is nearby that click, it will focus that target. Otherwise it will just cast to your mouse position.
+				Fix'd spam
 
 
 
@@ -25,7 +31,7 @@ function Say(text)
 end
 
 --[[		Auto Update		]]
-local version = "1.03"
+local version = "1.04"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Xerath"
 local AUTOUPDATE = true
@@ -54,12 +60,12 @@ end
 
 
 
-if not FileExist(LIB_PATH.."TotallyLib.lua") then return Say("Please download TotallyLib before running this script, thank you.") end
+if not FileExist(LIB_PATH.."TotallyLib.lua") then return Say("Please download TotallyLib before running this script, thank you. Make sure it is in your common folder.") end
 
 
 -- Download Libraries
 local REQUIRED_LIBS = {
-	["VPrediction"] = "https://raw.githubusercontent.com/Ralphlol/BoLGit/master/VPrediction.lua",
+	["VPrediction"] = "https://raw.githubusercontent.com/SidaBoL/Scripts/master/Common/VPrediction.lua",
 	["TotallyLib"] = "https://raw.githubusercontent.com/Nickieboy/BoL/master/lib/TotallyLib.lua"
 }
 local DOWNLOADING_LIBS, DOWNLOAD_COUNT = false, 0
@@ -103,10 +109,10 @@ function InitializeVariables()
 	-- Spells
 	Spells = {
 				["AA"] = {range = 600, disabled = false},
-				["Q"] = {name = "Arcanopulse", range = {min = 750, max = 1450}, speed = math.huge, radius = 100, Target = nil, ready = false, delay = 0.6, Charge = nil},
-				["W"] = {name = "Eye of Destruction", range = 1150, radius = 200, delay = 0.65, speed = math.huge, ready = false},
-				["E"] = {name = "Shocking Orb", range = 1000, speed = 1200, radius = 60, delay = 0, ready = false},
-				["R"] = {name = "Rite of the Arcane", range = {3200, 4400, 5600}, speed = math.huge, radius = 180, delay = 0.5, ready = false, Target = {old = nil, new = nil}, isChanneled = false, x = 0, lastCast = os.clock()},
+				["Q"] = {name = "Arcanopulse", range = {min = 750, max = 1500, charged = 750}, speed = math.huge, radius = 100, Target = nil, ready = false, delay = 0.6, Charge = nil, isCharged = false, chargedTime = os.clock(), timeToMax = 1.5, chargeDuration = 3, collision = false},
+				["W"] = {name = "Eye of Destruction", range = 1150, radius = 200, delay = 0.65, speed = math.huge, ready = false, collision = false},
+				["E"] = {name = "Shocking Orb", range = 1000, speed = 1200, radius = 60, delay = 0, ready = false, collision = true},
+				["R"] = {name = "Rite of the Arcane", range = {3200, 4400, 5600}, speed = math.huge, radius = 180, delay = 0.5, delay1 = os.clock(), delay2 = os.clock(), delay3 = os.clock(), ready = false, Target = {old = nil, new = nil}, isChanneled = false, x = 0, lastCast = os.clock(), collision = false},
 				["Helper"] = nil,
 				["Target"] = nil
 	}
@@ -121,6 +127,11 @@ function InitializeVariables()
 
 	-- movement
 	movementDisabled = false
+
+	-- R helper
+	shouldCastR = false
+	shouldCastSpecialR = false
+	tempSelect = nil
 
 	-- Different target selector for Q and other spells
 	ts = TargetSelector(TARGET_LOW_HP, 1200, DAMAGE_MAGIC, true)
@@ -164,6 +175,7 @@ function CheckOrbWalker()
 		Say("You need either SAC or SxOrbWalk for this script. Please download one of them.") 
 	else
 		Say("Succesfully Loaded. Enjoy the script! Report bugs on the thread.")
+		Say("I recommenend to choose VPrediction.")
 	end
 end
 
@@ -176,6 +188,8 @@ function OnLoad()
     -- Loading Menu 
     DrawMenu()
 
+    Menu.combo.comboR.comboRTabClick = false
+
     Say("Please wait...")
     DelayAction(function() CheckOrbWalker() end, 10)
 
@@ -183,36 +197,82 @@ function OnLoad()
 		AutoUpdate()
 	end
 
-    -- Loading SpellHelper (From TotallyLib)
-    Spells.Helper = SpellHelper(VP)
-
-    Spells.Helper:AddSkillShot(_Q, Spells.Q.range.max, Spells.Q.delay, Spells.Q.radius, Spells.Q.speed, false, "line") 
-    Spells.Helper:AddSkillShot(_W, Spells.W.range, Spells.W.delay, Spells.W.radius, Spells.W.speed, false, "circ")
-    Spells.Helper:AddSkillShot(_E, Spells.E.range, Spells.E.delay, Spells.E.radius, Spells.E.speed, true, "line")
-    Spells.Helper:AddSkillShot(_R, Spells.R.range[1], Spells.R.delay, Spells.R.radius, Spells.R.speed, false, "circ")
-    Spells.Helper:SetCharged(_Q, "XerathArcanopulseChargeUp", Spells.Q.range.min, Spells.Q.range.max, 3, 1.5, "Xerath_Base_Q_cas_charge.troy")
     if divinePredLoaded then
-    	Spells.Helper:AddDivinePrediction(DP, true)
+    	LoadDivinePrediction()
     end
 
     if hPredLoaded then
-    	Spells.Helper:HPredStyle(_Q, "PromptLine")
-    	Spells.Helper:HPredStyle(_W, "PromptCircle")
-    	Spells.Helper:HPredStyle(_R, "PromptCircle")
-    	Spells.Helper:AddHPred(HPred, true)
+    	LoadHPrediction()
     end
 
-    Spells.Helper:InitializePrediction(Menu)
    
 end
 
+function LoadDivinePrediction()
+	divinePredictionTargetTable = {}
+	dpSkills = {}
+	for i, enemy in pairs(GetEnemyHeroes()) do
+		if enemy and enemy.type and enemy.type == myHero.type then
+			divinePredictionTargetTable[enemy.networkID] = DPTarget(enemy)
+		end
+	end
+
+	dpSkills = {
+		["Q"] = LineSS(Spells.Q.speed, Spells.Q.range.max, Spells.Q.radius, (Spells.Q.delay * 1000), 0),
+		["W"] = CircleSS(Spells.W.speed, Spells.W.range, Spells.W.radius, (Spells.W.delay * 1000), 0),
+		["E"] = LineSS(Spells.E.speed, Spells.E.range, Spells.E.radius, (Spells.E.delay * 1000), math.huge),
+		["R"] = CircleSS(Spells.R.speed, Spells.R.range[1], Spells.R.radius, (Spells.R.delay * 1000), 0)
+	}
+end
+
+function LoadHPrediction()
+	hpSkills = {
+		["Q"] = HPSkillshot({type = "PromptLine", delay = Spells.Q.delay, range = Spells.Q.range.max, width = Spells.Q.radius, speed = Spells.Q.speed}),
+		["W"] = HPSkillshot({type = "PromptCircle", delay = Spells.W.delay, range = Spells.W.range, radius = Spells.W.radius, collisionM = Spells.W.collision, collisionH = Spells.W.collision}),
+		["E"] = HPSkillshot({type = "DelayLine", delay = Spells.E.delay, range = Spells.E.range, speed = Spells.E.speed, width = Spells.E.radius, collisionM = Spells.E.collision, collisionH = Spells.E.collision}),
+		["R"] = HPSkillshot({type = "PromptCircle", delay = Spells.R.delay, range = Spells.R.range[1], radius = Spells.R.radius, collisionM = Spells.R.collision, collisionH = Spells.R.collision})
+	}
+	hpSkills["Q"]:SetProperty("range", function() return Spells.Q.range.charged end)
+end
 
 function OnTick()
 	Checks()
 	if Menu.combo.useCombo then PerformCombo() end
-	CastR()
+	CastRAll()
+	CastRTab()
 	if Menu.harass.useHarassToggle or Menu.harass.useHarass then PerformHarass() end
 	if Menu.laneclear.useLaneClear then PerformLaneClear() end
+	QCharge()
+
+	if not Spells.R.isChanneled and Menu.combo.comboR.comboRTabClick and Spells.R.x == 0 and Spells.R.ready then
+		CastSpell(_R, mousePos.x, mousePos.z)
+		Menu.combo.comboR.comboRTabClick = true
+	end
+end
+
+function OnCreateObj(obj)
+	if obj and obj.name == "Xerath_Base_Q_cas_charge.troy" and GetDistance(obj, myHero) <= 50 then
+		Spells.Q.isCharged = true
+	end
+end
+
+function OnDeleteObj(obj) 
+	if obj and obj.name == "Xerath_Base_Q_cas_charge.troy" and GetDistance(obj, myHero) <= 50 then
+		Spells.Q.isCharged = false
+	end
+end
+
+function QCharge()
+	if not Spells.Q.isCharged and Spells.Q.range.charged ~= Spells.Q.range.min then
+		Spells.Q.range.charged = Spells.Q.range.min
+	end
+	if Spells.Q.isCharged and Spells.Q.chargedTime + ((Spells.Q.timeToMax + Spells.Q.chargeDuration) + 1) < os.clock() then
+		Spells.Q.isCharged = false
+		Spells.Q.range.charged = Spells.Q.range.min
+	end
+	if Spells.Q.isCharged then
+		Spells.Q.range.charged = math.floor((math.min(Spells.Q.range.min + (Spells.Q.range.max - Spells.Q.range.min) * ((os.clock() - Spells.Q.chargedTime) / Spells.Q.timeToMax), Spells.Q.range.max)))
+	end
 end
 
 -- Checks same with FPS
@@ -242,43 +302,43 @@ function CheckRRange()
 	local level = ((myHero:GetSpellData(_R).level and myHero:GetSpellData(_R).level >= 1 and myHero:GetSpellData(_R).level) or 1)
 	local range = Spells.R.range[level]
 	if oldRange ~= range then
-		Spells.Helper:ChangeRange(_R, range)
+		dpSkills["R"] = CircleSS(Spells.R.speed, Spells.R.range[myHero:GetSpellData(_R).level], Spells.R.radius, (Spells.R.delay * 1000), 0)
+		hpSkills["R"] = HPSkillshot({type = "PromptCircle", delay = Spells.R.delay, range = Spells.R.range[myHero:GetSpellData(_R).level], speed = Spells.R.speed, radius = Spells.R.radius, collisionM = Spells.R.collision, collisionH = Spells.R.collision})
 		oldRange = range 
 	end
 end
 
 function PerformCombo()
 	if Menu.combo.comboQ.comboQ and Spells.Q.Target and ValidTarget(Spells.Q.Target) and Spells.Q.ready then
-		if Spells.Helper:IsCharging() then
-			if Spells.Helper:GetChargedRange() <= Spells.Q.range.max and GetDistanceSqr(Spells.Q.Target) < math.pow(Spells.Helper:GetChargedRange() - 200, 2) then
-				Spells.Helper:CastCharged(_Q, Spells.Q.Target)
+		if Spells.Q.isCharged then
+			if Spells.Q.range.charged <= Spells.Q.range.max and GetDistanceSqr(Spells.Q.Target) < math.pow(Spells.Q.range.charged - 200, 2) then
+				CastQ(Spells.Q.Target)
 			end
 		else
-			Spells.Helper:CastCharged(_Q)
+			CastQ(Spells.Q.Target)
 		end
 	end
 
-	if not Spells.Helper:IsCharging() then
+	if not Spells.Q.isCharged then
 		if Spells.Target and ValidTarget(Spells.Target) then
 			if Menu.combo.comboW.comboW then
-				Spells.Helper:Cast(_W, Spells.Target)
+				CastW(Spells.Target)
 			end
 			if Menu.combo.comboE.comboE then
-				Spells.Helper:Cast(_E, Spells.Target)
+				CastE(Spells.Target)
 			end
 		end
 	end
-
 end
 
 function PerformHarass()
 	if Spells.Q.Target and ValidTarget(Spells.Q.Target) and Spells.Q.ready then
-		if Spells.Helper:IsCharging() then
-			if Spells.Helper:GetChargedRange() <= Spells.Q.range.max and GetDistanceSqr(Spells.Q.Target) < math.pow(Spells.Helper:GetChargedRange() - 100, 2) then
-				Spells.Helper:CastCharged(_Q, Spells.Q.Target)
+		if Spells.Q.isCharged then
+			if Spells.Q.range.charged <= Spells.Q.range.max and GetDistanceSqr(Spells.Q.Target) < math.pow(Spells.Q.range.charged - 200, 2) then
+				CastQ(Spells.Q.Target)
 			end
 		elseif ManaManager("Harass") then
-			Spells.Helper:CastCharged(_Q)
+			CastQ(Spells.Q.Target)
 		end
 	end
 end
@@ -288,12 +348,12 @@ function PerformLaneClear()
 		if Spells.Q.ready then
 			local position, hit = GetBestLineFarmPosition(Spells.Q.range.max, Spells.Q.radius, EnemyMinions.objects)
 			if position and hit >= Menu.laneclear.laneclearQamount and GetDistanceSqr(position) <= Spells.Q.range.max * Spells.Q.range.max then
-				if Spells.Helper:IsCharging() then
-					if Spells.Helper:GetChargedRange() <= Spells.Q.range.max and GetDistanceSqr(position) < math.pow(Spells.Helper:GetChargedRange() - 100, 2) then
-						Spells.Helper:CastCharged(_Q, position)
+				if Spells.Q.isCharging then
+					if Spells.Q.range.charged <= Spells.Q.range.max and GetDistanceSqr(position) < math.pow(Spells.Q.range.charged - 100, 2) then
+						CastQ(position)
 					end
 				elseif ManaManager("LaneClear") then
-					Spells.Helper:CastCharged(_Q)
+					CastQ(position)
 				end
 			end
 		end
@@ -303,16 +363,159 @@ function PerformLaneClear()
 		if Spells.W.ready then
 			local position, hit = GetBestAOEPosition(EnemyMinions.objects, Spells.W.range, Spells.W.radius, myHero)
 			if position and hit >= Menu.laneclear.laneclearWamount and GetDistanceSqr(position) <= Spells.W.range * Spells.W.range then
-				Spells.Helper:Cast(_W, position.x, position.z)
+				CastW(position)
 			end
 		end
 	end
-
 end
 
-function CastR()
+function CastQ(target)
+	if not target then return end
+	if Spells.Q.ready and GetDistanceSqr(target) <= Spells.Q.range.max * Spells.Q.range.max and target and target.type then
+		if Spells.Q.isCharged then
+			if Spells.Q.range.charged <= Spells.Q.range.max and GetDistanceSqr(target) < math.pow(Spells.Q.range.charged - 200, 2) then
+				if target.type then
+					local castPos = PredictQ(target)
+					if castPos then
+						if not castPos.y then
+							castPos.y = 0
+						end
+						CastSpell2(_Q, D3DXVECTOR3(castPos.x, castPos.y, castPos.z))
+					end
+				else
+					if not target.y then target.y = 0 end
+					CastSpell2(_Q, D3DXVECTOR3(target.x, target.y, target.z))
+				end
+			end
+		else
+			CastSpell(_Q, mousePos.x, mousePos.z)
+		end
+	end
+end
+
+function PredictQ(target)
+	if not target then return end
+	local castPos = nil
+	if Menu.prediction.usePrediction == 1 then
+		local dashing, canHit, position = VP:IsDashing(target, Spells.Q.delay, Spells.Q.radius, Spells.Q.speed, myHero)
+		if dashing and canHit and GetDistanceSqr(position) <= Spells.Q.range.charged * Spells.Q.range.charged then
+			castPos = position
+		else
+			local castPos2, hitchance = VP:GetLineCastPosition(target, Spells.Q.delay, Spells.Q.radius, Spells.Q.range.charged, Spells.Q.speed, myHero, false)	
+			if hitchance >= Menu.prediction.usePredictionVPred then	
+				castPos = castPos2
+			end 	
+		end
+
+	elseif DivinePredLoaded() then
+		local tempDivineTarget = nil
+		if divinePredictionTargetTable[target.networkID] ~= nil then
+			tempDivineTarget = divinePredictionTargetTable[target.networkID]
+		end
+		if tempDivineTarget then
+			local state, hitPos, perc = DP:predict(tempDivineTarget, dpSkills["Q"])
+			if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
+				castPos = hitPos
+			end
+		end
+
+	elseif HPredMenuLoaded() then
+		local pos, hitchance = HPred:GetPredict(hpSkills["Q"], target, myHero)
+		if hitchance >= Menu.prediction.usePredictionHPred  then
+			castPos = pos 
+		end
+	end
+	return castPos
+end
+
+function CastW(target)
+	if not target then return end
+	if Spells.W.ready and GetDistanceSqr(target) <= Spells.W.range * Spells.W.range and target and target.type then
+		local castPos = PredictW(target)
+		if castPos and GetDistance(castPos) <= Spells.W.radius + Spells.W.range then
+			CastSpell(_W, castPos.x, castPos.z)
+		end
+	end
+end
+
+function PredictW(target)
+	if not target then return end
+	local castPos = nil
+	if Menu.prediction.usePrediction == 1 then
+		local dashing, canHit, position = VP:IsDashing(target, Spells.W.delay, Spells.W.radius, Spells.W.speed, myHero)
+		if dashing and canHit and GetDistanceSqr(position) <= Spells.W.range * Spells.W.range then
+			castPos = position
+		else
+			local castPos2, hitchance = VP:GetLineCastPosition(target, Spells.W.delay, Spells.W.radius, Spells.W.range, Spells.W.speed, myHero, false)	
+			if hitchance >= Menu.prediction.usePredictionVPred then	
+				castPos = castPos2
+			end 	
+		end
+
+	elseif DivinePredLoaded() then
+		local tempDivineTarget = nil
+		if divinePredictionTargetTable[target.networkID] ~= nil then
+			tempDivineTarget = divinePredictionTargetTable[target.networkID]
+		end
+		if tempDivineTarget then
+			local state, hitPos, perc = DP:predict(tempDivineTarget, dpSkills["W"])
+			if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
+				castPos = hitPos
+			end
+		end
+
+	elseif HPredMenuLoaded() then
+		local pos, hitchance = HPred:GetPredict(hpSkills["W"], target, myHero)
+		if hitchance >= Menu.prediction.usePredictionHPred  then
+			castPos = pos 
+		end
+	end
+	return castPos
+end
+
+function CastE(target)
+	if not target then return end
+	if Spells.E.ready and GetDistanceSqr(target) <= Spells.E.range * Spells.E.range and target and target.type then
+		local castPos = PredictE(target)
+		if castPos and GetDistanceSqr(castPos) <= Spells.E.range * Spells.E.range then
+			CastSpell(_E, castPos.x, castPos.z)
+		end
+	end
+end
+
+function PredictE(target)
+	if not target then return end
+	local castPos = nil
+	if Menu.prediction.usePrediction == 1 then
+		local castPos2, hitchance = VP:GetLineCastPosition(target, Spells.E.delay, Spells.E.radius, Spells.E.range, Spells.E.speed, myHero, true)	
+		if hitchance >= Menu.prediction.usePredictionVPred then	
+			castPos = castPos2
+		end 	
+
+	elseif DivinePredLoaded() then
+		local tempDivineTarget = nil
+		if divinePredictionTargetTable[target.networkID] ~= nil then
+			tempDivineTarget = divinePredictionTargetTable[target.networkID]
+		end
+		if tempDivineTarget then
+			local state, hitPos, perc = DP:predict(tempDivineTarget, dpSkills["E"])
+			if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
+				castPos = hitPos
+			end
+		end
+
+	elseif HPredMenuLoaded() then
+		local pos, hitchance = HPred:GetPredict(hpSkills["E"], target, myHero)
+		if hitchance >= Menu.prediction.usePredictionHPred  then
+			castPos = pos 
+		end
+	end
+	return castPos
+end
+
+function CastRAll()
 	if not Spells.R.isChanneled and Menu.combo.comboR.comboR and Spells.R.x == 0 and Spells.R.ready then
-		Spells.Helper:Cast(_R, Spells.R.Target.new)
+		CastSpell(_R, mousePos.x, mousePos.z)
 	end
 
 	if Menu.combo.comboR.comboR and Spells.R.isChanneled and myHero:GetSpellData(_R).level >= 1 and Spells.R.Target.new and ValidTarget(Spells.R.Target.new, Spells.R.range[myHero:GetSpellData(_R).level]) then
@@ -320,33 +523,86 @@ function CastR()
 
 
 		if Spells.R.x == 1 then
-			local delay = (Menu.combo.comboR.useDelay and Menu.combo.comboR.delay1/1000) or 0
-			if Spells.R.lastCast + delay <= os.clock() then
-				Spells.Helper:Cast(_R, Spells.R.Target.new)
+			if Spells.R.delay1 <= os.clock() then
+				CastR(Spells.R.Target.new)
 			end
-
 		elseif Spells.R.x == 2 then
-			local delay = (Menu.combo.comboR.useDelay and Menu.combo.comboR.delay2/1000) or 0
-			if Spells.R.Target.old ~= Spells.R.Target.new then
-				delay = delay * Menu.combo.comboR.delayTarget
-				Spells.R.Target.old = Spells.R.Target.new
+			if Spells.R.delay2 <= os.clock() then
+				CastR(Spells.R.Target.new)
 			end
-			if Spells.R.lastCast + delay <= os.clock() then
-				Spells.Helper:Cast(_R, Spells.R.Target.new)
-			end
-
 		elseif Spells.R.x == 3 then
-			local delay = (Menu.combo.comboR.useDelay and Menu.combo.comboR.delay3/1000) or 0
-			if Spells.R.Target.old ~= Spells.R.Target.new then
-				delay = delay * Menu.combo.comboR.delayTarget
-				Spells.R.Target.old = Spells.R.Target.new
-			end
-			if Spells.R.lastCast + delay <= os.clock() then
-				Spells.Helper:Cast(_R, Spells.R.Target.new)
+			if Spells.R.delay3 <= os.clock() then
+				CastR(Spells.R.Target.new)
 			end
 		end
 	end
+end
 
+function CastRTab()
+	if not Spells.R.isChanneled and Menu.combo.comboR.comboRTab and Spells.R.x == 0 and Spells.R.ready then
+		CastSpell(_R, mousePos.x, mousePos.z)
+		shouldCastR = true
+	end
+	if shouldCastR then
+		if Spells.R.Target.new and Spells.R.isChanneled and Spells.R.ready then
+			CastR(Spells.R.Target.new)
+		end
+	end
+	if Spells.R.isChanneled and Menu.combo.comboR.comboRTab and Spells.R.ready then
+		if Spells.R.Target.new then
+			CastR(Spells.R.Target.new)
+		end
+	end
+end
+
+function CastR(target, zParam)
+	if not target then return end
+	if zParam then
+		if Spells.R.ready and GetDistanceSqr(Point(target, zParam)) <= Spells.R.range[myHero:GetSpellData(_R).level] * Spells.R.range[myHero:GetSpellData(_R).level] then
+			CastSpell(_R, target, zParam)
+		end
+	else
+		if Spells.R.ready and GetDistanceSqr(target) <= Spells.R.range[myHero:GetSpellData(_R).level] * Spells.R.range[myHero:GetSpellData(_R).level] and target and target.type then
+			local castPos = PredictR(target)
+			if castPos and GetDistanceSqr(castPos) <= (Spells.R.range[myHero:GetSpellData(_R).level] + Spells.R.radius) * (Spells.R.range[myHero:GetSpellData(_R).level] + Spells.R.radius) then
+				CastSpell(_R, castPos.x, castPos.z)
+			end
+		end
+	end
+end
+
+function PredictR(target)
+	if not target then return end
+	local castPos = nil
+	if Menu.prediction.usePrediction == 1 then
+		local dashing, canHit, position = VP:IsDashing(target, Spells.R.delay, Spells.R.radius, Spells.R.speed, myHero)
+		if dashing and canHit and GetDistanceSqr(position) <= Spells.R.range[myHero:GetSpellData(_R).level] * Spells.R.range[myHero:GetSpellData(_R).level] then
+			castPos = position
+		else
+			local castPos2, hitchance = VP:GetLineCastPosition(target, Spells.R.delay, Spells.R.radius, Spells.R.range[myHero:GetSpellData(_R).level], Spells.R.speed, myHero, false)	
+			if hitchance >= Menu.prediction.usePredictionVPred then	
+				castPos = castPos2
+			end 	
+		end
+	elseif DivinePredLoaded() then
+		local tempDivineTarget = nil
+		if divinePredictionTargetTable[target.networkID] ~= nil then
+			tempDivineTarget = divinePredictionTargetTable[target.networkID]
+		end
+		if tempDivineTarget then
+			local state, hitPos, perc = DP:predict(tempDivineTarget, dpSkills["R"])
+			if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
+				castPos = hitPos
+			end
+		end
+
+	elseif HPredMenuLoaded() then
+		local pos, hitchance = HPred:GetPredict(hpSkills["R"], target, myHero)
+		if hitchance >= Menu.prediction.usePredictionHPred then
+			castPos = pos 
+		end
+	end
+	return castPos
 end
 
 function OnProcessSpell(unit, spell)
@@ -356,26 +612,47 @@ function OnProcessSpell(unit, spell)
 
 	if unit and unit.isMe and spell and spell.name and spell.name == "xerathlocuspulse" then
 		Spells.R.lastCast = os.clock()
+		if shouldCastR and Spells.R.x == 1 then
+			shouldCastR = false 
+		end
+
 		Spells.R.x = Spells.R.x + 1
+
+		if (Spells.R.x == 2) then
+			local delay = (Menu.combo.comboR.useDelay and Menu.combo.comboR.delay2) or 0
+			Spells.R.delay2 = os.clock() + (delay/1000)
+		elseif Spells.R.x == 3 then
+			local delay = (Menu.combo.comboR.useDelay and Menu.combo.comboR.delay3) or 0
+			Spells.R.delay3 = os.clock() + (delay/1000)
+		end
+
 	end
 	if unit and unit.isMe and spell and spell.name and spell.name:lower():find("xerathlocusofpower2") then
 		Spells.R.isChanneled = true
 		Spells.R.x = 1
 		Spells.R.lastCast = os.clock()
+
+		local delay = (Menu.combo.comboR.useDelay and Menu.combo.comboR.delay1) or 0
+		Spells.R.delay1 = os.clock() + (delay/1000)
 	end
 
-	if unit and unit.isMe and spell and spell.name:lower():find("xeratharcanopulse2") and Spells.Helper:IsCharging() then
-		Spells.Helper:ForceCharge(false)
+	if unit and unit.isMe and spell and spell.name:lower():find("xeratharcanopulse2") and Spells.Q.isCharged then
+		Spells.Q.isCharged = false
+	end
+
+	if unit and unit.isMe and spell and spell.name and spell.name == "XerathArcanopulseChargeUp" then
+		Spells.Q.isCharged = true
+		Spells.Q.chargedTime = os.clock()
 	end
 end
 
 function OnGainTurretFocus(turret, unit)
 	if turret and unit and unit.team and unit.team ~= myHero.team and unit.type and unit.type == myHero.type and ValidTarget(unit) and UnderTurret(unit, true) then
-		if GetDistanceSqr(unit) <= (Spells.W.range * Spells.W.range) then
+		if GetDistanceSqr(unit) <= (Spells.E.range * Spells.E.range) then
 			if Menu.misc.underTurret.useUnderTurret then
 		 		if Menu.misc.underTurret[unit.charName] then
-		 			if Spells.W.ready then
-		 				Spells.Helper:Cast(_W, unit)
+		 			if Spells.E.ready then
+		 				CastE(unit)
 		 			end
 		 		end
 		 	end
@@ -396,10 +673,10 @@ function OnRemoveBuff(unit, buff)
 		Menu.combo.comboR.comboR = false 
 	end
 	if source and source.isMe and buff and buff.name == "XerathArcanopulseChargeUp"  then
-		Spells.Helper:ForceCharge(false)
+		Spells.Q.isCharged = false
 	end
 	if unit and unit.isMe and buff and buff.name == "xerathqlaunchsound" then
-		Spells.Helper:ForceCharge(false)
+		Spells.Q.isCharged = false
 	end
 end
 
@@ -421,14 +698,11 @@ function ManaManager(string)
  	end
  end
 
- function UltActive()
- 	return Spells.R.lastCast + 10 > os.clock() and myHero:GetSpellData(_R).currentCd < 10
- end
 
 
 -- Draw Menu
 function DrawMenu()
-	Menu = scriptConfig("Totally Xerath - Totally Legit", "TotallyLegit")
+	Menu = scriptConfig("Totally Xerath - Totally Legit", "TotallyXerath.cfg")
 
 	local tempName = "Totally Xerath - "
 	 -- Combo
@@ -451,12 +725,13 @@ function DrawMenu()
  	
  		-- Use R in combo
  	Menu.combo:addSubMenu(Spells.R.name .. " (R)", "comboR")
- 	Menu.combo.comboR:addParam("comboR", "Use " .. Spells.R.name .. " (M)", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("K"))
+ 	Menu.combo.comboR:addParam("comboR", "Use " .. Spells.R.name .. " (R)", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("R"))
+ 	Menu.combo.comboR:addParam("comboRTab", "Tab R", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("K"))
+ 	Menu.combo.comboR:addParam("comboRTabClick", "Tab Click R", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("M"))
  	Menu.combo.comboR:addParam("useDelay", "Use Delay on R", SCRIPT_PARAM_ONOFF, true)
  	Menu.combo.comboR:addParam("delay1", "Delay on First R", SCRIPT_PARAM_SLICE, 150, 0, 1000, 0)
  	Menu.combo.comboR:addParam("delay2", "Delay on Second R", SCRIPT_PARAM_SLICE, 200, 0, 1000, 0)
  	Menu.combo.comboR:addParam("delay3", "Delay on Third R", SCRIPT_PARAM_SLICE, 75, 0, 1000, 0)
- 	Menu.combo.comboR:addParam("delayTarget", "Multitude new target", SCRIPT_PARAM_SLICE, 1, 1, 5, 2)
 
  	 -- Harass
 	Menu:addSubMenu(tempName .. "Harass", "harass")
@@ -484,6 +759,26 @@ function DrawMenu()
  	Menu.drawings:addParam("drawW", "Draw " .. Spells.W.name .. " (W)", SCRIPT_PARAM_ONOFF, true)
  	Menu.drawings:addParam("drawE", "Draw " .. Spells.E.name .. " (E)", SCRIPT_PARAM_ONOFF, true)
  	Menu.drawings:addParam("drawR", "Draw " .. Spells.R.name .. " (R)", SCRIPT_PARAM_ONOFF, true)
+
+ 	-- Prediction
+ 	Menu:addSubMenu(tempName .. "Prediction", "prediction")
+ 	if divinePredLoaded and hPredLoaded then
+		Menu.prediction:addParam("usePrediction", "Prediction Type:", SCRIPT_PARAM_LIST, 2, {"VPrediction", "DivinePrediction", "HPrediction"})
+		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+		Menu.prediction:addParam("usePredictionHPred", "HPrediction HitChance", SCRIPT_PARAM_SLICE, 1, 1, 3, 2)
+		Menu.prediction:addParam("usePredictionDPred", "DivinePred HitChance", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+	elseif divinePredLoaded and not hPredLoaded then
+		Menu.prediction:addParam("usePrediction", "Prediction Type:", SCRIPT_PARAM_LIST, 2, {"VPrediction", "DivinePrediction"})
+		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+		Menu.prediction:addParam("usePredictionDPred", "DivinePred HitChance", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+	elseif hPredLoaded and not divinePredLoaded then
+		Menu.prediction:addParam("usePrediction", "Prediction Type:", SCRIPT_PARAM_LIST, 2, {"VPrediction", "HPrediction"})
+		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+		Menu.prediction:addParam("usePredictionHPred", "HPrediction HitChance", SCRIPT_PARAM_SLICE, 1, 1, 3, 2)
+	elseif not hPredLoaded and not divinePredLoaded then
+		Menu.prediction:addParam("usePrediction", "Prediction Type:", SCRIPT_PARAM_LIST, 2, {"VPrediction"})
+		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+	end
 
  	--Misc
  	Menu:addSubMenu(tempName .. "Misc", "misc")
@@ -522,15 +817,24 @@ function DrawMenu()
 
 end
 
+function DivinePredLoaded()
+	return divinePredLoaded and Menu.prediction.usePrediction == 2
+
+end
+
+function HPredMenuLoaded()
+	return hPredLoaded and ((divinePredLoaded and Menu.prediction.usePrediction == 3) or (not divinePredLoaded and Menu.prediction.usePrediction == 2))
+end
+
 function AntiGapCloseFunc(unit, spell)
 	if unit and unit.team ~= myHero.team and ValidTarget(unit) then
-		Spells.Helper:Cast(_E, unit)
+		CastE(unit)
 	end
 end
 
 function InterruptFunc(unit, spell) 
 	if unit and unit.team ~= myHero.team and ValidTarget(unit) then
-		Spells.Helper:Cast(_E, unit)
+		CastE(unit)
 	end 	
 end 
 
@@ -554,7 +858,20 @@ function Checks()
 	TargetChecks()
 	
 	CheckRRange()
+
+	CastRTabCheck()
+
+	if not Spells.R.isChanneled and Menu.combo.comboR.comboRTabClick and Spells.R.x == 0 and not Spells.R.ready then
+		Menu.combo.comboR.comboRTabClick = false 
+	end
+
 end 
+
+function CastRTabCheck()
+	if Menu.combo.comboR.comboRTab and not Spells.R.ready then
+		Menu.combo.comboR.comboRTab = false
+	end
+end
 
 function TargetChecks()
 	if Spells.Target and Spells.Q.Target and Spells.Q.Target ~= Spells.Target then
@@ -619,6 +936,28 @@ end
 
 
 
+function OnWndMsg(Msg, Key)
+    if Msg == WM_LBUTTONDOWN and Menu.combo.comboR.comboRTabClick and Spells.R.isChanneled then
+    	tempSelect = nil
+        for i, enemy in pairs(GetEnemyHeroes()) do
+            if enemy and not enemy.dead and ValidTarget(enemy) then
+                if GetDistanceSqr(enemy, mousePos) <= 90000 and GetDistanceSqr(enemy) <= Spells.R.range[myHero:GetSpellData(_R).level] * Spells.R.range[myHero:GetSpellData(_R).level] then
+                    tempSelect = enemy
+                end
+            end
+      	end
+        if tempSelect and GetDistanceSqr(tempSelect, mousePos) < 90000 then
+        	Say("Targeting: " .. tempSelect.charName)
+            CastR(tempSelect)
+    	elseif not tempSelect and GetDistanceSqr(mousePos) <= Spells.R.range[myHero:GetSpellData(_R).level] * Spells.R.range[myHero:GetSpellData(_R).level] then
+    		Say("No target found. Casting to mouse position.")
+    		CastR(mousePos.x, mousePos.z)
+    	end
+    end
+end
+
+
+
 
 
 
@@ -642,7 +981,6 @@ end
 
     Interrupter - They will never cast!
 
-    Like alwasy undocumented by honda...
 ]]
 class 'Interrupter'
 
