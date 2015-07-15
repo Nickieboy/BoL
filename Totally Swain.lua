@@ -1,9 +1,8 @@
 --[[
-				Author: Nickieboy
+				Author: Totally Legit
 				Changelog:
 						 > 1.0
 						 		Release
-
 						 > 1.1
 						 		Few tweaks
 						 		Fixed R
@@ -23,19 +22,17 @@
 								Temp fixes
 						> 1.42
 								Fixed few stuff
-
 						> 1.43
 								Ult really works now
 
-				Bugs: Post in thread
-				Appreciation: Post comment on bol.b00st and in thread
-				Need more features: Post in thread. Everything is considered
+						> 1.50
+								No longer requires SxOrb
+								Supports all predictions now
+
 --]]
 
-if myHero.charName ~= "Swain" then return end
-
 -- Download script
-local version = 1.43
+local version = 1.50
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Swain"
 local AUTOUPDATE = true
@@ -66,9 +63,11 @@ if AUTOUPDATE then
 	end
 end
 
+if not FileExist(LIB_PATH.."TotallyLib.lua") then return Say("Please download TotallyLib before running this script, thank you. Make sure it is in your common folder.") end
+if not FileExist(LIB_PATH.."VPrediction.lua") then return Say("Please download VPrediction before running this script, thank you. Make sure it is in your common folder.") end
+
 -- Download Libraries
 local REQUIRED_LIBS = {
-	["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua",
 	["VPrediction"] = "https://raw.githubusercontent.com/Ralphlol/BoLGit/master/VPrediction.lua",
 	["TotallyLib"] = "https://raw.githubusercontent.com/Nickieboy/BoL/master/lib/TotallyLib.lua"
 }
@@ -94,13 +93,24 @@ for DOWNLOAD_LIB_NAME, DOWNLOAD_LIB_URL in pairs(REQUIRED_LIBS) do
 	end
 end
 
-if VIP_USER and FileExist(LIB_PATH.."Prodiction.lua") then
-	require "Prodiction"
+
+local divinePredLoaded, hPredLoaded, sPredLoaded = false, false, false
+
+if VIP_USER and FileExist(LIB_PATH.."DivinePred.lua") and FileExist(LIB_PATH.."DivinePred.luac") then
+	divinePredLoaded = true
+	require "DivinePred"
+end 
+
+if FileExist(LIB_PATH.."HPrediction.lua") then
+	hPredLoaded = true
+	require "HPrediction"
 end
 
-if not FileExist(LIB_PATH .. "SxOrbWalk.lua") then return Say("You need SxOrbWalk for this script. Please download this library before running this script.") end
-if not FileExist(LIB_PATH .. "VPrediction.lua") then return Say("You need VPrediction for this script. Please download this library before running this script.") end
-if not FileExist(LIB_PATH .. "TotallyLib.lua") then return Say("You need TotallyLib for this script. Please download this library before running this script.") end
+if FileExist(LIB_PATH.."SPrediction.lua") then
+	sPredLoaded = true
+	require "SPrediction"
+end
+
 
 function InitializeVariables()
 	serverMessage = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/announcements/totallyseries.txt")
@@ -114,6 +124,8 @@ function InitializeVariables()
 
 	}
 
+	Qready, Wready, Eready, Rready = false
+
 	target = nil
 	RcastedThroughBot = false
 
@@ -125,6 +137,7 @@ function InitializeVariables()
 	Items = {
 		BRK = { id = 3153, range = 450, reqTarget = true, slot = nil },
 		BWC = { id = 3144, range = 400, reqTarget = true, slot = nil },
+		DFG = { id = 3128, range = 750, reqTarget = true, slot = nil },
 		HGB = { id = 3146, range = 400, reqTarget = true, slot = nil },
 		RSH = { id = 3074, range = 350, reqTarget = false, slot = nil },
 		STD = { id = 3131, range = 350, reqTarget = false, slot = nil },
@@ -134,15 +147,77 @@ function InitializeVariables()
 		RND = { id = 3143, range = 275, reqTarget = false, slot = nil }
 	}
 
-	ultActive = false
+	-- DivinePrediction
+ 	if divinePredLoaded then
+		DP = assert(DivinePred())
+		if not DP then
+			divinePredLoaded = false 
+		end	
+	end
+
+	if hPredLoaded then
+		HPred = assert(HPrediction())
+		if not HPred then
+			hPredLoaded = false 
+		end
+	end
+
+	if sPredLoaded then
+		SPred = assert(SPrediction())
+		if not SPred then
+			sPredLoaded = false 
+		else
+			SPred.SpellData[myHero.charName][_W] = { speed = Spells.W.speed, delay = Spells.W.delay, range = Spells.W.range, width = Spells.W.radius, collision = false, aoe = true, type = "circular"}
+		end
+	end
+
+	-- Checking whether ult is active or not
+	ultActive = TargetHaveParticle("swain_demonForm_idle.troy", myHero, 50)
+end
+
+function OnCreateObj(obj) 
+	if obj and obj.name and obj.name:lower():find("swain_demonform_idle.troy") and GetDistance(obj) <= 50 then
+		ultActive = true
+	end
+end
+
+function OnDeleteObj(obj)
+	if obj and obj.name and obj.name and obj.name:lower():find("swain_demonform_idle.troy") and GetDistance(obj) <= 50 then
+		ultActive = false
+	end
+end
+
+function CheckOrbWalker() 
+	if _G.Reborn_Initialised then
+		SACLoaded = true 
+		Menu.orbwalker:addParam("info", "Detected SAC", SCRIPT_PARAM_INFO, "")
+		Say("SAC found.")
+	elseif FileExist(LIB_PATH .. "SxOrbWalk.lua") then
+		require("SxOrbWalk")
+		SxOrbLoaded = true 
+		_G.SxOrb:LoadToMenu(Menu.orbwalker)
+		Say("SxOrbWalk found.")
+	end
+
+	if SACLoaded or SxOrbLoaded then
+		orbWalkLoaded = true
+	end
+
+	if not orbWalkLoaded then 
+		Say("You need either SAC or SxOrbWalk for this script. Please download one of them.") 
+	else
+		Say("Succesfully Loaded. Enjoy the script! Report bugs on the thread.")
+	end
 end
 
 function GetOrbTarget()
 	ts:update()
-	--if SxOrbloaded then return SxOrb:GetTarget() end
 	return ts.target
 end 
 
+function isUltActive()
+	return ultActive
+end
 
 assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQINAAAABgBAAEFAAAAdQAABBkBAAGUAAAAKQACBBkBAAGVAAAAKQICBBkBAAB2AgAAIAACCHwCAAAUAAAAEBgAAAGNsYXNzAAQIAAAAVHJhY2tlcgAEBwAAAF9faW5pdAAECgAAAFVwZGF0ZVdlYgAEGgAAAGNvdW50aW5nSG93TXVjaFVzZXJzSWhhdmUAAgAAAAEAAAADAAAAAQAFCAAAAEwAQADDAIAAAUEAAF1AAAJGgEAApQAAAF1AAAEfAIAAAwAAAAQKAAAAVXBkYXRlV2ViAAMAAAAAAAAQQAQUAAAAQWRkQnVnc3BsYXRDYWxsYmFjawABAAAAAgAAAAMAAAAAAAQGAAAABQAAAAwAQACDAAAAwUAAAB1AAAIfAIAAAgAAAAQKAAAAVXBkYXRlV2ViAAMAAAAAAAAQQAAAAAABAAAAAQAQAAAAQG9iZnVzY2F0ZWQubHVhAAYAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAAAAAAAAQAAAAUAAABzZWxmAAEAAAAAABAAAABAb2JmdXNjYXRlZC5sdWEACAAAAAEAAAABAAAAAQAAAAEAAAACAAAAAwAAAAIAAAADAAAAAQAAAAUAAABzZWxmAAAAAAAIAAAAAQAAAAUAAABfRU5WAAQAAAALAAAAAwAKIwAAAMYAQAABQQAA3YAAAQaBQABHwcABXQGAAB2BAABMAUECwUEBAAGCAQBdQQACWwAAABeAAYBMwUECwQECAAACAAFBQgIA1kGCA11BgAEXQAGATMFBAsGBAgAAAgABQUICANZBggNdQYABTIFDAsHBAwBdAYEBCMCBhgiAAYYIQIGFTAFEAl1BAAEfAIAAEQAAAAQIAAAAcmVxdWlyZQAEBwAAAHNvY2tldAAEBwAAAGFzc2VydAAEBAAAAHRjcAAECAAAAGNvbm5lY3QABBQAAABtYWlraWU2MS5zaW5uZXJzLmJlAAMAAAAAAABUQAQFAAAAc2VuZAAEKwAAAEdFVCAvdHJhY2tlci9pbmRleC5waHAvdXBkYXRlL2luY3JlYXNlP2lkPQAEKQAAACBIVFRQLzEuMA0KSG9zdDogbWFpa2llNjEuc2lubmVycy5iZQ0KDQoABCsAAABHRVQgL3RyYWNrZXIvaW5kZXgucGhwL3VwZGF0ZS9kZWNyZWFzZT9pZD0ABAIAAABzAAQHAAAAc3RhdHVzAAQIAAAAcGFydGlhbAAECAAAAHJlY2VpdmUABAMAAAAqYQAEBgAAAGNsb3NlAAAAAAABAAAAAAAQAAAAQG9iZnVzY2F0ZWQubHVhACMAAAAFAAAABQAAAAUAAAAFAAAABQAAAAUAAAAFAAAABgAAAAYAAAAGAAAABgAAAAcAAAAHAAAACAAAAAgAAAAJAAAACQAAAAkAAAAIAAAACQAAAAoAAAAKAAAACwAAAAsAAAALAAAACgAAAAsAAAALAAAACwAAAAsAAAALAAAACwAAAAsAAAALAAAACwAAAAUAAAAFAAAAc2VsZgAAAAAAIwAAAAIAAABhAAAAAAAjAAAAAgAAAGIAAAAAACMAAAACAAAAYwADAAAAIwAAAAIAAABkAAcAAAAjAAAAAQAAAAUAAABfRU5WAAEAAAABABAAAABAb2JmdXNjYXRlZC5sdWEADQAAAAEAAAABAAAAAQAAAAEAAAADAAAAAQAAAAQAAAALAAAABAAAAAsAAAALAAAACwAAAAsAAAAAAAAAAQAAAAUAAABfRU5WAA=="), nil, "bt", _ENV))()
 
@@ -150,33 +225,132 @@ assert(load(Base64Decode("G0x1YVIAAQQEBAgAGZMNChoKAAAAAAAAAAAAAQINAAAABgBAAEFAAA
 function OnLoad()
 
 	InitializeVariables()
-	CheckOrbWalker()
 
 	-- Basic libraries
 	VP = VPrediction()
-	SxOrb = SxOrbWalk()
+
+	-- Orbwalker
+	DelayAction(function() CheckOrbWalker() end, 10)
 
 	-- Drawing Menu
 	Menu()
 
-	-- Checking whether ult is active or not
-	ultActive = TargetHaveParticle("swain_demonForm_idle.troy", myHero, 50)
 
-	-- TotallyLib Spell initializing
-	Abilities = SpellHelper(VP, Menu)
-	Abilities:AddSpell(_Q, Spells.Q.range)
-	Abilities:AddSpell(_E, Spells.E.range)
-	Abilities:AddSkillShot(_W, Spells.W.range, Spells.W.delay, Spells.W.radius, Spells.W.speed, false, "circaoe")
+	if divinePredLoaded then
+    	LoadDivinePrediction()
+    end
 
-
-	Say("Succesfully loaded. Enjoy the script. Please give feedback on the thread.")
+    if hPredLoaded then
+    	LoadHPrediction()
+    end
 
 end
 
+function LoadDivinePrediction()
+	divinePredictionTargetTable = {}
+	for i, enemy in pairs(GetEnemyHeroes()) do
+		if enemy and enemy.type and enemy.type == myHero.type then
+			divinePredictionTargetTable[enemy.networkID] = DPTarget(enemy)
+		end
+	end
+
+	CircleW = CircleSS(Spells.W.speed, Spells.W.range, Spells.W.radius, (Spells.W.delay * 1000), 0)
+end
+
+function LoadHPrediction()
+	HPW = HPSkillshot({type = "PromptCircle", delay = Spells.W.delay, range = Spells.W.range, radius = Spells.W.radius, collisionM = Spells.W.collision, collisionH = Spells.W.collision})
+end
+
+function DivinePredictionLoaded()
+	return divinePredLoaded and Menu.prediction.predictionType == 2
+end
+
+function SPredictionLoaded()
+ 	return sPredLoaded and ((divinePredLoaded and hPredLoaded and Menu.prediction.predictionType == 4) or (divinePredLoaded and not hPredLoaded and Menu.prediction.predictionType == 3) or (hPredLoaded and not divinePredLoaded and Menu.prediction.predictionType == 3) or (not hPredLoaded and not divinePredLoaded and Menu.prediction.predictionType == 2))
+ end
+
+function HPredMenuLoaded()
+	return hPredLoaded and ((divinePredLoaded and Menu.prediction.predictionType == 3) or (not divinePredLoaded and Menu.prediction.predictionType == 2))
+end
+
+
+function PredictW(target)
+	if not target then return end
+	local castPos = nil
+
+	if Menu.prediction.predictionType == 1 then
+		local dashing, canHit, position = VP:IsDashing(target, Spells.W.delay, Spells.W.radius, Spells.W.speed, myHero)
+		if dashing and canHit and GetDistanceSqr(position) <= Spells.W.range * Spells.W.range then
+			castPos = position
+		else
+			local castPos2, hitchance = VP:GetCircularCastPosition(target, Spells.W.delay, Spells.W.radius, Spells.W.range, Spells.W.speed)	
+			if hitchance >= Menu.prediction.usePredictionVPred then	
+				castPos = castPos2
+			end 	
+		end
+
+	elseif DivinePredictionLoaded() then
+		local tempDivineTarget = nil
+		if divinePredictionTargetTable[target.networkID] ~= nil then
+			tempDivineTarget = divinePredictionTargetTable[target.networkID]
+		end
+		if tempDivineTarget then
+			local state, hitPos, perc = DP:predict(tempDivineTarget, CircleW)
+			if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
+				castPos = hitPos
+			end
+		end
+
+	elseif HPredMenuLoaded() then
+		local pos, hitchance = HPred:GetPredict(HPW, target, myHero)
+		if hitchance >= Menu.prediction.usePredictionHPred  then
+			castPos = pos 
+		end
+	elseif SPredictionLoaded() then
+		local CastPosition, Chance, PredPos = SPred:Predict(_W, myHero, target)
+		if CastPosition and Chance >= 1 then
+			castPos = CastPosition
+		end
+	end
+	return castPos
+end
+
+function CastQ(target)
+	if target ~= nil and not target.dead and target.visible and GetDistanceSqr(target) <= Spells.Q.range * Spells.Q.range and target.type and (target.type == myHero.type or target.type == "obj_AI_Minion") then
+		if Qready and ValidTarget(target) then
+			CastSpell(_Q, target)
+			return true
+		end  
+	end 
+	return false
+end 
+
+function CastE(target)
+	if target ~= nil and not target.dead and target.visible and GetDistanceSqr(target) <= Spells.E.range * Spells.E.range and target.type and (target.type == myHero.type or target.type == "obj_AI_Minion") then
+		if Eready and ValidTarget(target) then
+			CastSpell(_E, target)
+			return true
+		end  
+	end 
+	return false
+end 
+
+function CastW(target)
+	if not target then return end
+	if Wready and GetDistanceSqr(target) <= Spells.W.range * Spells.W.range and target and target.type then
+		local castPos = PredictW(target)
+		if castPos and GetDistance(castPos) <= Spells.W.radius + Spells.W.range then
+			CastSpell(_W, castPos.x, castPos.z)
+		end
+	end
+end
+
+
 function OnTick()
-	
+
 	EnemyMinions:update()
 	target = GetOrbTarget()
+	Checks()
 
 	if Menu.keys.combo then Combo() end 
 
@@ -184,18 +358,26 @@ function OnTick()
 
 	if Menu.keys.laneclear then LaneClear() end
 
- 	if RcastedThroughBot and not Menu.keys.combo and not Menu.keys.laneclear and isUltActive() and CountEnemyHeroInRange(Spells.R.range) < 1 then
+ 	if RcastedThroughBot and not Menu.keys.combo and not Menu.keys.laneclear and isUltActive() and CountEnemyHeroInRange(Spells.R.range) < 1 and not Menu.combo.comboROff then
  		CastSpell(_R)
  		RcastedThroughBot = false
+ 	end
+
+ 	if RcastedThroughBot and not isUltActive() then
+ 		RcastedThroughBot = false 
  	end
 
  	if myHero.dead and RcastedThroughBot then 
  		RcastedThroughBot = false
  	end 
+ 	print(isUltActive() and "true" or "false")
+end
 
- 	if myHero.dead and isUltActive() then
- 		ultActive = false
- 	end
+function Checks()
+	Qready = (myHero:CanUseSpell(_Q) == READY)
+	Wready = (myHero:CanUseSpell(_W) == READY)
+	Eready = (myHero:CanUseSpell(_E) == READY)
+	Rready = (myHero:CanUseSpell(_R) == READY)
 end
 
 
@@ -218,33 +400,6 @@ function OnDraw()
 
 end
 
-function OnCreateObj(obj) 
-	if obj and obj.name and obj.name == "swain_demonForm_idle.troy" and GetDistance(obj) <= 50 then
-		ultActive = true
-	end
-end
-
-function OnDeleteObj(obj)
-	if obj and obj.name and obj.name == "swain_demonForm_idle.troy" and GetDistance(obj) <= 50 then
-		ultActive = false
-	end
-end
-
---[[
-function OnApplyBuff(source, target, buff) 
-	if source and source.isMe and buff and buff.name:lower():find("swainmetamorphism") then
-		ultActive = true
-	end
-end
-
-function OnRemoveBuff(source, buff) 
-	if source and source.isMe and buff and buff.name:lower():find("swainmetamorphism") then
-		ultActive = false
-	end
-end
---]]
-
-
 function Combo()
 	if myHero.dead then return end
 
@@ -253,7 +408,7 @@ function Combo()
 			if IsSpellReady(_R) and not isUltActive() and CountEnemyHeroInRange(Spells.R.range) >= Menu.combo.comboRx then
 				RcastedThroughBot = true
 				CastSpell(_R) 
-			elseif IsSpellReady(_R) and isUltActive() and CountEnemyHeroInRange(Spells.R.range) < Menu.combo.comboRx then
+			elseif IsSpellReady(_R) and isUltActive() and CountEnemyHeroInRange(Spells.R.range) < Menu.combo.comboRx and not Menu.combo.comboROff then
 				CastSpell(_R)
 				RcastedThroughBot = false
 			end 
@@ -267,18 +422,18 @@ function Combo()
 		end 
 
 		if Menu.combo.comboE then
-			Abilities:Cast(_E, target)
+			CastE(target)
 		end 
 
 		if Menu.combo.comboQ then
-			Abilities:Cast(_Q, target) 
+			CastQ(target)
 		end  
 
 		if Menu.combo.comboW then
-			Abilities:Cast(_W, target)
+			CastW(target)
 		end
 	else
-		if isUltActive() and RcastedThroughBot and not (CountEnemyHeroInRange(Spells.R.range) >= Menu.combo.comboRx) then
+		if isUltActive() and RcastedThroughBot and not (CountEnemyHeroInRange(Spells.R.range) >= Menu.combo.comboRx) and not Menu.combo.comboROff then
  			CastSpell(_R) 
  		end
  	end
@@ -289,15 +444,15 @@ function Harass()
 	if myHero.dead then return end
 	if target ~= nil then
 		if Menu.harass.harassE then
-			Abilities:Cast(_E, target)
+			CastE(target)
 		end 
 
 		if Menu.harass.harassQ then
-			Abilities:Cast(_Q, target) 
+			CastQ(target)
 		end 
 
 		if Menu.harass.harassW then
-			Abilities:Cast(_W, target)
+			CastW(target)
 		end 
 	end
 end 
@@ -386,24 +541,14 @@ function getHitBoxRadius(target)
 end
 
 
-function isUltActive()
-	return ultActive
-end
-
-
 function Menu()
 
-	Menu = scriptConfig("Totally Swain by Totally Legit", "TotallySwain.cfg")
+	Menu = scriptConfig("Totally Swain by Nickieboy", "TotallySwain")
 
 	Menu:addSubMenu("Key Settings", "keys")
 	Menu.keys:addParam("combo", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 	Menu.keys:addParam("harass", "Harass", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
 	Menu.keys:addParam("laneclear", "LaneClear", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("K"))
-	Menu.keys:addParam("lasthit", "LastHit", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("X"))
-	SxOrb:RegisterHotKey("fight", Menu.keys, "combo") 
-	SxOrb:RegisterHotKey("harass", Menu.keys, "harass") 
-	SxOrb:RegisterHotKey("laneclear", Menu.keys, "laneclear") 
-	SxOrb:RegisterHotKey("lasthit", Menu.keys, "lasthit") 
 
 	-- Combo
 	Menu:addSubMenu("Combo", "combo")
@@ -413,8 +558,10 @@ function Menu()
 	Menu.combo:addParam("comboW", "Use " .. Spells.W.name .. " (W)", SCRIPT_PARAM_ONOFF, true)
 	Menu.combo:addParam("comboE", "Use " .. Spells.E.name .. " (E)", SCRIPT_PARAM_ONOFF, true)
 	Menu.combo:addParam("comboR", "Use " .. Spells.R.name .. " (R)", SCRIPT_PARAM_ONOFF, true)
-	Menu.combo:addParam("comboRx", "Min amount of people nearby", SCRIPT_PARAM_SLICE, 1, 1, 5, 0)
+	Menu.combo:addParam("comboRx", "Min amount of people nearby", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
 	Menu.combo:addParam("info", "Info:", SCRIPT_PARAM_INFO, "Above option is to only R if x people in range in combo")
+	Menu.combo:addParam("comboROff", "Turn R off yourself", SCRIPT_PARAM_ONOFF, false)
+	Menu.combo:addParam("info15", "Info:", SCRIPT_PARAM_INFO, "Script will activate R, but not disable it.")
 
 	 -- Harass
 	Menu:addSubMenu("Harass", "harass")
@@ -427,14 +574,7 @@ function Menu()
 	Menu.laneclear:addParam("laneclearW", "LaneClear using W", SCRIPT_PARAM_ONOFF, false)
 	Menu.laneclear:addParam("laneclearR", "Laneclear using R", SCRIPT_PARAM_ONOFF, false)
 
---[[
- 	 -- Killsteal
-	Menu:addSubMenu("KillSteal", "killsteal")
- 	Menu.killsteal:addParam("killsteal", "KillSteal", SCRIPT_PARAM_ONOFF, false)
- 	Menu.killsteal:addParam("killstealQ", "Use " .. Qspell.name .. " (Q)", SCRIPT_PARAM_ONOFF, false)
- 	Menu.killsteal:addParam("killstealW", "Use " .. Wspell.name .. " (W)", SCRIPT_PARAM_ONOFF, false)
- 	Menu.killsteal:addParam("killstealE", "Use " .. Espell.name .. " (E)", SCRIPT_PARAM_ONOFF, false)
---]]
+
  	--Drawings
  	Menu:addSubMenu("Drawings", "drawings")
  	Menu.drawings:addParam("draw", "Use Drawings", SCRIPT_PARAM_ONOFF, true)
@@ -443,14 +583,49 @@ function Menu()
  	Menu.drawings:addParam("drawE", "Draw " .. Spells.E.name .. " (E)", SCRIPT_PARAM_ONOFF, true)
  	Menu.drawings:addParam("drawR", "Draw " .. Spells.R.name .. " (R)", SCRIPT_PARAM_ONOFF, true)
 
+ 	-- Prediction
+ 	Menu:addSubMenu("Prediction", "prediction")
+ 	if divinePredLoaded and hPredLoaded and sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DivinePrediction", "HPrediction", "SPrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+		Menu.prediction:addParam("usePredictionHPred", "HPrediction HitChance", SCRIPT_PARAM_SLICE, 1, 1, 3, 2)
+		Menu.prediction:addParam("usePredictionDPred", "DivinePred HitChance", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+ 	elseif divinePredLoaded and hPredLoaded and not sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DivinePrediction", "HPrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+		Menu.prediction:addParam("usePredictionHPred", "HPrediction HitChance", SCRIPT_PARAM_SLICE, 1, 1, 3, 2)
+		Menu.prediction:addParam("usePredictionDPred", "DivinePred HitChance", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+ 	elseif divinePredLoaded and not hPredLoaded and sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DivinePrediction", "SPrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+		Menu.prediction:addParam("usePredictionDPred", "DivinePred HitChance", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+ 	elseif divinePredLoaded and not hPredLoaded and not sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DivinePrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+		Menu.prediction:addParam("usePredictionDPred", "DivinePred HitChance", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+ 	elseif hPredLoaded and not divinePredLoaded and sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "HPrediction", "SPrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+		Menu.prediction:addParam("usePredictionHPred", "HPrediction HitChance", SCRIPT_PARAM_SLICE, 1, 1, 3, 2)
+ 	elseif hPredLoaded and not divinePredLoaded and not sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "HPrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+		Menu.prediction:addParam("usePredictionHPred", "HPrediction HitChance", SCRIPT_PARAM_SLICE, 1, 1, 3, 2)
+ 	elseif not hPredLoaded and not divinePredLoaded and sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "SPrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+ 	elseif not hPredLoaded and not divinePredLoaded and not sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+ 	end
+
  	--Misc
  	Menu:addSubMenu("Misc", "misc")
 	MenuMisc(Menu.misc, true)
  	
 
-	--Orbwalker
+	-- OrbWalker
 	Menu:addSubMenu("OrbWalker", "orbwalker")
-	SxOrb:LoadToMenu(Menu.orbwalker, true)
 
 	 -- Always show
 	 Menu.keys:permaShow("combo")
@@ -459,13 +634,6 @@ function Menu()
 	 Menu.keys:permaShow("laneclear")
 	 Menu.drawings:permaShow("draw")
 
-end 
-
-
-function CheckOrbWalker()
-	if FileExist(LIB_PATH .. "SxOrbWalk.lua") then
-		SxOrbloaded = true
-	end 
 end 
 
 

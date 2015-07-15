@@ -19,6 +19,8 @@ if myHero.charName:lower() ~= "xerath" then return end
 					Tab R Mouse
 						This means that it will shoot ultimate to whereever you LEFT click. If a target is nearby that click, it will focus that target. Otherwise it will just cast to your mouse position.
 				Fix'd spam
+			1.05
+				Added SPrediction
 
 
 
@@ -31,7 +33,7 @@ function Say(text)
 end
 
 --[[		Auto Update		]]
-local version = "1.04"
+local version = "1.05"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Xerath"
 local AUTOUPDATE = true
@@ -61,6 +63,7 @@ end
 
 
 if not FileExist(LIB_PATH.."TotallyLib.lua") then return Say("Please download TotallyLib before running this script, thank you. Make sure it is in your common folder.") end
+if not FileExist(LIB_PATH.."VPrediction.lua") then return Say("Please download VPrediction before running this script, thank you. Make sure it is in your common folder.") end
 
 
 -- Download Libraries
@@ -88,8 +91,7 @@ for DOWNLOAD_LIB_NAME, DOWNLOAD_LIB_URL in pairs(REQUIRED_LIBS) do
 	end
 end
 
-local divinePredLoaded = false
-local hPredLoaded = false
+local divinePredLoaded, hPredLoaded, sPredLoaded = false, false, false
 
 if VIP_USER and FileExist(LIB_PATH.."DivinePred.lua") then
 	divinePredLoaded = true
@@ -99,6 +101,11 @@ end
 if FileExist(LIB_PATH.."HPrediction.lua") then
 	hPredLoaded = true
 	require "HPrediction"
+end
+
+if FileExist(LIB_PATH.."SPrediction.lua") then
+	sPredLoaded = true
+	require "SPrediction"
 end
 
 -----------------------------------
@@ -143,11 +150,29 @@ function InitializeVariables()
 
 	-- DivinePrediction
  	if divinePredLoaded then
-		DP = DivinePred()
+		DP = assert(DivinePred())
+		if not DP then
+			divinePredLoaded = false 
+		end	
 	end
 
 	if hPredLoaded then
-		HPred = HPrediction()
+		HPred = assert(HPrediction())
+		if not HPred then
+			hPredLoaded = false 
+		end
+	end
+
+	if sPredLoaded then
+		SPred = assert(SPrediction())
+		if not SPred then
+			sPredLoaded = false 
+		else
+			SPred.SpellData[myHero.charName][_Q] = { speed = Spells.Q.speed, delay = Spells.Q.delay, range = Spells.Q.range.max, width = Spells.Q.radius, collision = false, aoe = true, type = "linear"}
+			SPred.SpellData[myHero.charName][_W] = { speed = Spells.W.speed, delay = Spells.W.delay, range = Spells.W.range, width = Spells.W.radius, collision = false, aoe = true, type = "circular"}
+			SPred.SpellData[myHero.charName][_E] = { speed = Spells.E.speed, delay = Spells.E.delay, range = Spells.E.range, width = Spells.E.radius, collision = true, aoe = false, type = "linear"}
+			SPred.SpellData[myHero.charName][_R] = { speed = Spells.R.speed, delay = Spells.R.delay, range = Spells.R.range[1], width = Spells.R.radius, collision = false, aoe = true, type = "circular"}
+		end
 	end
 
 	--Vprediction
@@ -192,10 +217,6 @@ function OnLoad()
 
     Say("Please wait...")
     DelayAction(function() CheckOrbWalker() end, 10)
-
-    if _G.PerformAutoUpdate then
-		AutoUpdate()
-	end
 
     if divinePredLoaded then
     	LoadDivinePrediction()
@@ -275,7 +296,6 @@ function QCharge()
 	end
 end
 
--- Checks same with FPS
 function OnDraw()
 	if myHero.dead then return end
 	if Menu.drawings.draw then
@@ -302,8 +322,15 @@ function CheckRRange()
 	local level = ((myHero:GetSpellData(_R).level and myHero:GetSpellData(_R).level >= 1 and myHero:GetSpellData(_R).level) or 1)
 	local range = Spells.R.range[level]
 	if oldRange ~= range then
-		dpSkills["R"] = CircleSS(Spells.R.speed, Spells.R.range[myHero:GetSpellData(_R).level], Spells.R.radius, (Spells.R.delay * 1000), 0)
-		hpSkills["R"] = HPSkillshot({type = "PromptCircle", delay = Spells.R.delay, range = Spells.R.range[myHero:GetSpellData(_R).level], speed = Spells.R.speed, radius = Spells.R.radius, collisionM = Spells.R.collision, collisionH = Spells.R.collision})
+		if divinePredLoaded then
+			dpSkills["R"] = CircleSS(Spells.R.speed, range, Spells.R.radius, (Spells.R.delay * 1000), 0)
+		end
+		if hPredLoaded then
+			hpSkills["R"] = HPSkillshot({type = "PromptCircle", delay = Spells.R.delay, range = Spells.R.range[myHero:GetSpellData(_R).level], speed = Spells.R.speed, radius = Spells.R.radius, collisionM = Spells.R.collision, collisionH = Spells.R.collision})
+		end
+		if sPredLoaded then
+			SPred.SpellData[myHero.charName][_R].range = Spells.R.range[myHero:GetSpellData(_R).level]
+		end
 		oldRange = range 
 	end
 end
@@ -396,7 +423,7 @@ end
 function PredictQ(target)
 	if not target then return end
 	local castPos = nil
-	if Menu.prediction.usePrediction == 1 then
+	if Menu.prediction.predictionType == 1 then
 		local dashing, canHit, position = VP:IsDashing(target, Spells.Q.delay, Spells.Q.radius, Spells.Q.speed, myHero)
 		if dashing and canHit and GetDistanceSqr(position) <= Spells.Q.range.charged * Spells.Q.range.charged then
 			castPos = position
@@ -424,6 +451,12 @@ function PredictQ(target)
 		if hitchance >= Menu.prediction.usePredictionHPred  then
 			castPos = pos 
 		end
+	elseif SPredictionLoaded() then
+		SPred.SpellData[myHero.charName][_Q].range = Spells.Q.range.charged
+		local CastPosition, Chance, PredPos = SPred:Predict(_Q, myHero, target)
+		if CastPosition and Chance >= 1 then
+			castPos = CastPosition
+		end
 	end
 	return castPos
 end
@@ -441,12 +474,12 @@ end
 function PredictW(target)
 	if not target then return end
 	local castPos = nil
-	if Menu.prediction.usePrediction == 1 then
+	if Menu.prediction.predictionType == 1 then
 		local dashing, canHit, position = VP:IsDashing(target, Spells.W.delay, Spells.W.radius, Spells.W.speed, myHero)
 		if dashing and canHit and GetDistanceSqr(position) <= Spells.W.range * Spells.W.range then
 			castPos = position
 		else
-			local castPos2, hitchance = VP:GetLineCastPosition(target, Spells.W.delay, Spells.W.radius, Spells.W.range, Spells.W.speed, myHero, false)	
+			local castPos2, hitchance = VP:GetCircularCastPosition(target, Spells.W.delay, Spells.W.radius, Spells.W.range, Spells.W.speed)	
 			if hitchance >= Menu.prediction.usePredictionVPred then	
 				castPos = castPos2
 			end 	
@@ -469,6 +502,11 @@ function PredictW(target)
 		if hitchance >= Menu.prediction.usePredictionHPred  then
 			castPos = pos 
 		end
+	elseif SPredictionLoaded() then
+		local CastPosition, Chance, PredPos = SPred:Predict(_W, myHero, target)
+		if CastPosition and Chance >= 1 then
+			castPos = CastPosition
+		end
 	end
 	return castPos
 end
@@ -486,7 +524,7 @@ end
 function PredictE(target)
 	if not target then return end
 	local castPos = nil
-	if Menu.prediction.usePrediction == 1 then
+	if Menu.prediction.predictionType == 1 then
 		local castPos2, hitchance = VP:GetLineCastPosition(target, Spells.E.delay, Spells.E.radius, Spells.E.range, Spells.E.speed, myHero, true)	
 		if hitchance >= Menu.prediction.usePredictionVPred then	
 			castPos = castPos2
@@ -509,7 +547,14 @@ function PredictE(target)
 		if hitchance >= Menu.prediction.usePredictionHPred  then
 			castPos = pos 
 		end
+
+	elseif SPredictionLoaded() then
+		local CastPosition, Chance, PredPos = SPred:Predict(_E, myHero, target)
+		if CastPosition and Chance >= 1 then
+			castPos = CastPosition
+		end
 	end
+
 	return castPos
 end
 
@@ -574,12 +619,12 @@ end
 function PredictR(target)
 	if not target then return end
 	local castPos = nil
-	if Menu.prediction.usePrediction == 1 then
+	if Menu.prediction.predictionType == 1 then
 		local dashing, canHit, position = VP:IsDashing(target, Spells.R.delay, Spells.R.radius, Spells.R.speed, myHero)
 		if dashing and canHit and GetDistanceSqr(position) <= Spells.R.range[myHero:GetSpellData(_R).level] * Spells.R.range[myHero:GetSpellData(_R).level] then
 			castPos = position
 		else
-			local castPos2, hitchance = VP:GetLineCastPosition(target, Spells.R.delay, Spells.R.radius, Spells.R.range[myHero:GetSpellData(_R).level], Spells.R.speed, myHero, false)	
+			local castPos2, hitchance = VP:GetCircularCastPosition(target, Spells.R.delay, Spells.R.radius, Spells.R.range[myHero:GetSpellData(_R).level], Spells.R.speed)	
 			if hitchance >= Menu.prediction.usePredictionVPred then	
 				castPos = castPos2
 			end 	
@@ -601,7 +646,14 @@ function PredictR(target)
 		if hitchance >= Menu.prediction.usePredictionHPred then
 			castPos = pos 
 		end
+
+	elseif SPredictionLoaded() then
+		local CastPosition, Chance, PredPos = SPred:Predict(_R, myHero, target)
+		if CastPosition and Chance >= 1 then
+			castPos = CastPosition
+		end
 	end
+
 	return castPos
 end
 
@@ -762,24 +814,41 @@ function DrawMenu()
 
  	-- Prediction
  	Menu:addSubMenu(tempName .. "Prediction", "prediction")
- 	if divinePredLoaded and hPredLoaded then
-		Menu.prediction:addParam("usePrediction", "Prediction Type:", SCRIPT_PARAM_LIST, 2, {"VPrediction", "DivinePrediction", "HPrediction"})
-		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+ 	if divinePredLoaded and hPredLoaded and sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DivinePrediction", "HPrediction", "SPrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
 		Menu.prediction:addParam("usePredictionHPred", "HPrediction HitChance", SCRIPT_PARAM_SLICE, 1, 1, 3, 2)
 		Menu.prediction:addParam("usePredictionDPred", "DivinePred HitChance", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
-	elseif divinePredLoaded and not hPredLoaded then
-		Menu.prediction:addParam("usePrediction", "Prediction Type:", SCRIPT_PARAM_LIST, 2, {"VPrediction", "DivinePrediction"})
-		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
-		Menu.prediction:addParam("usePredictionDPred", "DivinePred HitChance", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
-	elseif hPredLoaded and not divinePredLoaded then
-		Menu.prediction:addParam("usePrediction", "Prediction Type:", SCRIPT_PARAM_LIST, 2, {"VPrediction", "HPrediction"})
-		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+ 	elseif divinePredLoaded and hPredLoaded and not sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DivinePrediction", "HPrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
 		Menu.prediction:addParam("usePredictionHPred", "HPrediction HitChance", SCRIPT_PARAM_SLICE, 1, 1, 3, 2)
-	elseif not hPredLoaded and not divinePredLoaded then
-		Menu.prediction:addParam("usePrediction", "Prediction Type:", SCRIPT_PARAM_LIST, 2, {"VPrediction"})
-		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
-	end
+		Menu.prediction:addParam("usePredictionDPred", "DivinePred HitChance", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+ 	elseif divinePredLoaded and not hPredLoaded and sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DivinePrediction", "SPrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+		Menu.prediction:addParam("usePredictionDPred", "DivinePred HitChance", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+ 	elseif divinePredLoaded and not hPredLoaded and not sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "DivinePrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+		Menu.prediction:addParam("usePredictionDPred", "DivinePred HitChance", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+ 	elseif hPredLoaded and not divinePredLoaded and sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "HPrediction", "SPrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+		Menu.prediction:addParam("usePredictionHPred", "HPrediction HitChance", SCRIPT_PARAM_SLICE, 1, 1, 3, 2)
+ 	elseif hPredLoaded and not divinePredLoaded and not sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "HPrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+		Menu.prediction:addParam("usePredictionHPred", "HPrediction HitChance", SCRIPT_PARAM_SLICE, 1, 1, 3, 2)
+ 	elseif not hPredLoaded and not divinePredLoaded and sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction", "SPrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+ 	elseif not hPredLoaded and not divinePredLoaded and not sPredLoaded then
+ 		Menu.prediction:addParam("predictionType", "Prediction", SCRIPT_PARAM_LIST, 1, {"VPrediction"})
+ 		Menu.prediction:addParam("usePredictionVPred", "VPrediction HitChance", SCRIPT_PARAM_SLICE, 2, 1, 6, 0)
+ 	end
 
+ 	
  	--Misc
  	Menu:addSubMenu(tempName .. "Misc", "misc")
  	Menu.misc:addSubMenu("Gapcloser", "gc")
@@ -818,12 +887,15 @@ function DrawMenu()
 end
 
 function DivinePredLoaded()
-	return divinePredLoaded and Menu.prediction.usePrediction == 2
-
+	return divinePredLoaded and Menu.prediction.predictionType == 2
 end
 
+function SPredictionLoaded()
+ 	return sPredLoaded and ((divinePredLoaded and hPredLoaded and Menu.prediction.predictionType == 4) or (divinePredLoaded and not hPredLoaded and Menu.prediction.predictionType == 3) or (hPredLoaded and not divinePredLoaded and Menu.prediction.predictionType == 3) or (not hPredLoaded and not divinePredLoaded and Menu.prediction.predictionType == 2))
+ end
+
 function HPredMenuLoaded()
-	return hPredLoaded and ((divinePredLoaded and Menu.prediction.usePrediction == 3) or (not divinePredLoaded and Menu.prediction.usePrediction == 2))
+	return hPredLoaded and ((divinePredLoaded and Menu.prediction.predictionType == 3) or (not divinePredLoaded and Menu.prediction.predictionType == 2))
 end
 
 function AntiGapCloseFunc(unit, spell)
