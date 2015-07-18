@@ -146,6 +146,9 @@
 			2.72
 				Ultimate crash fix
 
+			2.73
+				Fix'd the stun dependant things not doing anything once stun is gained one 1
+
 
 
 
@@ -161,7 +164,7 @@ if myHero.charName ~= "Annie" then return end
 
 
 --[[		Auto Update		]]
-local version = "2.72"
+local version = "2.73"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Annie"
 local AUTOUPDATE = true
@@ -911,6 +914,7 @@ function OnApplyBuff(unit, target, buff)
 	if unit.isMe and (buff and buff.name and buff.name == "pyromania_particle") then
 		canStun = true 
 	end
+
 	if unit and unit.isMe and buff and buff.name and buff.name:lower():find("infernalguardiantimer") then
 		ultActive = true 
 	end
@@ -930,7 +934,7 @@ function OnApplyBuff(unit, target, buff)
 end
 
 function OnUpdateBuff(unit, buff, stacks)
-	if unit and unit.isMe and buff and (buff.name == "pyromania") then
+	if unit and unit.isMe and buff and buff.name == "pyromania" then
 		passiveStacks = stacks
 	end 
 end
@@ -945,7 +949,7 @@ function OnRemoveBuff(unit, buff)
 	end
 
 	if unit.isMe and (buff and buff.name and buff.name == "pyromania_particle") then
-		canStun = true 
+		canStun = false 
 	end
 
 	if unit.isMe and (buff.name == "infernalguardiantimer") then
