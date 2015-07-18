@@ -29,10 +29,14 @@
 								No longer requires SxOrb
 								Supports all predictions now
 
+						> 1.51
+								Removed spam (forgot debug message)
+								Updated SPred API
+
 --]]
 
 -- Download script
-local version = 1.50
+local version = 1.51
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Swain"
 local AUTOUPDATE = true
@@ -113,9 +117,6 @@ end
 
 
 function InitializeVariables()
-	serverMessage = GetWebResult(UPDATE_HOST, "/Nickieboy/BoL/master/announcements/totallyseries.txt")
-	print("<font color=\"#000000\"><b>Totally Series (Latest News):</b></font> <font color=\"#ffaa00\">" .. tostring(serverMessage) .. "</font>")
-
 	Spells = {
 		["Q"] = {name = "Decrepify", range = 625, radius = 0, delay = 0, speed = 0},
 		["W"] = {name = "Nevermore", range = 900, radius = 125, delay = 0.85, speed = math.huge},
@@ -166,8 +167,6 @@ function InitializeVariables()
 		SPred = assert(SPrediction())
 		if not SPred then
 			sPredLoaded = false 
-		else
-			SPred.SpellData[myHero.charName][_W] = { speed = Spells.W.speed, delay = Spells.W.delay, range = Spells.W.range, width = Spells.W.radius, collision = false, aoe = true, type = "circular"}
 		end
 	end
 
@@ -307,7 +306,7 @@ function PredictW(target)
 			castPos = pos 
 		end
 	elseif SPredictionLoaded() then
-		local CastPosition, Chance, PredPos = SPred:Predict(_W, myHero, target)
+		local CastPosition, Chance, PredPos = SPred:Predict(target, Spells.W.range, Spells.W.speed, Spells.W.delay, Spells.W.radius, false, myHero)
 		if CastPosition and Chance >= 1 then
 			castPos = CastPosition
 		end
@@ -370,7 +369,6 @@ function OnTick()
  	if myHero.dead and RcastedThroughBot then 
  		RcastedThroughBot = false
  	end 
- 	print(isUltActive() and "true" or "false")
 end
 
 function Checks()

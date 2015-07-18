@@ -21,6 +21,8 @@ if myHero.charName:lower() ~= "xerath" then return end
 				Fix'd spam
 			1.05
 				Added SPrediction
+			1.06
+				Updated to new SPred API
 
 
 
@@ -33,7 +35,7 @@ function Say(text)
 end
 
 --[[		Auto Update		]]
-local version = "1.05"
+local version = "1.06"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Xerath"
 local AUTOUPDATE = true
@@ -167,11 +169,6 @@ function InitializeVariables()
 		SPred = assert(SPrediction())
 		if not SPred then
 			sPredLoaded = false 
-		else
-			SPred.SpellData[myHero.charName][_Q] = { speed = Spells.Q.speed, delay = Spells.Q.delay, range = Spells.Q.range.max, width = Spells.Q.radius, collision = false, aoe = true, type = "linear"}
-			SPred.SpellData[myHero.charName][_W] = { speed = Spells.W.speed, delay = Spells.W.delay, range = Spells.W.range, width = Spells.W.radius, collision = false, aoe = true, type = "circular"}
-			SPred.SpellData[myHero.charName][_E] = { speed = Spells.E.speed, delay = Spells.E.delay, range = Spells.E.range, width = Spells.E.radius, collision = true, aoe = false, type = "linear"}
-			SPred.SpellData[myHero.charName][_R] = { speed = Spells.R.speed, delay = Spells.R.delay, range = Spells.R.range[1], width = Spells.R.radius, collision = false, aoe = true, type = "circular"}
 		end
 	end
 
@@ -328,9 +325,6 @@ function CheckRRange()
 		if hPredLoaded then
 			hpSkills["R"] = HPSkillshot({type = "PromptCircle", delay = Spells.R.delay, range = Spells.R.range[myHero:GetSpellData(_R).level], speed = Spells.R.speed, radius = Spells.R.radius, collisionM = Spells.R.collision, collisionH = Spells.R.collision})
 		end
-		if sPredLoaded then
-			SPred.SpellData[myHero.charName][_R].range = Spells.R.range[myHero:GetSpellData(_R).level]
-		end
 		oldRange = range 
 	end
 end
@@ -452,8 +446,7 @@ function PredictQ(target)
 			castPos = pos 
 		end
 	elseif SPredictionLoaded() then
-		SPred.SpellData[myHero.charName][_Q].range = Spells.Q.range.charged
-		local CastPosition, Chance, PredPos = SPred:Predict(_Q, myHero, target)
+		local CastPosition, Chance, PredPos = SPred:Predict(target, Spells.Q.range.charged, Spells.Q.speed, Spells.Q.delay, Spells.Q.radius, false, myHero)
 		if CastPosition and Chance >= 1 then
 			castPos = CastPosition
 		end
@@ -503,7 +496,7 @@ function PredictW(target)
 			castPos = pos 
 		end
 	elseif SPredictionLoaded() then
-		local CastPosition, Chance, PredPos = SPred:Predict(_W, myHero, target)
+		local CastPosition, Chance, PredPos = SPred:Predict(target, Spells.W.range, Spells.W.speed, Spells.W.delay, Spells.W.radius, false, myHero)
 		if CastPosition and Chance >= 1 then
 			castPos = CastPosition
 		end
@@ -549,7 +542,7 @@ function PredictE(target)
 		end
 
 	elseif SPredictionLoaded() then
-		local CastPosition, Chance, PredPos = SPred:Predict(_E, myHero, target)
+		local CastPosition, Chance, PredPos = SPred:Predict(target, Spells.E.range, Spells.E.speed, Spells.E.delay, Spells.E.radius, true, myHero)
 		if CastPosition and Chance >= 1 then
 			castPos = CastPosition
 		end
@@ -648,7 +641,7 @@ function PredictR(target)
 		end
 
 	elseif SPredictionLoaded() then
-		local CastPosition, Chance, PredPos = SPred:Predict(_R, myHero, target)
+		local CastPosition, Chance, PredPos = SPred:Predict(target, Spells.R.range[myHero:GetSpellData(_R).level], Spells.R.speed, Spells.R.delay, Spells.R.radius, false, myHero)
 		if CastPosition and Chance >= 1 then
 			castPos = CastPosition
 		end
