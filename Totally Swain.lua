@@ -33,10 +33,15 @@
 								Removed spam (forgot debug message)
 								Updated SPred API
 
+						> 1.52
+							Champ name :$
+
 --]]
 
+if myHero.charName:lower() ~= "swain" then return end
+
 -- Download script
-local version = 1.51
+local version = 1.52
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Swain"
 local AUTOUPDATE = true
