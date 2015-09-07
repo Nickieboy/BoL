@@ -23,6 +23,8 @@ if myHero.charName:lower() ~= "xerath" then return end
 				Added SPrediction
 			1.06
 				Updated to new SPred API
+			1.07
+				Updated DPred API
 
 
 
@@ -35,7 +37,7 @@ function Say(text)
 end
 
 --[[		Auto Update		]]
-local version = "1.06"
+local version = "1.07"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Xerath"
 local AUTOUPDATE = true
@@ -227,13 +229,7 @@ function OnLoad()
 end
 
 function LoadDivinePrediction()
-	divinePredictionTargetTable = {}
 	dpSkills = {}
-	for i, enemy in pairs(GetEnemyHeroes()) do
-		if enemy and enemy.type and enemy.type == myHero.type then
-			divinePredictionTargetTable[enemy.networkID] = DPTarget(enemy)
-		end
-	end
 
 	dpSkills = {
 		["Q"] = LineSS(Spells.Q.speed, Spells.Q.range.max, Spells.Q.radius, (Spells.Q.delay * 1000), 0),
@@ -241,6 +237,11 @@ function LoadDivinePrediction()
 		["E"] = LineSS(Spells.E.speed, Spells.E.range, Spells.E.radius, (Spells.E.delay * 1000), math.huge),
 		["R"] = CircleSS(Spells.R.speed, Spells.R.range[1], Spells.R.radius, (Spells.R.delay * 1000), 0)
 	}
+
+	DP:bindSS("Q", dpSkills["Q"], 1)
+	DP:bindSS("W", dpSkills["W"], 1)
+	DP:bindSS("E", dpSkills["E"], 1)
+	DP:bindSS("R", dpSkills["R"], 1)
 end
 
 function LoadHPrediction()
@@ -321,6 +322,7 @@ function CheckRRange()
 	if oldRange ~= range then
 		if divinePredLoaded then
 			dpSkills["R"] = CircleSS(Spells.R.speed, range, Spells.R.radius, (Spells.R.delay * 1000), 0)
+			DP:bindSS("R", dpSkills["R"], 1)
 		end
 		if hPredLoaded then
 			hpSkills["R"] = HPSkillshot({type = "PromptCircle", delay = Spells.R.delay, range = Spells.R.range[myHero:GetSpellData(_R).level], speed = Spells.R.speed, radius = Spells.R.radius, collisionM = Spells.R.collision, collisionH = Spells.R.collision})
@@ -429,17 +431,10 @@ function PredictQ(target)
 		end
 
 	elseif DivinePredLoaded() then
-		local tempDivineTarget = nil
-		if divinePredictionTargetTable[target.networkID] ~= nil then
-			tempDivineTarget = divinePredictionTargetTable[target.networkID]
+		local state, hitPos, perc = DP:predict("Q", target)
+		if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
+			castPos = hitPos
 		end
-		if tempDivineTarget then
-			local state, hitPos, perc = DP:predict(tempDivineTarget, dpSkills["Q"])
-			if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
-				castPos = hitPos
-			end
-		end
-
 	elseif HPredMenuLoaded() then
 		local pos, hitchance = HPred:GetPredict(hpSkills["Q"], target, myHero)
 		if hitchance >= Menu.prediction.usePredictionHPred  then
@@ -479,17 +474,10 @@ function PredictW(target)
 		end
 
 	elseif DivinePredLoaded() then
-		local tempDivineTarget = nil
-		if divinePredictionTargetTable[target.networkID] ~= nil then
-			tempDivineTarget = divinePredictionTargetTable[target.networkID]
+		local state, hitPos, perc = DP:predict("W", target)
+		if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
+			castPos = hitPos
 		end
-		if tempDivineTarget then
-			local state, hitPos, perc = DP:predict(tempDivineTarget, dpSkills["W"])
-			if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
-				castPos = hitPos
-			end
-		end
-
 	elseif HPredMenuLoaded() then
 		local pos, hitchance = HPred:GetPredict(hpSkills["W"], target, myHero)
 		if hitchance >= Menu.prediction.usePredictionHPred  then
@@ -524,17 +512,10 @@ function PredictE(target)
 		end 	
 
 	elseif DivinePredLoaded() then
-		local tempDivineTarget = nil
-		if divinePredictionTargetTable[target.networkID] ~= nil then
-			tempDivineTarget = divinePredictionTargetTable[target.networkID]
+		local state, hitPos, perc = DP:predict("E", target)
+		if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
+			castPos = hitPos
 		end
-		if tempDivineTarget then
-			local state, hitPos, perc = DP:predict(tempDivineTarget, dpSkills["E"])
-			if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
-				castPos = hitPos
-			end
-		end
-
 	elseif HPredMenuLoaded() then
 		local pos, hitchance = HPred:GetPredict(hpSkills["E"], target, myHero)
 		if hitchance >= Menu.prediction.usePredictionHPred  then
@@ -623,17 +604,10 @@ function PredictR(target)
 			end 	
 		end
 	elseif DivinePredLoaded() then
-		local tempDivineTarget = nil
-		if divinePredictionTargetTable[target.networkID] ~= nil then
-			tempDivineTarget = divinePredictionTargetTable[target.networkID]
+		local state, hitPos, perc = DP:predict("R", target)
+		if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
+			castPos = hitPos
 		end
-		if tempDivineTarget then
-			local state, hitPos, perc = DP:predict(tempDivineTarget, dpSkills["R"])
-			if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
-				castPos = hitPos
-			end
-		end
-
 	elseif HPredMenuLoaded() then
 		local pos, hitchance = HPred:GetPredict(hpSkills["R"], target, myHero)
 		if hitchance >= Menu.prediction.usePredictionHPred then
