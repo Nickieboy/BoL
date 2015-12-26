@@ -36,12 +36,17 @@
 						> 1.52
 							Champ name :$
 
+						> 1.55
+							DPred integration
+							Fix'd crashes
+
 --]]
 
 if myHero.charName:lower() ~= "swain" then return end
+_G.GetInventorySlotItem = function(id) return end
 
 -- Download script
-local version = 1.52
+local version = 1.55
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Swain"
 local AUTOUPDATE = true
@@ -191,6 +196,7 @@ function OnDeleteObj(obj)
 	end
 end
 
+
 function CheckOrbWalker() 
 	if _G.Reborn_Initialised then
 		SACLoaded = true 
@@ -251,15 +257,11 @@ function OnLoad()
 end
 
 function LoadDivinePrediction()
-	divinePredictionTargetTable = {}
-	for i, enemy in pairs(GetEnemyHeroes()) do
-		if enemy and enemy.type and enemy.type == myHero.type then
-			divinePredictionTargetTable[enemy.networkID] = DPTarget(enemy)
-		end
-	end
-
 	CircleW = CircleSS(Spells.W.speed, Spells.W.range, Spells.W.radius, (Spells.W.delay * 1000), 0)
+	DP:bindSS("wSkillShot", CircleW, 1)
+	predTimer = TimerC(500) --constructs a timer with 200 millis
 end
+
 
 function LoadHPrediction()
 	HPW = HPSkillshot({type = "PromptCircle", delay = Spells.W.delay, range = Spells.W.range, radius = Spells.W.radius, collisionM = Spells.W.collision, collisionH = Spells.W.collision})
@@ -294,17 +296,13 @@ function PredictW(target)
 		end
 
 	elseif DivinePredictionLoaded() then
-		local tempDivineTarget = nil
-		if divinePredictionTargetTable[target.networkID] ~= nil then
-			tempDivineTarget = divinePredictionTargetTable[target.networkID]
+		if not DP.isAuthed() then Say("You are not authed to use DivinePred. Change prediction!!") return end
+		if not predTimer:isUp() then return end
+		local state, hitPos, perc = DP:predict("wSkillShot", target)
+		if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
+			castPos = hitPos
+			predTimer:reset()
 		end
-		if tempDivineTarget then
-			local state, hitPos, perc = DP:predict(tempDivineTarget, CircleW)
-			if state and state == SkillShot.STATUS.SUCCESS_HIT and hitPos ~= nil and perc >= Menu.prediction.usePredictionDPred then
-				castPos = hitPos
-			end
-		end
-
 	elseif HPredMenuLoaded() then
 		local pos, hitchance = HPred:GetPredict(HPW, target, myHero)
 		if hitchance >= Menu.prediction.usePredictionHPred  then
