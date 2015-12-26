@@ -1,173 +1,22 @@
 --[[
 
 	Changelog
-			1.0: Released Script
-		
-
-			1.1
-			​	Added Farm
-				Added DFG and Zhonyas
-				Added auto downloading script (Not Libs)
-				Added another option in Combo to use R if the R stuns
-
-			1.2
-				​Added Auto Kill when Killable (Toggle)
-				Added Auto Q when Q will Stun (Inside Harass menu, but will still Cast even when Harass is Off)
-				Added Ignite
-				Added E cast until Stun is UP
-				Fixed a bug with AutoDownloading 
-
-			1.3
-				Added auto-downloading libraries
-				Rewrote combo (Combo where you use R only if it stuns)
-				Added auto E if being attacked
-				Added Harass option to Q > W if W will stun (so @ 3 stacks)
-
-			1.4
-				Fixed bol.boost link
-
-			1.5
-				Disabled usage of E when hero is recalling
-				Disabled BoL tracker for faster runtime
-
-			1.6
-				Fixed ManaManger
-				Added not to ult on certain targets
-				Fixed Ignite
-					Added "Use Ignite On"
-				Added barrier and heal
-				Added Auto Ult (if ult will hit x targets)
-				Better AutoKill (AutoKill and KillSteal are basically the same, so they are now the same menu)
-				Added DFG support
-				Now Draws Killable (with which spells) on ALL enemies
-
-			1.7
-				Added more Combo Ways
-					QWR
-					WQR
-					RQW
-					RWQ
-				Added Zhonyas support for
-					Karthus Ult
-					Zed Ult if the mark will kill you
-					Will add more if requested
-				Improved Drawing Killable with which spells text
-				Made the AutoUlt a little bit smoother/faster
-				Cleaned up Code
-
-			1.8
-				Little Tweaks to improve performance
-				Few bug fixes / mistypes
-				Hopefully fixed random bugsplats
-
-			1.85
-				Disabled AutoLeveling
---------------------------------------------------------------------------------------------
-
-			2.0
-				Added Ignite in AutoKill
-				Added Ignite in Draw KillAble
-				Added Flash in AutoR
-					Adjustable settings:
-						Enemies nearby
-						Range between you and enemies
-						Allies nearby
-						Range between you and allies
-				Added Gapcloser/Interrupter
-					Will cast Q/W if it'll stun
-				No longers farms while recalling
-				There is now a possibility to cast EW in fountain to stack Stun
-				Jungle Steal
-					There is no prediction added into this, so it'll just use abilites when the damage is higher than the health of the jungle creep.
-					Only works with big minions
-					Blue&Red: Cast Q
-					Dragon&Baron: Cast Q or Cast Q/R - Not adjustable, so be careful
-
-			2.05
-				Fixed damn ignite mistype
-
-			2.06 
-				Temp fix for SxOrbwalk
-
-			2.10
-				Fixed spam bug with "Qmg"
-				Fixed Jungle Names (Jungle steal should now work 'perfectly')
-					Perfectly as in it'll cast abilities.
-					It'll steal even if no enemies are near, so be careful with this.
-
-					I'll adjust this later, so you can adjust this to your own settings.
-				Added more options to Draw Killable
-				Re-enabled normal SxOrbWalk 
-				Changed Ignite settings
-					Normal killsteal Ignite is now included in AutoKill
-					Ignite kill with Combo is now included in Misc > Ignite
-
-			2.20
-				Jungle Steal now has optional settings
-				Rewrote AutoKill to look more accurately for all possibilities
-				Now gets a target through OrbWalker
-					Supports SAC Reborn / MMA and SxOrbWalk
-				Edited menu of Auto Kill
-					Added more optios
-				Option to disable AA in combo
-				The Kill Text should now have DFG
-				Few performance tweaks (Script should max give a 20fps drop)
-
-			2.25
-				R in Combo mode now:
-					Normal
-					Stun
-					Killable
-
-			2.27
-				Performance tweaks
-
-			2.28 
-				Minor bug fixes
-
-			2.30
-				Realised something didn't work, so took it out
-
-			2.33
-				Deleted Spell Damage Library requirement
-
-			2.5
-				Completely removed DFG
-				Made a workaround for the buff stacking
-					It should now detect the buffs, BUT you have to make sure you have 0 stacks when you start the script
-
-			2.7
-				Using buffs to check stun again
-				SAC Integration
-
-			2.71 
-				flix'd
-
-			2.72
-				Ultimate crash fix
-
-			2.73
-				Fix'd the stun dependant things not doing anything once stun is gained one 1
-
-			2.74
-				Some additionel tweaks
+			2.80
+				Finally an update that stops the bugsplats
 
 
 
 
 
 		Script Coded by Totally Legt.
-		If you have any questions, please post in the thread of send me an PM. You are always free to send me a PM regarding this script or regarding another.
-		If you use this script, please give me feedback on how it works and how to improve. If something doesn't work, don't just go to another script. Tell me 
-			what went wrong and I'll try my best to fix it as soon as possible.
-	]]
+--]]
 
 
 if myHero.charName ~= "Annie" then return end
-
+_G.GetInventorySlotItem = function(id) return end
 
 --[[		Auto Update		]]
-local version = "2.74"
+local version = "2.80"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Annie"
 local AUTOUPDATE = true
@@ -330,11 +179,11 @@ function OnTick()
 	if Menu.farm.farm and not Menu.combo.combo and isRecalling ~= true then
 		Farm()
 	end 
-
+--[[
 	if Menu.jungle.useJungle then
 		JungleSteal()
 	end 
-
+--]]
 	if Menu.misc.zhonyas.zhonyas then
 		Zhonyas()
 	end 
@@ -897,21 +746,25 @@ function DrawKillable()
 end
 
 function OnCreateObj(object)
-    if object.name == "TeleportHome.troy" and GetDistance(object, myHero) < 50 then
-    	isRecalling = true
-    end 
+	if object and object.valid and object.name then
+	    if object.name == "TeleportHome.troy" and GetDistance(object, myHero) < 50 then
+	    	isRecalling = true
+	    end 
+	end
 end 
 
 
 function OnDeleteObj(object)
-    if object.name == "TeleportHome.troy" and GetDistance(object, myHero) < 50 then
-    	isRecalling = false
-    end 
+	if object and object.valid and object.name then
+	    if object.name == "TeleportHome.troy" and GetDistance(object, myHero) < 50 then
+	    	isRecalling = false
+	    end 
+	end
 end
  
 
 function OnApplyBuff(unit, target, buff)
-	if unit and unit.isMe and buff and buff.name then 
+	if unit and unit.isMe and buff and buff.name and buff.valid then 
 		if buff.name == "pyromania_particle" then
 			canStun = true 
 		end
@@ -969,20 +822,11 @@ end
 
 
 function OnProcessSpell(object, spell)
-  	if (spell.target == myHero and string.find(spell.name, "BasicAttack")) and object.type == "Obj_AI_Hero" and Menu.misc.Esettings.useEonAttack and Eready then
-   	 	CastSpell(_E)
-  	end
-
-
-  	if spell.name == "KarthusFallenOne" and object.team ~= myHero.team and Menu.misc.zhonyas.zhonyas then
-  		local karthusRdmg = getDmg("R", myHero, object)
-  		if karthusRdmg > myHero.health and not myHero.dead then
-  			local zSlot = GetInventorySlotItem(3157)
-  			if zSlot ~= nil and myHero:CanUseSpell(zSlot) == READY then
-				DelayAction(function() if GetInventorySlotItem(3157) ~= nil and myHero:CanUseSpell(GetInventorySlotItem(3157)) == READY then CastSpell(GetInventorySlotItem(3157)) end end, 2) 
-			end 
-  		end 
-  	end 
+	if spell and object and spell.target and object.type then
+	  	if (spell.target == myHero and string.find(spell.name, "BasicAttack")) and object.type == "Obj_AI_Hero" and Menu.misc.Esettings.useEonAttack and Eready then
+	   	 	CastSpell(_E)
+	  	end
+	end
 end
 
 
@@ -1162,6 +1006,7 @@ function DrawMenu()
 	 Menu.farm:addParam("farmW", "Farm using W", SCRIPT_PARAM_ONOFF, false)
 	 Menu.farm:addParam("farmStun", "Farm until Stun is up", SCRIPT_PARAM_ONOFF, false)
 
+--[[
 	 -- Jungle Steal
 	 Menu:addSubMenu("Jungle Steal", "jungle")
 	 Menu.jungle:addParam("useJungle", "Jungle Steal", SCRIPT_PARAM_ONOFF, false)
@@ -1175,6 +1020,8 @@ function DrawMenu()
 	 Menu.jungle.optional:addParam("rangeenemyjungler", "Range Enemy Jungler - Monster", SCRIPT_PARAM_SLICE, 200, 0, 1000, 0)
 	 Menu.jungle.optional:addParam("allyjungler", "Ally Jungle Near", SCRIPT_PARAM_ONOFF, false)
 	 Menu.jungle.optional:addParam("rangeallyjungler", "Range Ally Jungler - Monster", SCRIPT_PARAM_SLICE, 200, 0, 1000, 0)
+
+	 --]]
 
 
 	 --Drawings
@@ -1254,7 +1101,7 @@ function DrawMenu()
 	 Menu.harass:permaShow("harassT")
 	 Menu.autokill:permaShow("autokill")
 	 Menu.farm:permaShow("farm")
-	 Menu.jungle:permaShow("useJungle")
+	 --Menu.jungle:permaShow("useJungle")
 	 Menu.drawings:permaShow("draw")
 
 end
@@ -1475,27 +1322,25 @@ function Interrupter:AddCallback(cb)
 end
 
 function Interrupter:TriggerCallbacks(unit, spell)
-
     for i, callback in ipairs(self.callbacks) do
         callback(unit, spell)
     end
-
 end
 
 function Interrupter:OnProcessSpell(unit, spell)
-
-    if not self.Menu.Enabled then return end
-    if unit.team ~= myHero.team then
-        if _INTERRUPTIBLE_SPELLS[spell.name] then
-            local SpellToInterrupt = _INTERRUPTIBLE_SPELLS[spell.name]
-            if (self.Menu and self.Menu[string.gsub(spell.name, "_", "")]) or not self.Menu then
-                local data = {unit = unit, DangerLevel = SpellToInterrupt.DangerLevel, endT = os.clock() + SpellToInterrupt.MaxDuration, CanMove = SpellToInterrupt.CanMove}
-                table.insert(self.activespells, data)
-                self:TriggerCallbacks(data.unit, data)
-            end
-        end
-    end
-
+	if unit and spell and spell.name and unit.visionPos and spell.endPos then
+	    if not self.Menu.Enabled then return end
+	    if unit.team ~= myHero.team then
+	        if _INTERRUPTIBLE_SPELLS[spell.name] then
+	            local SpellToInterrupt = _INTERRUPTIBLE_SPELLS[spell.name]
+	            if (self.Menu and self.Menu[string.gsub(spell.name, "_", "")]) or not self.Menu then
+	                local data = {unit = unit, DangerLevel = SpellToInterrupt.DangerLevel, endT = os.clock() + SpellToInterrupt.MaxDuration, CanMove = SpellToInterrupt.CanMove}
+	                table.insert(self.activespells, data)
+	                self:TriggerCallbacks(data.unit, data)
+	            end
+	        end
+	    end
+	end
 end
 
 function Interrupter:OnTick()
@@ -1614,35 +1459,35 @@ function AntiGapcloser:TriggerCallbacks(unit, spell)
 end
 
 function AntiGapcloser:OnProcessSpell(unit, spell)
+	if unit and spell and spell.name and unit.visionPos and spell.endPos then
+	    if not self.Menu.Enabled then return end
+	    if unit.team ~= myHero.team then
+	        if _GAPCLOSER_SPELLS[spell.name] then
+	            local Gapcloser = _GAPCLOSER_SPELLS[spell.name]
+	            if (self.Menu and self.Menu[string.gsub(spell.name, "_", "")]) or not self.Menu then
+	                local add = false
+	                if spell.target and spell.target.isMe then
+	                    add = true
+	                    startPos = Vector(unit.visionPos)
+	                    endPos = myHero
+	                elseif not spell.target then
+	                    local endPos1 = Vector(unit.visionPos) + 300 * (Vector(spell.endPos) - Vector(unit.visionPos)):normalized()
+	                    local endPos2 = Vector(unit.visionPos) + 100 * (Vector(spell.endPos) - Vector(unit.visionPos)):normalized()
+	                    --TODO check angles etc
+	                    if (GetDistanceSqr(myHero.visionPos, unit.visionPos) > GetDistanceSqr(myHero.visionPos, endPos1) or GetDistanceSqr(myHero.visionPos, unit.visionPos) > GetDistanceSqr(myHero.visionPos, endPos2))  then
+	                        add = true
+	                    end
+	                end
 
-    if not self.Menu.Enabled then return end
-    if unit.team ~= myHero.team then
-        if _GAPCLOSER_SPELLS[spell.name] then
-            local Gapcloser = _GAPCLOSER_SPELLS[spell.name]
-            if (self.Menu and self.Menu[string.gsub(spell.name, "_", "")]) or not self.Menu then
-                local add = false
-                if spell.target and spell.target.isMe then
-                    add = true
-                    startPos = Vector(unit.visionPos)
-                    endPos = myHero
-                elseif not spell.target then
-                    local endPos1 = Vector(unit.visionPos) + 300 * (Vector(spell.endPos) - Vector(unit.visionPos)):normalized()
-                    local endPos2 = Vector(unit.visionPos) + 100 * (Vector(spell.endPos) - Vector(unit.visionPos)):normalized()
-                    --TODO check angles etc
-                    if (GetDistanceSqr(myHero.visionPos, unit.visionPos) > GetDistanceSqr(myHero.visionPos, endPos1) or GetDistanceSqr(myHero.visionPos, unit.visionPos) > GetDistanceSqr(myHero.visionPos, endPos2))  then
-                        add = true
-                    end
-                end
-
-                if add then
-                    local data = {unit = unit, spell = spell.name, startT = os.clock(), endT = os.clock() + 1, startPos = startPos, endPos = endPos}
-                    table.insert(self.activespells, data)
-                    self:TriggerCallbacks(data.unit, data)
-                end
-            end
-        end
-    end
-
+	                if add then
+	                    local data = {unit = unit, spell = spell.name, startT = os.clock(), endT = os.clock() + 1, startPos = startPos, endPos = endPos}
+	                    table.insert(self.activespells, data)
+	                    self:TriggerCallbacks(data.unit, data)
+	                end
+	            end
+	        end
+	    end
+	end
 end
 
 function AntiGapcloser:OnTick()
