@@ -37,10 +37,13 @@
 			* 0.41
 				Better HPred support
 			* 0.42 Crash fix
+			* 0.43 Another crash fix
 
 --]]
 
-local version = 0.42
+_G.GetInventorySlotItem = function(id) return end
+
+local version = 0.43
 local AUTO_UPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/Nickieboy/BoL/master/lib/TotallyLib.lua".."?rand="..math.random(1,10000)

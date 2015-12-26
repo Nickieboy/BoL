@@ -25,6 +25,8 @@ if myHero.charName:lower() ~= "xerath" then return end
 				Updated to new SPred API
 			1.07
 				Updated DPred API
+			1.08
+				Crash fixes
 
 
 
@@ -36,8 +38,10 @@ function Say(text)
 	print("<font color=\"#FF0000\"><b>Totally Xerath:</b></font> <font color=\"#FFFFFF\">" .. tostring(text) .. "</font>")
 end
 
+_G.GetInventorySlotItem = function(id) return end
+
 --[[		Auto Update		]]
-local version = "1.07"
+local version = "1.08"
 local author = "Totally Legit"
 local SCRIPT_NAME = "Totally Xerath"
 local AUTOUPDATE = true
