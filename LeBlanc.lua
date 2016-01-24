@@ -4,7 +4,6 @@ if myHero.charName:lower() ~= "leblanc" then return end
 	_G.LeBlanc_Author = "Totally Legit"
 	_G.LeBlanc_PerformAutoUpdate = true
 	_G.LeBlanc_USEPACKETS = true
-	
 --[[
 
 		Changelog
