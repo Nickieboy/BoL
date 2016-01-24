@@ -1,32 +1,33 @@
 if myHero.charName:lower() ~= "leblanc" then return end
-	_G.LeBlanc_Loaded = true
-	_G.LeBlanc_ScriptVersion = 2.16
-	_G.LeBlanc_Author = "Totally Legit"
-	_G.LeBlanc_PerformAutoUpdate = true
-	_G.LeBlanc_USEPACKETS = true
+
+_G.LeBlanc_Loaded = true
+_G.LeBlanc_ScriptVersion = 2.16
+_G.LeBlanc_Author = "Totally Legit"
+_G.LeBlanc_PerformAutoUpdate = true
+_G.LeBlanc_USEPACKETS = true
+
 --[[
+	Changelog
+		* 2.11
+			Minor fixes
+			Added SPred
 
-		Changelog
-			* 2.11
-				Minor fixes
-				Added SPred
+		* 2.12
+			Updated to 5.15
 
-			* 2.12
-				Updated to 5.15
+		* 2.13
+			Updated DP API
+			Updated W values
+			Fix'd minor bugs
 
-			* 2.13
-				Updated DP API
-				Updated W values
-				Fix'd minor bugs
+		* 2.14
+			Fixed compability with Dancing Shoes
 
-			2.14
-				Fixed compability with Dancing Shoes
+		* 2.15
+			Fixed crash
 
-			2.15
-				Fixed crash
-
-			2.16
-				Updated for patch 6.1
+		* 2.16
+			Updated for patch 6.1
 --]]
 
 
